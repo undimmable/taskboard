@@ -4,3 +4,4 @@ vendor/
 .idea/
 *.ipr
 *.iws
+/config/env
