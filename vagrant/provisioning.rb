@@ -59,8 +59,11 @@ Vagrant.configure(2) do |config|
     service php5-fpm start
     rm -rf /etc/nginx/sites-enabled/default
     ln -s /home/vagrant/config/nginx.conf /etc/nginx/sites-enabled/taskboard.dev
-    openssl genrsa -out /etc/ssl/taskboard.dev.key 2048 > /dev/null 2>&1
-    openssl req -new -x509 -key /etc/ssl/taskboard.dev.key -out /etc/ssl/taskboard.dev.cert -days 365 -subj /CN=taskboard.dev -batch
+    openssl genrsa -des3 -passout pass:x -out /etc/ssl/taskboard.dev.pass.key 2048 > /dev/null 2>&1
+    openssl rsa -passin pass:x -in /etc/ssl/taskboard.dev.pass.key -out /etc/ssl/taskboard.dev.key
+    rm /etc/ssl/taskboard.dev.pass.key
+    openssl req -new -key /etc/ssl/taskboard.dev.key -out /etc/ssl/taskboard.dev.csr -days 365 -subj '/CN=taskboard.dev/C=RU/ST=NW/L=Saint-Petersburg/O=TaskBoard/OU=TB Team/emailAddress=na@notexists.com/subjectAltName=DNS.1=taskboard.dev' -batch
+    openssl x509 -req -days 365 -in /etc/ssl/taskboard.dev.csr -signkey /etc/ssl/taskboard.dev.key -out /etc/ssl/taskboard.dev.cert
     service nginx start
   SHELL
 end
