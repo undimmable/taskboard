@@ -1,5 +1,7 @@
 <?php
-class LoginTest extends PHPUnit_Framework_TestCase {
+
+class LoginIntegrationTest extends PHPUnit_Framework_TestCase
+{
     public function testPlaceholder()
     {
         $a = 1;
