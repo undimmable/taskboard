@@ -4,22 +4,22 @@ function JWT_decode($jwt, $key = null, $verify = true)
 {
     $tks = explode('.', $jwt);
     if (count($tks) != 3) {
-        die('Wrong number of segments');
+        return null;
     }
     list($headb64, $bodyb64, $cryptob64) = $tks;
     if (null === ($header = JWT_jsonDecode(JWT_urlsafeB64Decode($headb64)))) {
-        die('Invalid segment encoding');
+        return null;
     }
     if (null === $payload = JWT_jsonDecode(JWT_urlsafeB64Decode($bodyb64))) {
-        die('Invalid segment encoding');
+        return null;
     }
     $sig = JWT_urlsafeB64Decode($cryptob64);
     if ($verify) {
         if (empty($header->alg)) {
-            die('Empty algorithm');
+            return null;
         }
         if ($sig != JWT_sign("$headb64.$bodyb64", $key, $header->alg)) {
-            die('Signature verification failed');
+            return null;
         }
     }
     return $payload;
