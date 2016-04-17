@@ -32,6 +32,12 @@ Vagrant.configure(2) do |config|
     apt-get -q -y install mysql-server
     mysqladmin -u root password $MYSQL_PASS
     apt-get install -y mysql-client nginx php5-fpm php5-mysql php5-common php5-dev php5-cli php5-fpm php5-xdebug
+    mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_account identified by \"$MYSQL_ACCOUNT_PASS\""
+    mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_customer identified by \"$MYSQL_CUSTOMER_PASS\""
+    mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_login identified by \"$MYSQL_LOGIN_PASS\""
+    mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_performer identified by \"$MYSQL_PERFORMER_PASS\""
+    mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_system identified by \"$MYSQL_SYSTEM_PASS\""
+    mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_task identified by \"$MYSQL_TASK_PASS\""
     service php5-fpm stop
     service nginx stop
     echo "xdebug.remote_enable=true" >> /etc/php5/mods-available/xdebug.ini
