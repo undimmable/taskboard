@@ -61,7 +61,6 @@ Vagrant.configure(2) do |config|
     ln -s /home/vagrant/config/nginx.conf /etc/nginx/sites-enabled/taskboard.dev
     openssl genrsa -out /etc/ssl/taskboard.dev.key 2048 > /dev/null 2>&1
     openssl req -new -x509 -key /etc/ssl/taskboard.dev.key -out /etc/ssl/taskboard.dev.cert -days 365 -subj /CN=taskboard.dev -batch
-    rm -r /home/vagrant/config
     service nginx start
   SHELL
 end
