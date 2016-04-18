@@ -1,16 +1,16 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 begin
-  load '../vagrant/provisioning.rb'
+  load './../vagrant/provisioning.rb'
 rescue LoadError => error
   puts error.message
 end
 Vagrant.configure(2) do |config|
   config.vm.box = "digital_ocean"
   config.vm.hostname = 'taskboard.dev'
-  config.vm.synced_folder "./src/", "/var/www/taskboard/src", create: true, group: "www-data", owner: "www-data"
-  config.vm.synced_folder "./public/", "/var/www/taskboard/public", create: true, group: "www-data", owner: "www-data"
-  config.vm.synced_folder "./config/", "/home/vagrant/config", create: true, type: "rsync"
+  config.vm.synced_folder "../src/", "/var/www/taskboard/src", create: true, group: "www-data", owner: "www-data"
+  config.vm.synced_folder "../public/", "/var/www/taskboard/public", create: true, group: "www-data", owner: "www-data"
+  config.vm.synced_folder "../config/", "/home/vagrant/config", create: true, type: "rsync"
   config.vm.provider :digital_ocean do |provider,override|
     override.ssh.private_key_path = '~/.ssh/do_rsa'
     override.vm.box = 'digital_ocean'

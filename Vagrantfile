@@ -19,4 +19,7 @@ Vagrant.configure(2) do |config|
     v.cpus = 1
     v.customize ["modifyvm", :id, "--cpuexecutioncap", "50"]
   end
+  config.push.define "heroku" do |push|
+    push.app = "taskboard-development"
+  end
 end

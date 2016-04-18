@@ -5,4 +5,10 @@ env:
   - DB=mysql
 install:
   - composer install
-script: phpunit --configuration phpunit_mysql.xml --coverage-text
+script:
+  - phpunit --configuration phpunit_mysql.xml --coverage-text
+deploy:
+  provider: heroku
+  app:
+      master: taskboard-staging
+      production: taskboard-production
