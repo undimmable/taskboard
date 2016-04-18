@@ -1,14 +1,16 @@
 language: php
 php:
-  - '5.6'
+- '5.6'
 env:
-  - DB=mysql
+- DB=mysql
 install:
-  - composer install
+- composer install
 script:
-  - phpunit --configuration phpunit_mysql.xml --coverage-text
+- phpunit --configuration phpunit_mysql.xml --coverage-text
 deploy:
   provider: heroku
   app:
-      master: taskboard-staging
-      production: taskboard-production
+    master: taskboard-staging
+    production: taskboard-production
+  api_key:
+    secure: w72WqULedrWySnnQmOQohpHjZ5FkZ1J5x5p6dMt0gRZ0QZIx8dAkkUxfe+Nu843qL3VO3pdkhTWTfxjs1AumIn1lktZD6ez13r50ZHd6IfBVQWWylwupUmWdm8mCMAMesRnQ03n8N7By1gbD54mXGwv2mH6Xx7iU0LvtYpHe0BM5f9xBonwRYh8Kc/YUYLC+9jOJsdEgadlaeI4LQbUcqpVNVkZ4aKbj+XvF7zHkb4ai1hnblwfAoFg59OBKoUHTvvZrB7JnWjZN4cbh5DpyS20c5arV0XKV0etr2hN0H742eonlQYazGhppxcPcwjxCb3+OrvtIv6ZT+KNeBvGsiag4TCyM3KDJzGQKGr5JK7YIe3rZT9iS2vfbtAVmtwUQLdPNREHsk/tQuvwHCq362KuhSBHokkEW0aG+XfnAKwSq3IH6gLoXIQOz4LlFXdPZiT/Bm1EKsHnZ/pDMlX+0J+hfFlMJJv2HJbUcpReEZw8p2vXyJRyV5RuS9AWpWUVVO+VjkJRPqPqOPCRzXJHCFRhcvkW5NvytJpUJNhk3wSw4GV5VGRhKsTDD30RY5VftHwygVDLBUhA5qTobrEuthiAB3ggH8U6Y6IfiH3fhJ2K3qgi/wTRw3X5t/EJ1kQDeDnCtR1RDHlaZqVck/rmdEe6MkGm/dMeyfcpZ/s+kCoo=
