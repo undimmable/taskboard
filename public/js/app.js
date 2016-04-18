@@ -2,7 +2,7 @@ function r(f) {
     /in/.test(document.readyState) ? setTimeout('r(' + f + ')', 9) : f()
 }
 /**
- * @return {null}
+ * @return {XMLHttpRequest|ActiveXObject}
  */
 function XHR() {
     try {
@@ -42,6 +42,7 @@ var serialize = function (obj) {
     return str.join("&");
 };
 
+//noinspection JSUnusedGlobalSymbols
 var getJSON = function (url, params, successHandler, errorHandler) {
     var xhr = XHR();
     xhr.open('get', url, true);
@@ -61,9 +62,3 @@ var getJSON = function (url, params, successHandler, errorHandler) {
     };
     xhr.send(params);
 };
-
-getJSON("/api/v1/login/1", JSON.stringify({XDEBUG_SESSION_START: "PHPStorm_Remote"}), function (success) {
-    console.log(success);
-}, function (error) {
-    console.log(error);
-});
