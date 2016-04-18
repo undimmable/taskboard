@@ -58,7 +58,7 @@ Vagrant.configure(2) do |config|
     mv /home/vagrant/config/db_config.ini /etc/php5/fpm/conf.d/
     service php5-fpm start
     rm -rf /etc/nginx/sites-enabled/default
-    ln -s /home/vagrant/config/nginx.conf /etc/nginx/sites-enabled/taskboard.dev
+    ln -s /home/vagrant/config/nginx/nginx.conf /etc/nginx/sites-enabled/taskboard.dev
     openssl genrsa -des3 -passout pass:x -out /etc/ssl/taskboard.dev.pass.key 2048 > /dev/null 2>&1
     openssl rsa -passin pass:x -in /etc/ssl/taskboard.dev.pass.key -out /etc/ssl/taskboard.dev.key
     rm /etc/ssl/taskboard.dev.pass.key
