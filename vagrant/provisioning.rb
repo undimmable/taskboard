@@ -40,22 +40,22 @@ Vagrant.configure(2) do |config|
     echo "execute task"
     mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/task.sql
     service php5-fpm stop
-    sed -i -e 's/rplc_account_password/'"$MYSQL_ACCOUNT_PASS"'/g' /home/vagrant/config/db_config.ini
-    sed -i -e 's/rplc_account_host/'"$MYSQL_ACCOUNT_HOST"'/g' /home/vagrant/config/db_config.ini
-    sed -i -e 's/rplc_customer_password/'"$MYSQL_CUSTOMER_PASS"'/g' /home/vagrant/config/db_config.ini
-    sed -i -e 's/rplc_customer_host/'"$MYSQL_CUSTOMER_HOST"'/g' /home/vagrant/config/db_config.ini
-    sed -i -e 's/rplc_login_password/'"$MYSQL_LOGIN_PASS"'/g' /home/vagrant/config/db_config.ini
-    sed -i -e 's/rplc_login_host/'"$MYSQL_LOGIN_HOST"'/g' /home/vagrant/config/db_config.ini
-    sed -i -e 's/rplc_performer_password/'"$MYSQL_PERFORMER_PASS"'/g' /home/vagrant/config/db_config.ini
-    sed -i -e 's/rplc_performer_host/'"$MYSQL_PERFORMER_HOST"'/g' /home/vagrant/config/db_config.ini
-    sed -i -e 's/rplc_system_password/'"$MYSQL_SYSTEM_PASS"'/g' /home/vagrant/config/db_config.ini
-    sed -i -e 's/rplc_system_host/'"$MYSQL_SYSTEM_HOST"'/g' /home/vagrant/config/db_config.ini
-    sed -i -e 's/rplc_task_password/'"$MYSQL_TASK_PASS"'/g' /home/vagrant/config/db_config.ini
-    sed -i -e 's/rplc_task_host/'"$MYSQL_TASK_HOST"'/g' /home/vagrant/config/db_config.ini
+    sed -i -e 's/rplc_account_password/'"$MYSQL_ACCOUNT_PASS"'/g' /home/vagrant/config/db/db_config.ini
+    sed -i -e 's/rplc_account_host/'"$MYSQL_ACCOUNT_HOST"'/g' /home/vagrant/config/db/db_config.ini
+    sed -i -e 's/rplc_customer_password/'"$MYSQL_CUSTOMER_PASS"'/g' /home/vagrant/config/db/db_config.ini
+    sed -i -e 's/rplc_customer_host/'"$MYSQL_CUSTOMER_HOST"'/g' /home/vagrant/config/db/db_config.ini
+    sed -i -e 's/rplc_login_password/'"$MYSQL_LOGIN_PASS"'/g' /home/vagrant/config/db/db_config.ini
+    sed -i -e 's/rplc_login_host/'"$MYSQL_LOGIN_HOST"'/g' /home/vagrant/config/db/db_config.ini
+    sed -i -e 's/rplc_performer_password/'"$MYSQL_PERFORMER_PASS"'/g' /home/vagrant/config/db/db_config.ini
+    sed -i -e 's/rplc_performer_host/'"$MYSQL_PERFORMER_HOST"'/g' /home/vagrant/config/db/db_config.ini
+    sed -i -e 's/rplc_system_password/'"$MYSQL_SYSTEM_PASS"'/g' /home/vagrant/config/db/db_config.ini
+    sed -i -e 's/rplc_system_host/'"$MYSQL_SYSTEM_HOST"'/g' /home/vagrant/config/db/db_config.ini
+    sed -i -e 's/rplc_task_password/'"$MYSQL_TASK_PASS"'/g' /home/vagrant/config/db/db_config.ini
+    sed -i -e 's/rplc_task_host/'"$MYSQL_TASK_HOST"'/g' /home/vagrant/config/db/db_config.ini
     service nginx stop
     echo "xdebug.remote_enable=true" >> /etc/php5/mods-available/xdebug.ini
     echo "xdebug.profiler_enable=1" >> /etc/php5/mods-available/xdebug.ini
-    mv /home/vagrant/config/db_config.ini /etc/php5/fpm/conf.d/
+    mv /home/vagrant/config/db/db_config.ini /etc/php5/fpm/conf.d/
     service php5-fpm start
     rm -rf /etc/nginx/sites-enabled/default
     ln -s /home/vagrant/config/nginx/nginx.conf /etc/nginx/sites-enabled/taskboard.dev
