@@ -1,8 +1,9 @@
 {
-  "name": "dimyriy/task-board",
+  "name": "dmbogdanov/taskboard",
   "description": "Simple order processing application",
   "license": "proprietary",
   "require": {
+    "php": ">=5.6.0"
   },
   "require-dev": {
     "php": ">=5.6.0",
