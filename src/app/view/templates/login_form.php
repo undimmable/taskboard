@@ -5,7 +5,7 @@
             <hr/>
             <div id="error"></div>
             <div class="form-group">
-                <input type="hidden" id="back" name="back" value="<? $redirect_back ?>"/>
+                <input type="hidden" id="back" name="back" value="<?php echo $redirect_back ?>"/>
                 <input type="email" class="form-control" placeholder="Email address" name="user_email" id="user_email"/>
                 <span id="check-e"></span>
             </div>
