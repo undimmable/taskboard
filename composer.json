@@ -3,10 +3,12 @@
   "description": "Simple order processing application",
   "license": "proprietary",
   "require": {
-    "php": ">=5.6.0"
+    "php": ">=5.6.0",
+    "ext-mysql": "*"
   },
   "require-dev": {
     "php": ">=5.6.0",
+    "heroku/heroku-buildpack-php": "*",
     "phpunit/phpunit": "^5.2",
     "phpunit/php-code-coverage": "^3.3"
   },

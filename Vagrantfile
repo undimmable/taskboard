@@ -1,7 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 begin
-  load 'vagrant/provisioning.rb'
+  load 'deploy/vagrant-provisioning.rb'
 rescue LoadError => error
   puts error.message
 end
