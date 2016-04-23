@@ -11,7 +11,7 @@ Vagrant.configure(2) do |config|
   config.vm.network "private_network", ip: "192.168.56.101"
   config.vm.synced_folder "./src/", "/var/www/taskboard/src", create: true, group: "www-data", owner: "www-data"
   config.vm.synced_folder "./public/", "/var/www/taskboard/public", create: true, group: "www-data", owner: "www-data"
-  config.vm.synced_folder "./config/", "/home/vagrant/config", create: true, type: "rsync"
+  config.vm.synced_folder "./config/", "/home/vagrant/config", create: true
   config.vm.provider "virtualbox" do |v|
     v.gui = false
     v.name = "taskboard"
