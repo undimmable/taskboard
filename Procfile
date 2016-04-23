@@ -1,1 +1,0 @@
-web: vendor/bin/heroku-php-nginx -c config/nginx/nginx-heroku.conf -F config/nginx/heroku-php-fpm.inc.conf
