@@ -137,9 +137,9 @@ function verify_user($confirmation_token)
         add_error(mysqli_error($mysqli));
     if (!mysqli_stmt_execute($mysqli_stmt))
         add_error(mysqli_error($mysqli));
+    $id = mysqli_stmt_insert_id($mysqli_stmt);
     if (!mysqli_stmt_close($mysqli_stmt))
         add_error(mysqli_error($mysqli));
-    $id = mysqli_stmt_insert_id($mysqli_stmt);
     if (is_null($id))
         return null;
     return get_user_by_id($id);
