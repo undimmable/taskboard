@@ -27,3 +27,25 @@ function is_delete()
 {
     return $_SERVER["REQUEST_METHOD"] === "DELETE";
 }
+
+function get_request_content_type()
+{
+    return $_SERVER["CONTENT_TYPE"];
+}
+
+function is_request_www_form()
+{
+    $content_type = get_request_content_type();
+    return strpos($content_type, "multipart/form-data") !== false || strpos($content_type, "application/x-www-form-urlencoded") !== false;
+}
+
+function is_request_json()
+{
+    $content_type = get_request_content_type();
+    return $content_type === "application/json";
+}
+
+function array_slice_assoc($array, $keys)
+{
+    return array_intersect_key($array, array_flip($keys));
+}
