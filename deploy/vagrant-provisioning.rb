@@ -52,6 +52,7 @@ Vagrant.configure(2) do |config|
     cp /home/vagrant/config/mail/sasl_passwd /etc/postfix/sasl_passwd
     sed -i -e 's/rplc_username/'"$GOOGLE_USERNAME"'/g' /etc/postfix/sasl_passwd
     sed -i -e 's/rplc_password/'"$GOOGLE_PASS"'/g' /etc/postfix/sasl_passwd
+    echo "taskboard.dev" >> /etc/mailname
     postmap /etc/postfix/sasl_passwd
     chmod 600 /etc/postfix/sasl_passwd
     chmod 600 /etc/postfix/sasl_passwd.db
