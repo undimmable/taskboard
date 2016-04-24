@@ -1,6 +1,6 @@
 <div class="signin-form">
     <div class="container">
-        <form class="form-signin" method="post" id="login-form">
+        <form class="form-signin" method="post" id="login-form" action="/api/v1/auth/login">
             <h2 class="form-signin-heading">Log In to TaskBoard.</h2>
             <hr/>
             <div id="error"></div>
@@ -10,7 +10,7 @@
                 <span id="check-e"></span>
             </div>
             <div class="form-group">
-                <input type="password" class="form-control" placeholder="Password" name="password" id="password"/>
+                <input type="password" class="form-control" placeholder="Password" name="user_password" id="password"/>
             </div>
             <hr/>
             <div class="form-group">
