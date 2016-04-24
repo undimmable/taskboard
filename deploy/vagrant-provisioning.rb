@@ -14,7 +14,7 @@ Vagrant.configure(2) do |config|
     apt-get -qq update
     apt-get -q -y install mysql-server
     mysqladmin -u root password $MYSQL_PASS
-    apt-get install -y mysql-client nginx php5-fpm php5-mysql php5-common php5-dev php5-cli php5-fpm php5-xdebug
+    apt-get install -y mysql-client nginx php5-fpm php5-mysql php5-common php5-dev php5-cli php5-fpm php5-xdebug mailutils
     echo "create user_account"
     mysql --user=root --password=\"$MYSQL_PASS\"  -e "CREATE user user_account identified by '$MYSQL_ACCOUNT_PASS'"
     echo "create user_customer"
@@ -53,20 +53,30 @@ Vagrant.configure(2) do |config|
     sed -i -e 's/rplc_task_password/'"$MYSQL_TASK_PASS"'/g' /home/vagrant/config/db/db_config.ini
     sed -i -e 's/rplc_task_host/'"$MYSQL_TASK_HOST"'/g' /home/vagrant/config/db/db_config.ini
     service nginx stop
+    service postfix stop
     echo "xdebug.remote_enable=true" >> /etc/php5/mods-available/xdebug.ini
     echo "xdebug.profiler_enable=1" >> /etc/php5/mods-available/xdebug.ini
     echo "xdebug.remote_host=192.168.56.1" >> /etc/php5/mods-available/xdebug.ini
     mv /home/vagrant/config/db/db_config.ini /etc/php5/fpm/conf.d/
     rm -rf /etc/nginx/sites-enabled/default
-    ln -s /home/vagrant/config/nginx/nginx.conf /etc/nginx/sites-enabled/taskboard.dev
+    ln -s /home/vagrant/config/nginx/nginx.conf /etc/nginx/sites-enabled/taskboards.top
     ln -s /home/vagrant/config/nginx/mobile-rewrite.conf /etc/nginx/mobile-rewrite.conf
     ln -s /home/vagrant/config/fpm/fpm-config.ini /etc/php5/fpm/conf.d/fpm-taskboard.ini
-    openssl genrsa -des3 -passout pass:x -out /etc/ssl/taskboard.dev.pass.key 2048 > /dev/null 2>&1
-    openssl rsa -passin pass:x -in /etc/ssl/taskboard.dev.pass.key -out /etc/ssl/taskboard.dev.key
-    rm /etc/ssl/taskboard.dev.pass.key
-    openssl req -new -key /etc/ssl/taskboard.dev.key -out /etc/ssl/taskboard.dev.csr -days 365 -subj '/CN=taskboard.dev/C=RU/ST=NW/L=Saint-Petersburg/O=TaskBoard/OU=TB Team/emailAddress=na@notexists.com/subjectAltName=DNS.1=taskboard.dev' -batch
-    openssl x509 -req -days 365 -in /etc/ssl/taskboard.dev.csr -signkey /etc/ssl/taskboard.dev.key -out /etc/ssl/taskboard.dev.cert
+    openssl genrsa -des3 -passout pass:x -out /etc/ssl/taskboards.top.pass.key 2048 > /dev/null 2>&1
+    openssl rsa -passin pass:x -in /etc/ssl/taskboards.top.pass.key -out /etc/ssl/taskboards.top.key
+    rm /etc/ssl/taskboards.top.pass.key
+    openssl req -new -key /etc/ssl/taskboards.top.key -out /etc/ssl/taskboards.top.csr -days 365 -subj '/CN=taskboards.top/C=RU/ST=NW/L=Saint-Petersburg/O=TaskBoard/OU=TB Team/emailAddress=inbox@taskboards.top/subjectAltName=DNS.1=taskboards.top' -batch
+    openssl x509 -req -days 365 -in /etc/ssl/taskboards.top.csr -signkey /etc/ssl/taskboards.top.key -out /etc/ssl/taskboards.top.cert
+    rm -rf /etc/postfix/main.cf
+    ln -s /home/vagrant/config/mail/main.cf /etc/postfix/main.cf
+    cp /home/vagrant/config/mail/sasl_passwd /etc/postfix/sasl_passwd
+    sed -i -e 's/rplc_username/'"$GOOGLE_USERNAME"'/g' /etc/postfix/sasl_passwd
+    sed -i -e 's/rplc_password/'"$GOOGLE_PASS"'/g' /etc/postfix/sasl_passwd
+    postmap /etc/postfix/sasl_passwd
+    chmod 600 /etc/postfix/sasl_passwd
+    chmod 600 /etc/postfix/sasl_passwd.db
     service nginx start
     service php5-fpm start
+    service postfix start
   SHELL
 end

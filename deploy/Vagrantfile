@@ -21,6 +21,9 @@ Vagrant.configure(2) do |config|
     provider.size = '512mb'
   end
   config.vm.provision "write-host", type: "shell" do |s|
-    s.inline = "service nginx stop && sed -i 's/server_name\ taskboard\.dev/server_name\ taskboards\.top/g' /etc/nginx/sites-enabled/taskboard.dev && service nginx start"
+    s.inline = "service nginx stop && sed -i 's/server_name\ taskboard\.dev/server_name\ taskboards\.top/g' /etc/nginx/sites-enabled/taskboards.top && service nginx start"
+  end
+  config.vm.provision "write-mail-host", type: "shell" do |s|
+    s.inline = "service postfix stop && sed -i 's/taskboard\.dev/taskboards\.top/g' /etc/postfix/main.cf && service postfix start"
   end
 end
