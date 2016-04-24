@@ -79,7 +79,7 @@ function process_login_action()
     $user = get_user_by_email($email);
     if ($user === null)
         render_not_found();
-    $hashed_password = $user["password"];
+    $hashed_password = $user[get_password_assoc_key()];
     if (!password_verify($password, $hashed_password))
         render_not_found();
     $token = create_token($email, $user[get_username_assoc_key()], $user['id']);
