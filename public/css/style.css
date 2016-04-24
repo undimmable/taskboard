@@ -1,2 +1,13 @@
-body {
+.navbar-brand.logo {
+    background: url('/icons/favicon-96x96.png') no-repeat center;
+    background-size: 40px 40px;
+    width: 54px;
+}
+
+@media only screen and (min--moz-device-pixel-ratio: 2), only screen and (-o-min-device-pixel-ratio: 2/1), only screen and (-webkit-min-device-pixel-ratio: 2), only screen and (min-device-pixel-ratio: 2) {
+    .navbar-brand.logo {
+        background: url(/icons/favicon-96x96.png) no-repeat center;
+        background-size: 40px 40px;
+        width: 54px;
+    }
 }
