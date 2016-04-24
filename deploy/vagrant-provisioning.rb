@@ -61,6 +61,7 @@ Vagrant.configure(2) do |config|
     rm -rf /etc/nginx/sites-enabled/default
     ln -s /home/vagrant/config/nginx/nginx.conf /etc/nginx/sites-enabled/taskboard.dev
     ln -s /home/vagrant/config/nginx/mobile-rewrite.conf /etc/nginx/mobile-rewrite.conf
+    ln -s /home/vagrant/config/fpm/fpm-config.ini /etc/php5/fpm/conf.d/fpm-taskboard.ini
     openssl genrsa -des3 -passout pass:x -out /etc/ssl/taskboard.dev.pass.key 2048 > /dev/null 2>&1
     openssl rsa -passin pass:x -in /etc/ssl/taskboard.dev.pass.key -out /etc/ssl/taskboard.dev.key
     rm /etc/ssl/taskboard.dev.pass.key
