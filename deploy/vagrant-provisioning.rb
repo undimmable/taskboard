@@ -57,7 +57,6 @@ Vagrant.configure(2) do |config|
     echo "xdebug.profiler_enable=1" >> /etc/php5/mods-available/xdebug.ini
     echo "xdebug.remote_host=192.168.56.1" >> /etc/php5/mods-available/xdebug.ini
     mv /home/vagrant/config/db/db_config.ini /etc/php5/fpm/conf.d/
-    service php5-fpm start
     rm -rf /etc/nginx/sites-enabled/default
     ln -s /home/vagrant/config/nginx/nginx.conf /etc/nginx/sites-enabled/taskboard.dev
     ln -s /home/vagrant/config/nginx/mobile-rewrite.conf /etc/nginx/mobile-rewrite.conf
@@ -68,5 +67,6 @@ Vagrant.configure(2) do |config|
     openssl req -new -key /etc/ssl/taskboard.dev.key -out /etc/ssl/taskboard.dev.csr -days 365 -subj '/CN=taskboard.dev/C=RU/ST=NW/L=Saint-Petersburg/O=TaskBoard/OU=TB Team/emailAddress=na@notexists.com/subjectAltName=DNS.1=taskboard.dev' -batch
     openssl x509 -req -days 365 -in /etc/ssl/taskboard.dev.csr -signkey /etc/ssl/taskboard.dev.key -out /etc/ssl/taskboard.dev.cert
     service nginx start
+    service php5-fpm start
   SHELL
 end
