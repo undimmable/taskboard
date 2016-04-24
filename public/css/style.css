@@ -1,3 +1,7 @@
+.dropdown {
+    font-size: 1.2em;
+}
+
 .navbar-brand.logo {
     background: url('/icons/favicon-96x96.png') no-repeat center;
     background-size: 40px 40px;
@@ -10,4 +14,34 @@
         background-size: 40px 40px;
         width: 54px;
     }
+}
+
+@media (min-width: 768px) {
+    .dropdown:hover {
+        background: #e7e7e7;
+    }
+    .dropdown:hover > .dropdown-menu {
+        display: block;
+    }
+}
+
+.nav > li > div {
+    position: relative;
+    display: block;
+    padding: 10px 15px;
+    cursor: default;
+}
+.navbar-nav > li > div {
+    padding-top: 15px;
+    padding-bottom: 15px;
+    line-height: 20px;
+}
+.navbar-default .navbar-nav > li > div {
+    color: rgb(119, 119, 119);
+}
+.navbar-collapse.collapse {
+    display: none;
+}
+.dropdown-open {
+    background: #e7e7e7;
 }
