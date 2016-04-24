@@ -39,44 +39,44 @@ Vagrant.configure(2) do |config|
     mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/system.sql
     echo "execute task"
     mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/task.sql
-    service php5-fpm stop
-    sed -i -e 's/rplc_account_password/'"$MYSQL_ACCOUNT_PASS"'/g' /home/vagrant/config/db/db_config.ini
-    sed -i -e 's/rplc_account_host/'"$MYSQL_ACCOUNT_HOST"'/g' /home/vagrant/config/db/db_config.ini
-    sed -i -e 's/rplc_customer_password/'"$MYSQL_CUSTOMER_PASS"'/g' /home/vagrant/config/db/db_config.ini
-    sed -i -e 's/rplc_customer_host/'"$MYSQL_CUSTOMER_HOST"'/g' /home/vagrant/config/db/db_config.ini
-    sed -i -e 's/rplc_login_password/'"$MYSQL_LOGIN_PASS"'/g' /home/vagrant/config/db/db_config.ini
-    sed -i -e 's/rplc_login_host/'"$MYSQL_LOGIN_HOST"'/g' /home/vagrant/config/db/db_config.ini
-    sed -i -e 's/rplc_performer_password/'"$MYSQL_PERFORMER_PASS"'/g' /home/vagrant/config/db/db_config.ini
-    sed -i -e 's/rplc_performer_host/'"$MYSQL_PERFORMER_HOST"'/g' /home/vagrant/config/db/db_config.ini
-    sed -i -e 's/rplc_system_password/'"$MYSQL_SYSTEM_PASS"'/g' /home/vagrant/config/db/db_config.ini
-    sed -i -e 's/rplc_system_host/'"$MYSQL_SYSTEM_HOST"'/g' /home/vagrant/config/db/db_config.ini
-    sed -i -e 's/rplc_task_password/'"$MYSQL_TASK_PASS"'/g' /home/vagrant/config/db/db_config.ini
-    sed -i -e 's/rplc_task_host/'"$MYSQL_TASK_HOST"'/g' /home/vagrant/config/db/db_config.ini
     service nginx stop
+    service php5-fpm stop
     service postfix stop
-    echo "xdebug.remote_enable=true" >> /etc/php5/mods-available/xdebug.ini
-    echo "xdebug.profiler_enable=1" >> /etc/php5/mods-available/xdebug.ini
-    echo "xdebug.remote_host=192.168.56.1" >> /etc/php5/mods-available/xdebug.ini
-    mv /home/vagrant/config/db/db_config.ini /etc/php5/fpm/conf.d/
+    cp /home/vagrant/config/db/db_config.ini /etc/php5/fpm/conf.d/
     rm -rf /etc/nginx/sites-enabled/default
     ln -s /home/vagrant/config/nginx/nginx.conf /etc/nginx/sites-enabled/taskboards.top
     ln -s /home/vagrant/config/nginx/mobile-rewrite.conf /etc/nginx/mobile-rewrite.conf
     ln -s /home/vagrant/config/fpm/fpm-config.ini /etc/php5/fpm/conf.d/fpm-taskboard.ini
-    openssl genrsa -des3 -passout pass:x -out /etc/ssl/taskboards.top.pass.key 2048 > /dev/null 2>&1
-    openssl rsa -passin pass:x -in /etc/ssl/taskboards.top.pass.key -out /etc/ssl/taskboards.top.key
-    rm /etc/ssl/taskboards.top.pass.key
-    openssl req -new -key /etc/ssl/taskboards.top.key -out /etc/ssl/taskboards.top.csr -days 365 -subj '/CN=taskboards.top/C=RU/ST=NW/L=Saint-Petersburg/O=TaskBoard/OU=TB Team/emailAddress=inbox@taskboards.top/subjectAltName=DNS.1=taskboards.top' -batch
-    openssl x509 -req -days 365 -in /etc/ssl/taskboards.top.csr -signkey /etc/ssl/taskboards.top.key -out /etc/ssl/taskboards.top.cert
     rm -rf /etc/postfix/main.cf
-    ln -s /home/vagrant/config/mail/main.cf /etc/postfix/main.cf
+    cp /home/vagrant/config/mail/main.cf /etc/postfix/main.cf
     cp /home/vagrant/config/mail/sasl_passwd /etc/postfix/sasl_passwd
     sed -i -e 's/rplc_username/'"$GOOGLE_USERNAME"'/g' /etc/postfix/sasl_passwd
     sed -i -e 's/rplc_password/'"$GOOGLE_PASS"'/g' /etc/postfix/sasl_passwd
     postmap /etc/postfix/sasl_passwd
     chmod 600 /etc/postfix/sasl_passwd
     chmod 600 /etc/postfix/sasl_passwd.db
-    service nginx start
-    service php5-fpm start
+    sed -i -e 's/rplc_account_password/'"$MYSQL_ACCOUNT_PASS"'/g' /etc/php5/fpm/conf.d/db_config.ini
+    sed -i -e 's/rplc_account_host/'"$MYSQL_ACCOUNT_HOST"'/g' /etc/php5/fpm/conf.d/db_config.ini
+    sed -i -e 's/rplc_customer_password/'"$MYSQL_CUSTOMER_PASS"'/g' /etc/php5/fpm/conf.d/db_config.ini
+    sed -i -e 's/rplc_customer_host/'"$MYSQL_CUSTOMER_HOST"'/g' /etc/php5/fpm/conf.d/db_config.ini
+    sed -i -e 's/rplc_login_password/'"$MYSQL_LOGIN_PASS"'/g' /etc/php5/fpm/conf.d/db_config.ini
+    sed -i -e 's/rplc_login_host/'"$MYSQL_LOGIN_HOST"'/g' /etc/php5/fpm/conf.d/db_config.ini
+    sed -i -e 's/rplc_performer_password/'"$MYSQL_PERFORMER_PASS"'/g' /etc/php5/fpm/conf.d/db_config.ini
+    sed -i -e 's/rplc_performer_host/'"$MYSQL_PERFORMER_HOST"'/g' /etc/php5/fpm/conf.d/db_config.ini
+    sed -i -e 's/rplc_system_password/'"$MYSQL_SYSTEM_PASS"'/g' /etc/php5/fpm/conf.d/db_config.ini
+    sed -i -e 's/rplc_system_host/'"$MYSQL_SYSTEM_HOST"'/g' /etc/php5/fpm/conf.d/db_config.ini
+    sed -i -e 's/rplc_task_password/'"$MYSQL_TASK_PASS"'/g' /etc/php5/fpm/conf.d/db_config.ini
+    sed -i -e 's/rplc_task_host/'"$MYSQL_TASK_HOST"'/g' /etc/php5/fpm/conf.d/db_config.ini
+    echo "xdebug.remote_enable=true" >> /etc/php5/mods-available/xdebug.ini
+    echo "xdebug.profiler_enable=1" >> /etc/php5/mods-available/xdebug.ini
+    echo "xdebug.remote_host=192.168.56.1" >> /etc/php5/mods-available/xdebug.ini
+    openssl genrsa -des3 -passout pass:x -out /etc/ssl/taskboards.top.pass.key 2048 > /dev/null 2>&1
+    openssl rsa -passin pass:x -in /etc/ssl/taskboards.top.pass.key -out /etc/ssl/taskboards.top.key
+    rm /etc/ssl/taskboards.top.pass.key
+    openssl req -new -key /etc/ssl/taskboards.top.key -out /etc/ssl/taskboards.top.csr -days 365 -subj '/CN=taskboards.top/C=RU/ST=NW/L=Saint-Petersburg/O=TaskBoard/OU=TB Team/emailAddress=inbox@taskboards.top/subjectAltName=DNS.1=taskboards.top' -batch
+    openssl x509 -req -days 365 -in /etc/ssl/taskboards.top.csr -signkey /etc/ssl/taskboards.top.key -out /etc/ssl/taskboards.top.cert
     service postfix start
+    service php5-fpm start
+    service nginx start
   SHELL
 end
