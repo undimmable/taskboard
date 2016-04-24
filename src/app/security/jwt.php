@@ -15,10 +15,10 @@ function JWT_decode($jwt, $key = null, $verify = true)
     }
     $sig = JWT_urlsafeB64Decode($cryptob64);
     if ($verify) {
-        if (empty($header->alg)) {
+        if (!array_key_exists('alg', $header)) {
             return null;
         }
-        if ($sig != JWT_sign("$headb64.$bodyb64", $key, $header->alg)) {
+        if ($sig != JWT_sign("$headb64.$bodyb64", $key, $header['alg'])) {
             return null;
         }
     }
@@ -52,13 +52,13 @@ function JWT_sign($msg, $key, $method = "HS256")
 
 function JWT_jsonDecode($input)
 {
-    $obj = json_decode($input);
+    $decoded = json_decode($input, true);
     if ($errno = json_last_error()) {
         _JWT_handleJsonError($errno);
-    } else if ($obj === null && $input !== 'null') {
+    } else if ($decoded === null && $input !== 'null') {
         die('Null result with non-null input');
     }
-    return $obj;
+    return $decoded;
 }
 
 function JWT_jsonEncode($input)
