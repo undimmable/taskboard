@@ -1,8 +1,11 @@
 <?php
-
-function initialize_configuration($config_location = '/etc/php5/fpm/conf.d/db_config.ini')
+$db_config = null;
+function initialize_configuration()
 {
-    return parse_ini_file($config_location, true);
+    global $php_config_path, $db_config;
+    if (is_null($db_config)) {
+        $db_config = include "$php_config_path/taskboard_db_config.php";
+    }
 }
 
 function get_db_config()
@@ -11,4 +14,4 @@ function get_db_config()
     return $db_config;
 }
 
-$db_config = initialize_configuration();
+initialize_configuration();

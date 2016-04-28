@@ -2,6 +2,8 @@
 # vi: set ft=ruby :
 Vagrant.configure(2) do |config|
   config.vm.provision "shell", inline: <<-SHELL
+    echo "Provisioning: STARTED"
+    echo "Provisioning: fix console locales"
     export DEBIAN_FRONTEND=noninteractive
     export LANGUAGE=en_US.UTF-8
     export LANG=en_US.UTF-8
@@ -10,74 +12,100 @@ Vagrant.configure(2) do |config|
     locale-gen en_US.UTF-8
     rm -v /etc/apt/apt.conf.d/70debconf
     dpkg-reconfigure locales
+    echo "Provisioning: remove default mysql"
     apt-get -y purge mysql-server mysql-client mysql-common mysql-server-5.5
     apt-get -qq update
+
+    echo "Provisioning: Install MySQL"
     apt-get -q -y install mysql-server
     mysqladmin -u root password $MYSQL_PASS
-    apt-get install -y mysql-client nginx php5-fpm php5-mysql php5-common php5-dev php5-cli php5-fpm php5-xdebug mailutils
-    echo "create user_account"
-    mysql --user=root --password=\"$MYSQL_PASS\"  -e "CREATE user user_account identified by '$MYSQL_ACCOUNT_PASS'"
-    echo "create user_customer"
+
+    echo "Provisioning: install PHP, FPM and mailutils"
+    apt-get install -y mysql-client nginx php5-fpm php5-mysql php5-common php5-dev php5-cli php5-fpm php5-xdebug mailutils 2>/dev/null
+
+    echo "Provisioning: creating MySQL users"
+    mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_account identified by '$MYSQL_ACCOUNT_PASS'"
     mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_customer identified by '$MYSQL_CUSTOMER_PASS'"
-    echo "create user_login"
     mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_login identified by '$MYSQL_LOGIN_PASS'"
-    echo "create user_performer"
     mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_performer identified by '$MYSQL_PERFORMER_PASS'"
-    echo "create user_system"
     mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_system identified by '$MYSQL_SYSTEM_PASS'"
-    echo "create user_task"
     mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_task identified by '$MYSQL_TASK_PASS'"
-    echo "execute account"
+
+    echo "Provisioning: creating MySQL databases"
     mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/account.sql
-    echo "execute customer"
     mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/customer.sql
-    echo "execute login"
     mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/login.sql
-    echo "execute performer"
     mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/performer.sql
-    echo "execute system"
     mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/system.sql
-    echo "execute task"
     mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/task.sql
+
+    echo "Provisioning: stopping services"
     service nginx stop
     service php5-fpm stop
     service postfix stop
-    cp /home/vagrant/config/db/db_config.ini /etc/php5/fpm/conf.d/
+    echo "Provisioning: configure nginx"
     rm -rf /etc/nginx/sites-enabled/default
     ln -s /home/vagrant/config/nginx/nginx.conf /etc/nginx/sites-enabled/taskboards.top
     ln -s /home/vagrant/config/nginx/mobile-rewrite.conf /etc/nginx/mobile-rewrite.conf
     ln -s /home/vagrant/config/fpm/fpm-config.ini /etc/php5/fpm/conf.d/fpm-taskboard.ini
+
+    echo "Provisioning: configure mailutils"
     rm -rf /etc/postfix/main.cf
     cp /home/vagrant/config/mail/main.cf /etc/postfix/main.cf
     cp /home/vagrant/config/mail/sasl_passwd /etc/postfix/sasl_passwd
     sed -i -e 's/rplc_username/'"$GOOGLE_USERNAME"'/g' /etc/postfix/sasl_passwd
     sed -i -e 's/rplc_password/'"$GOOGLE_PASS"'/g' /etc/postfix/sasl_passwd
     echo "taskboard.dev" >> /etc/mailname
-    postmap /etc/postfix/sasl_passwd
+    postmap /etc/postfix/sasl_passwd 2>/dev/null
     chmod 600 /etc/postfix/sasl_passwd
     chmod 600 /etc/postfix/sasl_passwd.db
-    sed -i -e 's/rplc_account_password/'"$MYSQL_ACCOUNT_PASS"'/g' /etc/php5/fpm/conf.d/db_config.ini
-    sed -i -e 's/rplc_account_host/'"$MYSQL_ACCOUNT_HOST"'/g' /etc/php5/fpm/conf.d/db_config.ini
-    sed -i -e 's/rplc_customer_password/'"$MYSQL_CUSTOMER_PASS"'/g' /etc/php5/fpm/conf.d/db_config.ini
-    sed -i -e 's/rplc_customer_host/'"$MYSQL_CUSTOMER_HOST"'/g' /etc/php5/fpm/conf.d/db_config.ini
-    sed -i -e 's/rplc_login_password/'"$MYSQL_LOGIN_PASS"'/g' /etc/php5/fpm/conf.d/db_config.ini
-    sed -i -e 's/rplc_login_host/'"$MYSQL_LOGIN_HOST"'/g' /etc/php5/fpm/conf.d/db_config.ini
-    sed -i -e 's/rplc_performer_password/'"$MYSQL_PERFORMER_PASS"'/g' /etc/php5/fpm/conf.d/db_config.ini
-    sed -i -e 's/rplc_performer_host/'"$MYSQL_PERFORMER_HOST"'/g' /etc/php5/fpm/conf.d/db_config.ini
-    sed -i -e 's/rplc_system_password/'"$MYSQL_SYSTEM_PASS"'/g' /etc/php5/fpm/conf.d/db_config.ini
-    sed -i -e 's/rplc_system_host/'"$MYSQL_SYSTEM_HOST"'/g' /etc/php5/fpm/conf.d/db_config.ini
-    sed -i -e 's/rplc_task_password/'"$MYSQL_TASK_PASS"'/g' /etc/php5/fpm/conf.d/db_config.ini
-    sed -i -e 's/rplc_task_host/'"$MYSQL_TASK_HOST"'/g' /etc/php5/fpm/conf.d/db_config.ini
+
+    echo "Provisioning: configure php"
+    PHP_ADDITIONAL_INCLUDE_PATH=/var/www/taskboard_config/
+    DB_CONFIG_FILE="taskboard_db_config.php"
+    DB_CONFIG_FULL_PATH=$PHP_ADDITIONAL_INCLUDE_PATH/$DB_CONFIG_FILE
+    KEY_CONFIG_FILE="taskboard_key_config.php"
+    KEY_CONFIG_FULL_PATH=$PHP_ADDITIONAL_INCLUDE_PATH/$KEY_CONFIG_FILE
+    mkdir -p $PHP_ADDITIONAL_INCLUDE_PATH
+    cp /home/vagrant/config/php/*.php $PHP_ADDITIONAL_INCLUDE_PATH
+
+    echo "Provisioning: PHP database configuration inside $DB_CONFIG_FULL_PATH"
+    sed -i -e 's/rplc_account_password/'"$MYSQL_ACCOUNT_PASS"'/g' $DB_CONFIG_FULL_PATH
+    sed -i -e 's/rplc_account_host/'"$MYSQL_ACCOUNT_HOST"'/g' $DB_CONFIG_FULL_PATH
+    sed -i -e 's/rplc_customer_password/'"$MYSQL_CUSTOMER_PASS"'/g' $DB_CONFIG_FULL_PATH
+    sed -i -e 's/rplc_customer_host/'"$MYSQL_CUSTOMER_HOST"'/g' $DB_CONFIG_FULL_PATH
+    sed -i -e 's/rplc_login_password/'"$MYSQL_LOGIN_PASS"'/g' $DB_CONFIG_FULL_PATH
+    sed -i -e 's/rplc_login_host/'"$MYSQL_LOGIN_HOST"'/g' $DB_CONFIG_FULL_PATH
+    sed -i -e 's/rplc_performer_password/'"$MYSQL_PERFORMER_PASS"'/g' $DB_CONFIG_FULL_PATH
+    sed -i -e 's/rplc_performer_host/'"$MYSQL_PERFORMER_HOST"'/g' $DB_CONFIG_FULL_PATH
+    sed -i -e 's/rplc_system_password/'"$MYSQL_SYSTEM_PASS"'/g' $DB_CONFIG_FULL_PATH
+    sed -i -e 's/rplc_system_host/'"$MYSQL_SYSTEM_HOST"'/g' $DB_CONFIG_FULL_PATH
+    sed -i -e 's/rplc_task_password/'"$MYSQL_TASK_PASS"'/g' $DB_CONFIG_FULL_PATH
+    sed -i -e 's/rplc_task_host/'"$MYSQL_TASK_HOST"'/g' $DB_CONFIG_FULL_PATH
+
+    echo "Provisioning PHP keys configuration inside $KEY_CONFIG_FULL_PATH"
+    sed -i -e 's/rplc_jwt_secret/'"$JWT_SECRET"'/g' $KEY_CONFIG_FULL_PATH
+    sed -i -e 's/rplc_confirmation_key/'"$CONFIRMATION_SECRET"'/g' $KEY_CONFIG_FULL_PATH
+    sed -i -e 's/rplc_vk_client_id/'"$VK_APP_ID"'/g' $KEY_CONFIG_FULL_PATH
+    sed -i -e 's/rplc_vk_secret/'"$VK_APP_SECRET"'/g' $KEY_CONFIG_FULL_PATH
+
+    echo "Provisioning: add debug support"
     echo "xdebug.remote_enable=true" >> /etc/php5/mods-available/xdebug.ini
     echo "xdebug.profiler_enable=1" >> /etc/php5/mods-available/xdebug.ini
     echo "xdebug.remote_host=192.168.56.1" >> /etc/php5/mods-available/xdebug.ini
+
+    echo "Provisioning: add certs"
     openssl genrsa -des3 -passout pass:x -out /etc/ssl/taskboards.top.pass.key 2048 > /dev/null 2>&1
     openssl rsa -passin pass:x -in /etc/ssl/taskboards.top.pass.key -out /etc/ssl/taskboards.top.key
-    rm /etc/ssl/taskboards.top.pass.key
-    openssl req -new -key /etc/ssl/taskboards.top.key -out /etc/ssl/taskboards.top.csr -days 365 -subj '/CN=taskboards.top/C=RU/ST=NW/L=Saint-Petersburg/O=TaskBoard/OU=TB Team/emailAddress=inbox@taskboards.top/subjectAltName=DNS.1=taskboards.top' -batch
-    openssl x509 -req -days 365 -in /etc/ssl/taskboards.top.csr -signkey /etc/ssl/taskboards.top.key -out /etc/ssl/taskboards.top.cert
+    rm /etc/ssl/taskboards.top.pass.key   2>/dev/null
+    openssl req -new -key /etc/ssl/taskboards.top.key -out /etc/ssl/taskboards.top.csr -days 365 -subj '/CN=taskboards.top/C=RU/ST=NW/L=Saint-Petersburg/O=TaskBoard/OU=TB Team/emailAddress=inbox@taskboards.top/subjectAltName=DNS.1=taskboards.top' -batch 2>/dev/null
+    openssl x509 -req -days 365 -in /etc/ssl/taskboards.top.csr -signkey /etc/ssl/taskboards.top.key -out /etc/ssl/taskboards.top.cert 2>/dev/null
+
+    echo "Provisioning: starting services"
     service postfix start
     service php5-fpm start
     service nginx start
+
+    echo "Provisioning: DONE"
   SHELL
 end
