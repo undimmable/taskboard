@@ -5,6 +5,7 @@ function get_key_config()
 {
     global $php_config_path, $key_config;
     if (is_null($key_config)) {
+        /** @noinspection PhpIncludeInspection */
         $key_config = include "$php_config_path/taskboard_key_config.php";
     }
     return $key_config;
