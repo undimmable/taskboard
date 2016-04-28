@@ -1,68 +1,71 @@
 <?php
 
-$user_input_validation_errors = [];
-
-function is_password_valid($password)
+function is_password_valid($password, &$validation_context)
 {
-    global $minimal_password_length, $user_input_validation_errors;
     if (is_null($password)) {
-        $user_input_validation_errors["password"] = "not provided";
+        add_validation_error($validation_context, 'password', 'not provided');
         return false;
     }
-    if (strlen($password) < $minimal_password_length) {
-        $user_input_validation_errors["password"] = "too short";
+    if (strlen($password) < get_minimal_password_length()) {
+        add_validation_error($validation_context, 'password', 'too short');
         return false;
     }
     return true;
 }
 
-function is_email_valid($email)
+function is_email_valid($email, &$validation_context)
 {
-    global $user_input_validation_errors;
     if (is_null($email)) {
-        $user_input_validation_errors["email"] = "not provided";
+        add_validation_error($validation_context, 'email', 'not provided');
         return false;
     }
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $user_input_validation_errors["email"] = "is invalid";
+        add_validation_error($validation_context, 'email', 'is invalid');
         return false;
     }
     return true;
 }
 
-function is_role_valid($role)
+function is_role_valid($role, &$validation_context)
 {
-    global $user_input_validation_errors;
     if (is_null($role)) {
-        $user_input_validation_errors["role"] = "not provided";
+        add_validation_error($validation_context, 'role', 'not provided');
         return false;
     }
     if (!filter_var($role, FILTER_VALIDATE_INT)) {
-        $user_input_validation_errors["role"] = "is invalid";
+        add_validation_error($validation_context, 'role', 'is invalid');
         return false;
     }
     if (!role_exists($role)) {
         $filtered_role = filter_var(FILTER_SANITIZE_NUMBER_INT);
-        $user_input_validation_errors["role"] = "no such role $filtered_role";
+        add_validation_error($validation_context, 'role', "no such role $filtered_role");
         return false;
     }
     return true;
 }
 
-function user_input_has_errors()
+function add_validation_error(&$validation_context, $name, $description)
 {
-    global $user_input_validation_errors;
-    return !empty($user_input_validation_errors);
+    $validation_context[$name] = $description;
 }
 
-function initialize_user_input_validation()
+function get_validation_error(&$validation_context, $name)
 {
-    global $user_input_validation_errors;
-    $user_input_validation_errors = [];
+    return $validation_context[$name];
 }
 
-function get_user_input_validation_errors()
+function get_all_validation_errors(&$validation_context)
 {
-    global $user_input_validation_errors;
-    return $user_input_validation_errors;
+    return $validation_context;
+}
+
+function validation_context_has_errors(&$validation_errors)
+{
+    return !empty($validation_errors);
+}
+
+function &initialize_validation_context()
+{
+    $validation_context = [];
+    return $validation_context;
 }
