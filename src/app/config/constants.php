@@ -1,21 +1,22 @@
 <?php
-
-function get_username_assoc_key()
-{
-    return 'user_email';
-}
-
-function get_password_assoc_key()
-{
-    return 'user_password';
-}
-
-function get_role_assoc_key()
-{
-    return 'user_role';
-}
-
-function get_token_assoc_key()
-{
-    return 'PRIVATE-TOKEN';
-}
+define('ID', 'id');
+define('USER_ID', 'user_id');
+define('USER_EMAIL', 'user_email');
+define('USER_PASSWORD', 'user_password');
+define('USER_ROLE', 'user_role');
+define('PRIVATE_TOKEN', 'PRIVATE-TOKEN');
+define('ACCESS_TOKEN', 'access_token');
+define('HASHED_PASSWORD', 'hashed_password');
+define('GET', 'GET');
+define('POST', 'POST');
+define('PUT', 'PUT');
+define('DELETE', 'DELETE');
+define('HEAD', 'HEAD');
+define('ROOT', 'root');
+define('LOGIN', 'login');
+define('CODE', 'code');
+define('CLIENT_SECRET', 'client_secret');
+define('REDIRECT_URI', 'redirect_uri');
+define('FIELDS', 'fields');
+define('UID', 'uid');
+define('UIDS', 'uids');
