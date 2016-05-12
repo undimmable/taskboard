@@ -13,6 +13,8 @@ Vagrant.configure(2) do |config|
     rm -v /etc/apt/apt.conf.d/70debconf
     dpkg-reconfigure locales
     echo "Provisioning: remove default mysql"
+    apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys 5072E1F5
+    echo "deb http://repo.mysql.com/apt/ubuntu/ trusty mysql-5.7" | tee -a /etc/apt/sources.list.d/mysql.list
     apt-get -y purge mysql-server mysql-client mysql-common mysql-server-5.5
     apt-get -qq update
 
