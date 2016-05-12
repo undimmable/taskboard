@@ -1,9 +1,9 @@
 <?php
 $user = null;
 
-function create_token($email, $role, $id)
+function create_jwt_token($email, $role, $id)
 {
-    return JWT_encode([USER_EMAIL => $email, USER_ROLE => $role, ID => $id], get_key_jwt_secret());
+    return JWT_encode([EMAIL => $email, ROLE => $role, ID => $id], get_config_jwt_secret());
 }
 
 function set_token_cookie($jwt_token, $session = true)
@@ -26,7 +26,7 @@ function parse_token_from_cookie()
     $privateToken = $_COOKIE[PRIVATE_TOKEN];
     if (is_null($privateToken))
         return null;
-    return JWT_decode($privateToken, get_key_jwt_secret());
+    return JWT_decode($privateToken, get_config_jwt_secret());
 }
 
 function try_authorize_from_cookie()
@@ -41,18 +41,18 @@ function try_authorize_from_cookie()
 
 function parse_user_from_token($token)
 {
-    if (!array_key_exists(USER_EMAIL, $token) || !array_key_exists(USER_ROLE, $token) || !array_key_exists(ID, $token))
+    if (!array_key_exists(EMAIL, $token) || !array_key_exists(ROLE, $token) || !array_key_exists(ID, $token))
         return null;
-    $username = $token[USER_EMAIL];
+    $username = $token[EMAIL];
     if (is_null($username))
         return null;
-    $role = $token[USER_ROLE];
+    $role = $token[ROLE];
     if (is_null($role))
         return null;
     $id = $token[ID];
     if (is_null($id))
         return null;
-    return [USER_EMAIL => $username, USER_ROLE => $role, ID => $id];
+    return [EMAIL => $username, ROLE => $role, ID => $id];
 }
 
 function get_authorized_user()
@@ -74,5 +74,5 @@ function is_authorized()
 
 function create_confirmation_token($string)
 {
-    return hash("sha256", $string . get_key_confirmation_secret());
+    return hash("sha256", $string . get_config_confirmation_secret());
 }
