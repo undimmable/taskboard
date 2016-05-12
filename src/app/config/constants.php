@@ -1,9 +1,12 @@
 <?php
 define('ID', 'id');
 define('USER_ID', 'user_id');
-define('USER_EMAIL', 'user_email');
-define('USER_PASSWORD', 'user_password');
-define('USER_ROLE', 'user_role');
+define('EMAIL', 'email');
+define('PASSWORD', 'password');
+define('REMEMBER_ME', 'remember_me');
+define('PASSWORD_REPEAT', 'password_repeat');
+define('ROLE', 'role');
+define('IS_CUSTOMER', 'is_customer');
 define('PRIVATE_TOKEN', 'PRIVATE-TOKEN');
 define('ACCESS_TOKEN', 'access_token');
 define('HASHED_PASSWORD', 'hashed_password');
@@ -20,3 +23,4 @@ define('REDIRECT_URI', 'redirect_uri');
 define('FIELDS', 'fields');
 define('UID', 'uid');
 define('UIDS', 'uids');
+ini_set('sendmail_from', 'signup@taskboards.top');
