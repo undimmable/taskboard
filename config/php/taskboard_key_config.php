@@ -4,5 +4,7 @@ return [
     'confirmation_secret'   => 'rplc_confirmation_key',
     'vk_client_id'          => 'rplc_vk_client_id',
     'vk_secret'             => 'rplc_vk_secret',
-    'password_length'       => 6,
+    'min_password_length'   => 6,
+    'max_email_length'      => 255,
+    'max_task_amount'       => 100000
 ];
