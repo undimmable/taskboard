@@ -22,4 +22,17 @@ Vagrant.configure(2) do |config|
   config.push.define "heroku" do |push|
     push.app = "taskboard-development"
   end
+  config.vm.provision "mysql_dev", type: "shell", inline: <<-SHELL
+    source /home/vagrant/config/env
+    service mysql stop
+    sed -i -e 's/127\.0\.0\.1/0\.0\.0\.0/g' /etc/mysql/my.cnf
+    service mysql start
+    mysql --user=root --password=$MYSQL_PASS  -e "CREATE USER idea@'%' IDENTIFIED BY '123'"
+    mysql --user=root --password=$MYSQL_PASS  -e "GRANT ALL ON *.* TO idea@'%' IDENTIFIED BY '123'"
+  SHELL
+  config.vm.provision "enable_xdebug", type: "shell", inline: <<-SHELL
+    echo "xdebug.remote_enable=true" >> /etc/php5/mods-available/xdebug.ini
+    echo "xdebug.profiler_enable=1" >> /etc/php5/mods-available/xdebug.ini
+    echo "xdebug.remote_host=192.168.56.1" >> /etc/php5/mods-available/xdebug.ini
+  SHELL
 end
