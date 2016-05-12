@@ -2,12 +2,10 @@ USE mysql;
 CREATE DATABASE db_account;
 GRANT ALL ON db_account.* TO 'user_account'@'%';
 USE db_account;
+
 CREATE TABLE account (
-  id            BIGINT PRIMARY KEY AUTO_INCREMENT,
-  user_id       BIGINT                  NOT NULL,
-  created_at    TIMESTAMP DEFAULT now() NOT NULL,
-  updated_at    TIMESTAMP,
-  amount        INTEGER,
-  locked_amount INTEGER
+  user_id    BIGINT PRIMARY KEY,
+  balance    NUMERIC(10, 2) NOT NULL DEFAULT 0,
+  last_tx_id BIGINT         NOT NULL DEFAULT -1
 )
   ENGINE = InnoDB;
