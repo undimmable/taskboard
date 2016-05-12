@@ -3,6 +3,5 @@ return [
     'jwt_secret'            => '123',
     'confirmation_secret'   => '123',
     'vk_client_id'          => null,
-    'vk_secret'             => null,
-    'password_length'       => 6,
+    'vk_secret'             => null
 ];

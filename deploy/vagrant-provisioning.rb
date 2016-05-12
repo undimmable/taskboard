@@ -66,8 +66,10 @@ Vagrant.configure(2) do |config|
     PHP_ADDITIONAL_INCLUDE_PATH=/var/www/taskboard_config/
     DB_CONFIG_FILE="taskboard_db_config.php"
     DB_CONFIG_FULL_PATH=$PHP_ADDITIONAL_INCLUDE_PATH/$DB_CONFIG_FILE
-    KEY_CONFIG_FILE="taskboard_key_config.php"
-    KEY_CONFIG_FULL_PATH=$PHP_ADDITIONAL_INCLUDE_PATH/$KEY_CONFIG_FILE
+    SECURITY_CONFIG_FILE="taskboard_security_config.php"
+    SECURITY_CONFIG_FULL_PATH=$PHP_ADDITIONAL_INCLUDE_PATH/$SECURITY_CONFIG_FILE
+    VALIDATION_CONFIG_FILE="taskboard_validation_config.php"
+    VALIDATION_CONFIG_FULL_PATH=$PHP_ADDITIONAL_INCLUDE_PATH/$VALIDATION_CONFIG_FILE
     mkdir -p $PHP_ADDITIONAL_INCLUDE_PATH
     cp /home/vagrant/config/php/*.php $PHP_ADDITIONAL_INCLUDE_PATH
 
@@ -87,11 +89,11 @@ Vagrant.configure(2) do |config|
     sed -i -e 's/rplc_user_info_password/'"$MYSQL_USER_INFO_PASS"'/g' $DB_CONFIG_FULL_PATH
     sed -i -e 's/rplc_user_info_host/'"$MYSQL_USER_INFO_HOST"'/g' $DB_CONFIG_FULL_PATH
 
-    echo "Provisioning PHP keys configuration inside $KEY_CONFIG_FULL_PATH"
-    sed -i -e 's/rplc_jwt_secret/'"$JWT_SECRET"'/g' $KEY_CONFIG_FULL_PATH
-    sed -i -e 's/rplc_confirmation_key/'"$CONFIRMATION_SECRET"'/g' $KEY_CONFIG_FULL_PATH
-    sed -i -e 's/rplc_vk_client_id/'"$VK_APP_ID"'/g' $KEY_CONFIG_FULL_PATH
-    sed -i -e 's/rplc_vk_secret/'"$VK_APP_SECRET"'/g' $KEY_CONFIG_FULL_PATH
+    echo "Provisioning PHP keys configuration inside $SECURITY_CONFIG_FULL_PATH"
+    sed -i -e 's/rplc_jwt_secret/'"$JWT_SECRET"'/g' $SECURITY_CONFIG_FULL_PATH
+    sed -i -e 's/rplc_confirmation_key/'"$CONFIRMATION_SECRET"'/g' $SECURITY_CONFIG_FULL_PATH
+    sed -i -e 's/rplc_vk_client_id/'"$VK_APP_ID"'/g' $SECURITY_CONFIG_FULL_PATH
+    sed -i -e 's/rplc_vk_secret/'"$VK_APP_SECRET"'/g' $SECURITY_CONFIG_FULL_PATH
 
     echo "Provisioning: add certs"
     openssl genrsa -des3 -passout pass:x -out /etc/ssl/taskboards.top.pass.key 2048 > /dev/null 2>&1
