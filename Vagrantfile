@@ -34,5 +34,6 @@ Vagrant.configure(2) do |config|
     echo "xdebug.remote_enable=true" >> /etc/php5/mods-available/xdebug.ini
     echo "xdebug.profiler_enable=1" >> /etc/php5/mods-available/xdebug.ini
     echo "xdebug.remote_host=192.168.56.1" >> /etc/php5/mods-available/xdebug.ini
+    service php5-fpm restart
   SHELL
 end
