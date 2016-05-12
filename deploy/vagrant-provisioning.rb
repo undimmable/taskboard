@@ -25,19 +25,21 @@ Vagrant.configure(2) do |config|
 
     echo "Provisioning: creating MySQL users"
     mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_account identified by '$MYSQL_ACCOUNT_PASS'"
-    mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_customer identified by '$MYSQL_CUSTOMER_PASS'"
     mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_login identified by '$MYSQL_LOGIN_PASS'"
-    mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_performer identified by '$MYSQL_PERFORMER_PASS'"
-    mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_system identified by '$MYSQL_SYSTEM_PASS'"
     mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_task identified by '$MYSQL_TASK_PASS'"
+    mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_text_idx identified by '$MYSQL_TEXT_IDX_PASS'"
+    mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_tx identified by '$MYSQL_TX_PASS'"
+    mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_user identified by '$MYSQL_USER_PASS'"
+    mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_user_info identified by '$MYSQL_USER_INFO_PASS'"
 
     echo "Provisioning: creating MySQL databases"
     mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/account.sql
-    mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/customer.sql
     mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/login.sql
-    mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/performer.sql
-    mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/system.sql
     mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/task.sql
+    mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/text_idx.sql
+    mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/tx.sql
+    mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/user.sql
+    mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/user_info.sql
 
     echo "Provisioning: stopping services"
     service nginx stop
@@ -72,27 +74,24 @@ Vagrant.configure(2) do |config|
     echo "Provisioning: PHP database configuration inside $DB_CONFIG_FULL_PATH"
     sed -i -e 's/rplc_account_password/'"$MYSQL_ACCOUNT_PASS"'/g' $DB_CONFIG_FULL_PATH
     sed -i -e 's/rplc_account_host/'"$MYSQL_ACCOUNT_HOST"'/g' $DB_CONFIG_FULL_PATH
-    sed -i -e 's/rplc_customer_password/'"$MYSQL_CUSTOMER_PASS"'/g' $DB_CONFIG_FULL_PATH
-    sed -i -e 's/rplc_customer_host/'"$MYSQL_CUSTOMER_HOST"'/g' $DB_CONFIG_FULL_PATH
     sed -i -e 's/rplc_login_password/'"$MYSQL_LOGIN_PASS"'/g' $DB_CONFIG_FULL_PATH
     sed -i -e 's/rplc_login_host/'"$MYSQL_LOGIN_HOST"'/g' $DB_CONFIG_FULL_PATH
-    sed -i -e 's/rplc_performer_password/'"$MYSQL_PERFORMER_PASS"'/g' $DB_CONFIG_FULL_PATH
-    sed -i -e 's/rplc_performer_host/'"$MYSQL_PERFORMER_HOST"'/g' $DB_CONFIG_FULL_PATH
-    sed -i -e 's/rplc_system_password/'"$MYSQL_SYSTEM_PASS"'/g' $DB_CONFIG_FULL_PATH
-    sed -i -e 's/rplc_system_host/'"$MYSQL_SYSTEM_HOST"'/g' $DB_CONFIG_FULL_PATH
     sed -i -e 's/rplc_task_password/'"$MYSQL_TASK_PASS"'/g' $DB_CONFIG_FULL_PATH
     sed -i -e 's/rplc_task_host/'"$MYSQL_TASK_HOST"'/g' $DB_CONFIG_FULL_PATH
+    sed -i -e 's/rplc_text_idx_password/'"$MYSQL_TEXT_IDX_PASS"'/g' $DB_CONFIG_FULL_PATH
+    sed -i -e 's/rplc_text_idx_host/'"$MYSQL_TEXT_IDX_HOST"'/g' $DB_CONFIG_FULL_PATH
+    sed -i -e 's/rplc_tx_password/'"$MYSQL_TX_PASS"'/g' $DB_CONFIG_FULL_PATH
+    sed -i -e 's/rplc_tx_host/'"$MYSQL_TX_HOST"'/g' $DB_CONFIG_FULL_PATH
+    sed -i -e 's/rplc_user_password/'"$MYSQL_USER_PASS"'/g' $DB_CONFIG_FULL_PATH
+    sed -i -e 's/rplc_user_host/'"$MYSQL_USER_HOST"'/g' $DB_CONFIG_FULL_PATH
+    sed -i -e 's/rplc_user_info_password/'"$MYSQL_USER_INFO_PASS"'/g' $DB_CONFIG_FULL_PATH
+    sed -i -e 's/rplc_user_info_host/'"$MYSQL_USER_INFO_HOST"'/g' $DB_CONFIG_FULL_PATH
 
     echo "Provisioning PHP keys configuration inside $KEY_CONFIG_FULL_PATH"
     sed -i -e 's/rplc_jwt_secret/'"$JWT_SECRET"'/g' $KEY_CONFIG_FULL_PATH
     sed -i -e 's/rplc_confirmation_key/'"$CONFIRMATION_SECRET"'/g' $KEY_CONFIG_FULL_PATH
     sed -i -e 's/rplc_vk_client_id/'"$VK_APP_ID"'/g' $KEY_CONFIG_FULL_PATH
     sed -i -e 's/rplc_vk_secret/'"$VK_APP_SECRET"'/g' $KEY_CONFIG_FULL_PATH
-
-    echo "Provisioning: add debug support"
-    echo "xdebug.remote_enable=true" >> /etc/php5/mods-available/xdebug.ini
-    echo "xdebug.profiler_enable=1" >> /etc/php5/mods-available/xdebug.ini
-    echo "xdebug.remote_host=192.168.56.1" >> /etc/php5/mods-available/xdebug.ini
 
     echo "Provisioning: add certs"
     openssl genrsa -des3 -passout pass:x -out /etc/ssl/taskboards.top.pass.key 2048 > /dev/null 2>&1
