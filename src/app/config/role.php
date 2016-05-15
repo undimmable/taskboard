@@ -1,7 +1,7 @@
 <?php
 
-$roles = array(1 => "System", 2 => "Customer", 3 => "Performer");
-$roles_reversed = array("System" => 1, "Customer" => 2, "Performer" => 3);
+$roles = array(1 => SYSTEM, 2 => CUSTOMER, 3 => PERFORMER);
+$roles_reversed = array_flip($roles);
 
 function get_role_value($key)
 {
@@ -27,10 +27,14 @@ function role_value_exists($key)
     return array_key_exists($key, $roles);
 }
 
-function is_customer($key) {
-    return $key === 2;
+function is_customer($key)
+{
+    global $roles_reversed;
+    return $key === $roles_reversed[CUSTOMER];
 }
 
-function is_performer($key) {
-    return $key === 3;
+function is_performer($key)
+{
+    global $roles_reversed;
+    return $key === $roles_reversed[PERFORMER];
 }

@@ -1,4 +1,4 @@
-§$(document).ready(function () {
+$(document).ready(function () {
     "use strict";
     $.fn.serializeObject = function () {
         var o = {};
