@@ -63,7 +63,7 @@ function auth_login_action()
         $data = json_decode(file_get_contents('php://input'), true);
     } else {
         render_unsupported_media_type();
-        die;
+        return false;
     }
     $email = $data[EMAIL];
     $password = $data[PASSWORD];
@@ -78,6 +78,7 @@ function auth_login_action()
     $token = create_jwt_token($user[EMAIL], $user[ROLE], $user[ID]);
     set_token_cookie($token, !$remember_me);
     render_ok("application/json", "/feed");
+    return true;
 }
 
 function auth_signup_action()
