@@ -2,6 +2,7 @@ build/
 .vagrant/
 vendor/
 .idea/
+public/**/temp_*
 *.ipr
 *.iws
 /config/env
