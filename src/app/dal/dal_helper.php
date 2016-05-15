@@ -22,9 +22,8 @@ function get_db_errors()
     return $db_errors;
 }
 
-function add_error($mysqli)
+function add_error($mysqli, &$db_errors)
 {
-    global $db_errors;
     $error = mysqli_error($mysqli);
     array_push($db_errors, $error);
     error_log($error);
