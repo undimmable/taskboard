@@ -1,115 +1,82 @@
-var app = {
-    magicScreenWidth: 768,
-    statusOk: 200,
-    statusNotFound: 404,
-    toggle: {},
-    collapse: {},
-    dropdowns: [],
-    DOMReady: function (a, b, c) {
-        b = document;
-        c = 'addEventListener';
-        b[c] ? b[c]('DOMContentLoaded', a) : window.attachEvent('onload', a)
-    },
-    init: function () {
-        var initializer = this.initDropdowns;
-        this.DOMReady(function () {
-            "use strict";
-            initializer();
+§$(document).ready(function () {
+    "use strict";
+    $.fn.serializeObject = function () {
+        var o = {};
+        var a = this.serializeArray();
+        $.each(a, function () {
+            if (o[this.name] !== undefined) {
+                if (!o[this.name].push) {
+                    o[this.name] = [o[this.name]];
+                }
+                o[this.name].push(this.value || '');
+            } else {
+                o[this.name] = this.value || '';
+            }
         });
-    },
-    initDropdowns: function () {
-        this.dropdowns = document.getElementsByClassName('dropdown');
-        this.collapse = document.getElementsByClassName('navbar-collapse')[0];
-        this.toggle = document.getElementsByClassName('navbar-toggle')[0];
-        for (var i = 0; i < this.dropdowns.length; i++) {
-            this.dropdowns[i].addEventListener('click', function () {
-                if (document.body.clientWidth < this.magicScreenWidth) {
-                    var open = this.classList.contains('open');
-                    this.closeMenus();
-                    if (!open) {
-                        this.getElementsByClassName('dropdown-toggle')[0].classList.toggle('dropdown-open');
-                        this.classList.toggle('open');
+        return o;
+    };
+    $('#login_form,#signup_form').on('submit', function (e) {
+        e.preventDefault();
+        var form = $(this);
+        $('.has-error').each(function () {
+            $(this).removeClass('has-error');
+        });
+        $.each($('.error-description'), function () {
+            $(this).empty();
+        });
+        $(".role-btn-group button").click(function () {
+            $("#signup_user_role").val($(this).text());
+        });
+        var formId = form.attr('id');
+        var data = form.serializeObject();
+        var action = form.attr('action');
+        $('#'.concat(formId, '_spinner')).each(function () {
+            $(this).addClass('glyphicon glyphicon-refresh spinning');
+        });
+        $.ajax({
+            url: action,
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            type: "POST",
+            data: JSON.stringify(data),
+            success: function (msg) {
+                $('.spinning').each(function () {
+                    $(this).removeClass('spinning');
+                });
+                if (msg != null) {
+                    console.log(msg);
+                    if (msg == null) {
+                        console.log("Something went extremely wrong here, response is not JSON");
+                        return;
                     }
+                    if (msg.redirect == null) {
+                        console.log("Leave as is");
+                        return;
+                    }
+                    location.href = msg.redirect;
                 }
-            });
-        }
-        window.addEventListener('resize', this.closeMenusOnResize, false);
-        if (this.toggle !== undefined && this.toggle != null) {
-            this.toggle.addEventListener('click', this.toggleMenu, false);
-        }
-    },
-    toggleMenu: function () {
-        this.collapse.classList.toggle('collapse');
-        this.collapse.classList.toggle('in');
-    },
-    closeMenusOnResize: function () {
-        if (document.body.clientWidth >= this.magicScreenWidth) {
-            this.closeMenus();
-            collapse.classList.add('collapse');
-            collapse.classList.remove('in');
-        }
-    },
-    closeMenus: function () {
-        for (var j = 0; j < this.dropdowns.length; j++) {
-            this.dropdowns[j].getElementsByClassName('dropdown-toggle')[0].classList.remove('dropdown-open');
-            this.dropdowns[j].classList.remove('open');
-        }
-    },
-    serialize: function (obj) {
-        var str = [];
-        for (var p in obj)
-            if (obj.hasOwnProperty(p)) {
-                str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
-            }
-        return str.join("&");
-    },
-    getJSON: function (url, params, successHandler, errorHandler) {
-        "use strict";
-        var xhr = this.XHR();
-        xhr.open('get', url, true);
-        xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.onreadystatechange = function () {
-            var status;
-            var data;
-            if (xhr.readyState == 4) {
-                status = xhr.status;
-                if (status == this.statusOk) {
-                    data = JSON.parse(xhr.responseText);
-                    successHandler && successHandler(data);
-                } else {
-                    errorHandler && errorHandler(status);
+            },
+            error: function (msg) {
+                $('.spinning').each(function () {
+                    $(this).removeClass('spinning');
+                });
+                var response = msg.responseJSON;
+                if (response == null) {
+                    console.log("Something went extremely wrong here, response is not JSON");
+                    return;
                 }
+                if (response.error == null) {
+                    console.log("Something went extremely wrong here, response is error, but JSON doesn't have an error field.");
+                    console.log(response);
+                    return;
+                }
+                //noinspection JSUnresolvedVariable
+                $.each(response.error, function (error_name, error_description) {
+                    var $errorSpan = $('#'.concat(formId, '_error_', error_name));
+                    $errorSpan.parent('div').addClass('has-error');
+                    $errorSpan.text(error_description);
+                });
             }
-        };
-        xhr.send(params);
-    },
-    XHR: function XHR() {
-        "use strict";
-        try {
-            return new XMLHttpRequest();
-        } catch (e) {
-        }
-        try {
-            return new ActiveXObject("Msxml3.XMLHTTP");
-        } catch (e) {
-        }
-        try {
-            return new ActiveXObject("Msxml2.XMLHTTP.6.0");
-        } catch (e) {
-        }
-        try {
-            return new ActiveXObject("Msxml2.XMLHTTP.3.0");
-        } catch (e) {
-        }
-        try {
-            return new ActiveXObject("Msxml2.XMLHTTP");
-        } catch (e) {
-        }
-        try {
-            return new ActiveXObject("Microsoft.XMLHTTP");
-        } catch (e) {
-        }
-        return null;
-    }
-};
-app.init();
+        });
+    });
+});
