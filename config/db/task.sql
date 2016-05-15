@@ -7,6 +7,7 @@ CREATE TABLE task (
   created_at   TIMESTAMP DEFAULT now() NOT NULL,
   customer_id  BIGINT                  NOT NULL,
   performer_id BIGINT             DEFAULT NULL,
-  amount       NUMERIC(10, 2)          NOT NULL
+  amount       NUMERIC(10, 2)          NOT NULL,
+  description  MEDIUMTEXT              NOT NULL
 )
   ENGINE = InnoDB;
