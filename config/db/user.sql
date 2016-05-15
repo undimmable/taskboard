@@ -11,4 +11,5 @@ CREATE TABLE user (
   confirmation_token VARCHAR(255)            NOT NULL,
   confirmed          BOOLEAN                 NOT NULL        DEFAULT FALSE
 )
-  ENGINE = InnoDB;
+  ENGINE = InnoDB
+  DEFAULT CHARSET UTF8;

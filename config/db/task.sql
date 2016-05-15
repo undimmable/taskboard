@@ -10,4 +10,5 @@ CREATE TABLE task (
   amount       NUMERIC(10, 2)          NOT NULL,
   description  MEDIUMTEXT              NOT NULL
 )
-  ENGINE = InnoDB;
+  ENGINE = InnoDB
+  DEFAULT CHARSET UTF8;

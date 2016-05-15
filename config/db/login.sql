@@ -8,4 +8,5 @@ CREATE TABLE login (
   user_client VARCHAR(31),
   created_at  TIMESTAMP
 )
-  ENGINE = InnoDB;
+  ENGINE = InnoDB
+  DEFAULT CHARSET UTF8;

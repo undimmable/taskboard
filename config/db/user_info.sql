@@ -8,4 +8,5 @@ CREATE TABLE user_info (
   last_name  VARCHAR(255),
   avatar_url VARCHAR(255)
 )
-  ENGINE = InnoDB;
+  ENGINE = InnoDB
+  DEFAULT CHARSET UTF8;

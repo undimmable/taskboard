@@ -8,4 +8,5 @@ CREATE TABLE account (
   balance    NUMERIC(10, 2) NOT NULL DEFAULT 0,
   last_tx_id BIGINT         NOT NULL DEFAULT -1
 )
-  ENGINE = InnoDB;
+  ENGINE = InnoDB
+  DEFAULT CHARSET UTF8;

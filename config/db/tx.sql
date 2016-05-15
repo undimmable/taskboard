@@ -11,4 +11,5 @@ CREATE TABLE tx (
   INDEX (from_user_id, id),
   INDEX (to_user_id, id)
 )
-  ENGINE = InnoDB;
+  ENGINE = InnoDB
+  DEFAULT CHARSET UTF8;

@@ -10,4 +10,5 @@ CREATE TABLE text_idx (
   text_val    TEXT                           NOT NULL,
   FULLTEXT idx (text_val)
 )
-  ENGINE = InnoDB;
+  ENGINE = InnoDB
+  DEFAULT CHARSET UTF8;
