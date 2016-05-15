@@ -13,9 +13,6 @@
  * @link      https://taskboards.top
  * @since     1.0.0
  */
-/**
- * Bootstrap application
- */
 require_once "../bootstrap.php";
 require_once "../lib/mail.php";
 require_once "../dal/user.php";
@@ -23,36 +20,37 @@ require_once "../dal/user.php";
 $routes = [
     'POST' => [
         'login' => 'auth_login_action',
-        'logout' => 'auth_logout_action',
         'signup' => 'auth_signup_action',
     ],
     'GET' => [
         'verify' => 'auth_verify_action',
+        'logout' => 'auth_logout_action',
         'signup_vk' => 'auth_signup_vk_action'
     ],
     'PUT' => [],
     'DELETE' => []
 ];
 
-function __validate_signup_input($email, $role, $password)
+function __validate_signup_input($email, $role, $password, $password_repeat)
 {
     $validation_context = initialize_validation_context();
     is_email_valid($email, $validation_context);
     is_role_valid($role, $validation_context);
     is_password_valid($password, $validation_context);
+    is_password_repeat_valid($password, $password_repeat, $validation_context);
     if (validation_context_has_errors($validation_context)) {
-        echo json_encode(get_all_validation_errors($validation_context));
+        header('Content-Type: application/json');
+        render_bad_request(get_all_validation_errors($validation_context));
         die;
     }
 }
 
-function __validate_login_input($email, $role)
+function __validate_login_input($email)
 {
-    $validation_errors = initialize_validation_context();
-    is_email_valid($email, $validation_errors);
-    is_role_valid($role, $validation_errors);
-    if (validation_context_has_errors($validation_errors)) {
-        echo json_encode(get_all_validation_errors($validation_errors));
+    $validation_context = initialize_validation_context();
+    is_email_valid($email, $validation_context);
+    if (validation_context_has_errors($validation_context)) {
+        render_bad_request(get_all_validation_errors($validation_context));
         die;
     }
 }
@@ -67,52 +65,67 @@ function auth_login_action()
         render_unsupported_media_type();
         die;
     }
-    $email = $data["email"];
-    $password = $data["password"];
+    $email = $data[EMAIL];
+    $password = $data[PASSWORD];
+    $remember_me = is_checked($data[REMEMBER_ME]);
+    __validate_login_input($email);
     $user = db_fetch_user_by_email($email);
-    if ($user === null)
-        render_not_found();
-    $hashed_password = $user["hashed_password"];
-    if (!password_verify($password, $hashed_password))
-        render_not_found();
-    $token = create_token($user["email"], $user["role"], $user['id']);
-    set_token_cookie($token);
-    render_ok();
+    if ($user === null || !password_verify($password, $user["hashed_password"])) {
+        render_not_found([
+            'error' => [EMAIL => "Wrong username and/or password"]
+        ], "application/json");
+    }
+    $token = create_jwt_token($user[EMAIL], $user[ROLE], $user[ID]);
+    set_token_cookie($token, !$remember_me);
+    render_ok("application/json", "/feed");
 }
 
 function auth_signup_action()
 {
     if (is_request_www_form()) {
-        $email = $_POST[USER_EMAIL];
-        $role = $_POST[USER_ROLE];
-        $password = $_POST[USER_PASSWORD];
+        $email = $_POST[EMAIL];
+        $is_customer = $_POST[IS_CUSTOMER];
+        $password = $_POST[PASSWORD];
+        $password_repeat = $_POST[PASSWORD_REPEAT];
     } elseif (is_request_json()) {
         $data = json_decode(file_get_contents('php://input'), true);
-        $email = $data[USER_EMAIL];
-        $role = $data[USER_ROLE];
-        $password = $data[USER_PASSWORD];
+        $email = $data[EMAIL];
+        $is_customer = $data[IS_CUSTOMER];
+        $password = $data[PASSWORD];
+        $password_repeat = $data[PASSWORD_REPEAT];
     } else {
         render_unsupported_media_type();
         die;
     }
-    __validate_signup_input($email, $role, $password);
+    if (is_checked($is_customer)) {
+        $role = get_role_key("Customer");
+    } else {
+        $role = get_role_key("Performer");
+    }
+    __validate_signup_input($email, $role, $password, $password_repeat);
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
     $confirmation_token = create_confirmation_token($email);
     $user = create_user($email, $role, $hashed_password, $confirmation_token);
     if (!$user) {
         $db_errors = get_db_errors();
-        render_conflict($db_errors[LOGIN]);
+        if ($db_errors[LOGIN] === "duplicate entity") {
+            render_conflict([
+                'error' => [EMAIL => "User with this email already registered"]
+            ]);
+        } else {
+            render_conflict($db_errors);
+        }
     }
-    $token = create_token($email, $role, $user[ID]);
+    $token = create_jwt_token($email, $role, $user[ID]);
     set_token_cookie($token);
-    send_verification_request_email($email, $confirmation_token);
-    flush();
+    send_verification_request_email($email, $_SERVER['HTTP_HOST'], $confirmation_token);
+    render_ok("application/json", "/");
 }
 
 function auth_logout_action()
 {
     if (delete_token_cookie())
-        render_ok();
+        https_redirect("/");
     else
         render_not_authorized();
 }
@@ -122,12 +135,14 @@ function auth_verify_action()
     if (isset($_GET['confirmation_token'])) {
         $user = verify_user($_GET['confirmation_token']);
         if (!is_null($user)) {
-            send_verification_confirmed_email($user[USER_EMAIL]);
-            https_redirect("/");
+            $token = create_jwt_token($user[EMAIL], $user[ROLE], $user[ID]);
+            set_token_cookie($token);
+            send_verification_confirmed_email($user[EMAIL], $_SERVER['HTTP_HOST']);
+            render_ok("text/html", "/");
         } else
-            render_not_authorized();
+            render_not_authorized("text/html");
     } else {
-        render_not_authorized();
+        render_not_authorized("text/html");
     }
 }
 
