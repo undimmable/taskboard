@@ -1,6 +1,6 @@
 {
   "name": "dmbogdanov/taskboard",
-  "description": "Simple order processing application",
+  "description": "Simple order processing application written in pure php and js",
   "license": "proprietary",
   "require": {
     "php": ">=5.6.0",
