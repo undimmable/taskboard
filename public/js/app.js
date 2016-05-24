@@ -87,9 +87,29 @@ function Taskboard() {
         }
     };
 
+    this.delay = (function () {
+        var timer = 0;
+        return function (callback, ms) {
+            clearTimeout(timer);
+            timer = setTimeout(callback, ms);
+        };
+    })();
+
     this.initializeSearch = function () {
-        $('#search').on('keyup', function () {
-            console.log($(this).val());
+        var searchInput = $('#search');
+        var callback = function () {
+            console.log(searchInput.val());
+            var icon = searchInput.closest('form').find('i');
+            taskboardApplication.replaceIconWithSpinner(icon);
+            taskboardApplication.delay(function () {
+                taskboardApplication.replaceSpinnerWithIcon(icon);
+            }, 10000);
+        };
+        searchInput.closest('form').submit(function (e) {
+            e.preventDefault();
+        });
+        searchInput.keyup(function () {
+            taskboardApplication.delay(callback, 300);
         });
     };
 
@@ -126,16 +146,21 @@ function Taskboard() {
 
     this.addFormSpinner = function () {
         $('#'.concat(taskboardApplication.currentFormId(), '-spinner')).each(function () {
-            $(this).removeAttr('class');
-            $(this).addClass('glyphicon glyphicon-refresh spinning');
+            taskboardApplication.replaceIconWithSpinner($(this));
         });
+    };
+
+    this.replaceIconWithSpinner = function (icon) {
+        icon.removeClass(icon.data('icon')).addClass('glyphicon glyphicon-refresh spinning');
+    };
+
+    this.replaceSpinnerWithIcon = function (icon) {
+        icon.removeClass('glyphicon glyphicon-refresh spinning').addClass(icon.data('icon'));
     };
 
     this.removeFormSpinner = function () {
         $('#'.concat(taskboardApplication.currentFormId(), '-spinner')).each(function () {
-            $(this).removeClass('glyphicon-refresh');
-            $(this).removeClass('spinning');
-            $(this).addClass($(this).data('icon'));
+            taskboardApplication.replaceSpinnerWithIcon($(this));
         });
     };
 
