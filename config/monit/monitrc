@@ -1,0 +1,15 @@
+  set daemon 60
+    with start delay 240
+  set logfile /var/log/monit.log
+  set idfile /var/lib/monit/id
+  set statefile /var/lib/monit/state
+  set eventqueue
+    basedir /var/lib/monit/events
+    slots 100
+  set mmonit http://monit:monit@localhost:3738/collector
+  set httpd port 3737 and
+    use address localhost
+    allow admin:monit
+    allow @monit
+    allow @users readonly
+  include /etc/monit/conf.d/*

@@ -1,0 +1,12 @@
+check process nginx with pidfile /var/run/nginx.pid
+    group www-data
+    start program = "/etc/init.d/nginx start"
+    stop program = "/etc/init.d/nginx stop"
+
+check process mysql with pidfile /var/run/mysqld/mysqld.pid
+    start program = "/etc/init.d/mysql start"
+    stop program = "/etc/init.d/mysql stop"
+
+check process php5-fpm with pidfile /var/run/php5-fpm.pid
+    start program = "/etc/init.d/php5-fpm start"
+    stop program = "/etc/init.d/php5-fpm stop"

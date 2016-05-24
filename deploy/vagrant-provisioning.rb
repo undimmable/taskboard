@@ -104,10 +104,27 @@ Vagrant.configure(2) do |config|
     openssl req -new -key /etc/ssl/taskboards.top.key -out /etc/ssl/taskboards.top.csr -days 365 -subj '/CN=taskboards.top/C=RU/ST=NW/L=Saint-Petersburg/O=TaskBoard/OU=TB Team/emailAddress=inbox@taskboards.top/subjectAltName=DNS.1=taskboards.top' -batch 2>/dev/null
     openssl x509 -req -days 365 -in /etc/ssl/taskboards.top.csr -signkey /etc/ssl/taskboards.top.key -out /etc/ssl/taskboards.top.cert 2>/dev/null
 
+    echo "Provisioning: monitoring tools"
+    apt-get -q -y install monit apache2-utils
+    wget --quiet --directory-prefix=/tmp/ https://mmonit.com/dist/mmonit-3.5.1-linux-x64.tar.gz
+    sudo tar -xvf /tmp/mmonit-3.5.1-linux-x64.tar.gz -C /opt/
+    sudo mv /opt/mmonit-3.5.1 /opt/mmonit
+    cp /home/vagrant/config/monit/monitrc /etc/monit/
+    cp /home/vagrant/config/monit/mmonit /etc/monit/monitrc.d/
+    cp /home/vagrant/config/monit/server.xml /opt/mmonit/conf/
+    cp /home/vagrant/config/monit/mmonit.conf /etc/init/
+    cp /home/vagrant/config/monit/lemp /etc/monit/conf.d/
+    cp /home/vagrant/config/nginx/monit /etc/nginx/sites-enabled/
+    sudo htpasswd -c -b /etc/nginx/.htpasswd $MONIT_USER $MONIT_PASSWORD
+    rm -rf /tmp/mmonit-3.5.1-linux-x64.tar.gz
+
     echo "Provisioning: starting services"
+    initctl reload-configuration
     service postfix start
     service php5-fpm start
     service nginx start
+    service mmonit restart
+    service monit restart
 
     echo "Provisioning: DONE"
   SHELL
