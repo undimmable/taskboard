@@ -70,6 +70,11 @@ function api_auth_login_action()
     $email = $data[EMAIL];
     $password = $data[PASSWORD];
     $remember_me = is_checked($data[REMEMBER_ME]);
+    $csrf = $data['csrf_token'];
+    if (!is_csrf_token_valid("login", $csrf)) {
+        render_not_authorized_json();
+        die;
+    }
     __validate_login_input($email, $password);
     $user = db_fetch_user_by_email($email);
     if ($user === null || !password_verify($password, $user[HASHED_PASSWORD])) {
@@ -108,19 +113,26 @@ function api_auth_login_action()
 function api_auth_signup_action()
 {
     $email = $is_customer = $password = $password_repeat = null;
+    $csrf = null;
     if (is_request_www_form()) {
         $email = $_POST[EMAIL];
         $is_customer = $_POST[IS_CUSTOMER];
         $password = $_POST[PASSWORD];
         $password_repeat = $_POST[PASSWORD_REPEAT];
+        $csrf = $_POST['csrf_token'];
     } elseif (is_request_json()) {
         $data = json_decode(file_get_contents('php://input'), true);
         $email = $data[EMAIL];
         $is_customer = $data[IS_CUSTOMER];
         $password = $data[PASSWORD];
         $password_repeat = $data[PASSWORD_REPEAT];
+        $csrf = $data['csrf_token'];
     } else {
         render_unsupported_media_type();
+    }
+    if (!is_csrf_token_valid("signup", $csrf)) {
+        render_not_authorized_json();
+        die;
     }
     if (is_checked($is_customer)) {
         $role = get_role_key(CUSTOMER);
