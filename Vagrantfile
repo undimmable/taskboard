@@ -26,6 +26,7 @@ Vagrant.configure(2) do |config|
     source /home/vagrant/config/env
     service mysql stop
     sed -i -e 's/127\.0\.0\.1/0\.0\.0\.0/g' /etc/mysql/my.cnf
+    ufw allow 3306
     service mysql start
     mysql --user=root --password=$MYSQL_PASS  -e "CREATE USER idea@'%' IDENTIFIED BY '123'"
     mysql --user=root --password=$MYSQL_PASS  -e "GRANT ALL ON *.* TO idea@'%' IDENTIFIED BY '123'"
