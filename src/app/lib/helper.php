@@ -36,13 +36,13 @@ function get_request_content_type()
 function is_request_www_form()
 {
     $content_type = get_request_content_type();
-    return strpos($content_type, "multipart/form-data") !== false || strpos($content_type, "application/x-www-form-urlencoded") !== false;
+    return strpos($content_type, 'multipart/form-data') !== false || strpos($content_type, 'application/x-www-form-urlencoded') !== false;
 }
 
 function is_request_json()
 {
     $content_type = get_request_content_type();
-    return $content_type === "application/json";
+    return strpos($content_type, 'application/json') !== false;
 }
 
 function array_slice_assoc($array, $keys)

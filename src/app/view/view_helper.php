@@ -1,133 +1,45 @@
 <?php
 
-function render_not_found($error_description = null, $content_type = "text/html")
+function render_not_found()
 {
-    http_response_code(404);
-    if ($content_type !== "application/json") {
-        /** @noinspection PhpIncludeInspection */
-        include $_SERVER['DOCUMENT_ROOT'] . '/../public/html/http_errors/404.html';
-    } else {
-        header('Content-Type: application/json');
-        echo json_encode($error_description);
-    }
-    die;
+    render_status_json(404, array('error' => 'Not found'));
 }
 
-function render_ok($content_type = "application/json", $redirect = null)
+function render_ok_json($response)
 {
-    http_response_code(200);
-    if ($redirect != null) {
-        if ($content_type === "application/json")
-            echo json_encode(["redirect" => $redirect]);
-        else
-            https_redirect($redirect);
-    }
-    die;
+    render_status_json(200, $response);
 }
 
-function render_unsupported_media_type($content_type = "application/json")
+function render_unsupported_media_type()
 {
-    http_response_code(415);
-    if ($content_type !== "application/json") {
-        echo "Unsupported media type";
-    }
-    die;
+    render_status_json(415, array('error' => 'Unsupported media type'));
 }
 
-function render_conflict($error_description, $content_type = "application/json")
+function render_conflict($error)
 {
-    http_response_code(409);
-    if ($content_type !== "application/json") {
-        echo $error_description;
-    } else {
-        header('Content-Type: application/json');
-        echo json_encode($error_description);
-    }
-    die;
+    render_status_json(409, $error);
 }
 
-function render_not_allowed($content_type = "application/json")
+function render_not_allowed_json()
 {
-    http_response_code(405);
-    if ($content_type !== "application/json") {
-        echo "Method not allowed";
-    }
-    die;
+    render_status_json(405, array('error' => 'Method not allowed'));
 }
 
-function render_not_authorized($content_type = "application/json")
+
+function render_bad_request_json($error)
 {
-    http_response_code(401);
-    if ($content_type !== "application/json") {
-        echo "Not authorized";
-    } else {
-        echo json_encode(["error" => "Not authorized"]);
-    }
-    die;
+    render_status_json(400, $error);
 }
 
-function render_bad_request($error, $content_type = "application/json")
+function render_not_authorized_json()
 {
-    http_response_code(400);
-    if ($content_type !== "application/json") {
-        echo $error;
-    } else {
-        header('Content-Type: application/json');
-        echo json_encode(["error" => $error]);
-    }
-    die;
+    render_status_json(401, array('error' => 'Not authorized'));
 }
 
-function add_html_header($content_type = "text/html")
+function render_status_json($code, $message)
 {
-    if ($content_type !== "application/json") {
-        include "templates/header.html.php";
-    }
-}
-
-function add_html_navbar($content_type = "text/html")
-{
-    if ($content_type !== "application/json") {
-        include "templates/navbar.html.php";
-    }
-}
-
-function add_login_buttons()
-{
-    include "templates/login_buttons.html.php";
-}
-
-function add_logout_button()
-{
-    include "templates/logout_button.html.php";
-}
-
-function add_html_footer($content_type = "text/html")
-{
-    if ($content_type !== "application/json") {
-        include "templates/footer.html.php";
-    }
-}
-
-function add_html_task($task, $content_type = "text/html")
-{
-    if ($content_type !== "application/json") {
-        include "templates/task.html.php";
-    }
-}
-
-function add_login_form($content_type = "text/html")
-{
-    if ($content_type !== "application/json") {
-        include "templates/login_form.html.php";
-    }
-}
-
-function add_signup_form($content_type = "text/html")
-{
-    if ($content_type !== "application/json") {
-        include "templates/signup_form.html.php";
-    }
+    http_response_code($code);
+    echo json_encode($message);
 }
 
 function signin_vk_url()
