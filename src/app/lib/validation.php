@@ -1,5 +1,19 @@
 <?php
 
+function is_csrf_token_valid($type, $payload)
+{
+    if ($type == 'task') {
+        return $payload == 10;
+    }
+    if ($type == 'login') {
+        return $payload == 9;
+    }
+    if ($type == 'signup') {
+        return $payload == 8;
+    }
+    return false;
+}
+
 function is_password_valid($password, &$validation_context)
 {
     if (is_null($password)) {
