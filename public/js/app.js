@@ -56,7 +56,7 @@ function Taskboard() {
         $('#'.concat(storageItemName, '-text')).text(popupItem);
         var popup = $('#'.concat(storageItemName));
         popup.removeClass('hidden');
-        popup.fadeTo(2000, 500).slideUp(500, function () {
+        popup.fadeTo(2000, 500).fadeOut(5000, function () {
             popup.hide();
             $(popup.find('span')).text('');
         });
@@ -253,6 +253,10 @@ function Taskboard() {
             taskboardApplication.closeFormOnUnknownError("Something went extremely wrong here, response is JSON of error type, but doesn't have any explanatory fields.");
             return;
         }
+        if (response.status === 401) {
+            taskboardApplication.closeFormOnUnknownError(json.error);
+            return;
+        }
         $(taskboardApplication.currentForm).find('input').on('change keyup', function () {
             if (!taskboardApplication.disableModals) {
                 $(this).off('change keyup');
@@ -268,7 +272,7 @@ function Taskboard() {
         });
         taskboardApplication.processResponseEvents(response);
         taskboardApplication.initializePopup(errorPopupKey);
-        taskboardApplication.currentForm = null;
+        taskboardApplication.finalizeForm();
     };
 
     this.initializeFormModals = function () {
@@ -280,20 +284,26 @@ function Taskboard() {
                 taskboardApplication.cleanupModal(this);
             }
         });
-        $modal.on('shown.bs.modal', function () {
-            var request = $(this).data('type');
+        $modal.on('shown.bs.modal', function (e) {
             var csrfInput = $(this).find('form').find('input[name=csrf_token]');
-            $.ajax({
-                url: 'https://taskboard.dev/api/v1/csrf/'.concat(request),
-                contentType: 'application/json; charset=UTF-8',
-                type: "GET",
-                success: function (response) {
-                    $(csrfInput).val(response);
-                },
-                error: function (error) {
-                    console.log(error);
+            if (csrfInput.val() !== undefined) {
+                e.preventDefault();
+                var request = $(this).data('type');
+                if (request !== undefined) {
+                    $.ajax({
+                        url: 'https://taskboard.dev/api/v1/csrf/'.concat(request),
+                        contentType: 'application/json; charset=UTF-8',
+                        type: "GET",
+                        success: function (response) {
+                            $(csrfInput).val(response);
+                            $modal.trigger(e);
+                        },
+                        error: function (error) {
+                            console.log(error);
+                        }
+                    });
                 }
-            });
+            }
         });
     };
 
@@ -340,7 +350,7 @@ function Taskboard() {
         taskboardApplication.initializeListeners();
         taskboardApplication.initializeFormListeners();
         taskboardApplication.initializeFormModals();
-        taskboardApplication.initializeEventStream();
+        // taskboardApplication.initializeEventStream();
         taskboardApplication.initializeSearch();
         return taskboardApplication;
     };
