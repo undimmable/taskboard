@@ -1,11 +1,9 @@
 <?php
-require_once "app/bootstrap.php";
-$page_title = "index";
-if (!is_authorized()) {
-    add_html_header();
-    add_html_navbar();
-    add_html_footer();
-    die();
-} else {
-    https_redirect("/feed");
-}
+require 'app/bootstrap.php';
+try_authorize_from_cookie();
+$user = get_authorized_user();
+$verification_popup = $_GET['verification_popup'];
+$page_title = "TaskBoards";
+ob_start();
+require 'app/view/templates/layout.php';
+ob_end_flush();
