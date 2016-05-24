@@ -49,3 +49,14 @@ function array_slice_assoc($array, $keys)
 {
     return array_intersect_key($array, array_flip($keys));
 }
+
+function parse_integer_param($param_name)
+{
+    $param = $_GET[$param_name];
+    if ($param !== null) {
+        $param = filter_var($param, FILTER_VALIDATE_INT);
+        if ($param === false)
+            $param = null;
+    }
+    return $param;
+}
