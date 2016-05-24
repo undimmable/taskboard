@@ -3,6 +3,16 @@
 require_once "../bootstrap.php";
 require_once "dal_helper.php";
 
+$user_connection = null;
+
+function get_user_connection()
+{
+    global $user_connection;
+    if ($user_connection === null) {
+        $user_connection = get_mysqli_connection(USER_DB);
+    }
+    return $user_connection;
+}
 
 function create_user($email, $role, $hashed_password, $confirmation_token)
 {
@@ -12,32 +22,32 @@ function create_user($email, $role, $hashed_password, $confirmation_token)
         return false;
     }
     initialize_db_errors();
-    $mysqli = get_mysqli_connection(USER_DB);
-    if (!$mysqli)
-        add_error(mysqli_error($mysqli), $db_errors);
-    $mysqli_stmt = mysqli_prepare($mysqli, "INSERT INTO db_user.user (email, role, hashed_password, confirmation_token) VALUES (?,?,?,?)");
-    if (!$mysqli_stmt) {
-        add_error(mysqli_error($mysqli), $db_errors);
+    $connection = get_mysqli_connection(USER_DB);
+    if (!$connection)
+        add_error(mysqli_error($connection), $db_errors);
+    $stmt = mysqli_prepare($connection, "INSERT INTO db_user.user (email, role, hashed_password, confirmation_token) VALUES (?,?,?,?)");
+    if (!$stmt) {
+        add_error(mysqli_error($connection), $db_errors);
         return false;
     }
     /** @noinspection PhpMethodParametersCountMismatchInspection */
-    if (!mysqli_stmt_bind_param($mysqli_stmt, 'siss', $email, $role, $hashed_password, $confirmation_token)) {
-        add_error(mysqli_error($mysqli), $db_errors);
+    if (!mysqli_stmt_bind_param($stmt, 'siss', $email, $role, $hashed_password, $confirmation_token)) {
+        add_error(mysqli_error($connection), $db_errors);
         return false;
     }
-    if (!mysqli_stmt_execute($mysqli_stmt)) {
-        add_error(mysqli_error($mysqli), $db_errors);
+    if (!mysqli_stmt_execute($stmt)) {
+        add_error(mysqli_error($connection), $db_errors);
         return false;
     }
-    if (!mysqli_stmt_close($mysqli_stmt)) {
-        add_error(mysqli_error($mysqli), $db_errors);
+    if (!mysqli_stmt_close($stmt)) {
+        add_error(mysqli_error($connection), $db_errors);
         return false;
     }
-    if (mysqli_errno($mysqli) !== 0) {
-        add_error(mysqli_error($mysqli), $db_errors);
+    if (mysqli_errno($connection) !== 0) {
+        add_error(mysqli_error($connection), $db_errors);
         return false;
     }
-    return [EMAIL => $email, ROLE => $role, ID => mysqli_insert_id($mysqli)];
+    return [EMAIL => $email, ROLE => $role, ID => mysqli_insert_id($connection)];
 }
 
 function user_exists($email)
@@ -80,28 +90,31 @@ function db_fetch_user_by_email($email)
     $mysqli = get_mysqli_connection(USER_DB);
     if (!$mysqli)
         add_error(mysqli_error($mysqli), $db_errors);
-    $mysqli_stmt = mysqli_prepare($mysqli, "SELECT id, email, hashed_password, role FROM db_user.user WHERE email = ?");
-    if (!$mysqli_stmt) {
+    $stmt = mysqli_prepare($mysqli, "SELECT id, email, hashed_password, role FROM db_user.user WHERE email = ?");
+    if (!$stmt) {
         add_error(mysqli_error($mysqli), $db_errors);
         return false;
     }
-    if (!mysqli_stmt_bind_param($mysqli_stmt, 's', $email)) {
+    if (!mysqli_stmt_bind_param($stmt, 's', $email)) {
         add_error(mysqli_error($mysqli), $db_errors);
         return false;
     }
-    if (!mysqli_stmt_execute($mysqli_stmt)) {
+    if (!mysqli_stmt_execute($stmt)) {
         add_error(mysqli_error($mysqli), $db_errors);
         return false;
     }
-    if (!mysqli_stmt_bind_result($mysqli_stmt, $id, $user_email, $hashed_password, $role)) {
+    if (!mysqli_stmt_bind_result($stmt, $id, $user_email, $hashed_password, $role)) {
         add_error(mysqli_error($mysqli), $db_errors);
         return false;
     }
-    if (!mysqli_stmt_fetch($mysqli_stmt)) {
+    if (!mysqli_stmt_fetch($stmt)) {
         add_error(mysqli_error($mysqli), $db_errors);
         return false;
     }
-    if (!mysqli_stmt_close($mysqli_stmt)) {
+    if (mysqli_stmt_num_rows($stmt) < 1) {
+        return null;
+    }
+    if (!mysqli_stmt_close($stmt)) {
         add_error(mysqli_error($mysqli), $db_errors);
         return false;
     }
