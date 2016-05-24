@@ -7,6 +7,7 @@ require_once "config/db_config.php";
 require_once "config/security_config.php";
 require_once "config/validation_config.php";
 require_once "config/role.php";
+require_once "events/event.php";
 require_once "lib/helper.php";
 require_once "lib/validation.php";
 require_once "lib/mobile.php";
