@@ -118,6 +118,14 @@ Vagrant.configure(2) do |config|
     sudo htpasswd -c -b /etc/nginx/.htpasswd $MONIT_USER $MONIT_PASSWORD
     rm -rf /tmp/mmonit-3.5.1-linux-x64.tar.gz
 
+    echo "Provisioning: firewall rules"
+    ufw allow ssh
+    ufw allow 2222/tcp
+    ufw default deny incoming
+    ufw allow 3736
+    ufw allow 80
+    ufw allow 443
+
     echo "Provisioning: starting services"
     initctl reload-configuration
     service postfix start
