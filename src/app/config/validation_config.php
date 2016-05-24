@@ -25,3 +25,13 @@ function get_config_max_amount()
 {
     return get_validation_config()['max_task_amount'];
 }
+
+function get_config_min_amount()
+{
+    return get_validation_config()['min_task_amount'];
+}
+
+function get_config_max_task_description_length()
+{
+    return get_validation_config()['max_task_description_length'];
+}
