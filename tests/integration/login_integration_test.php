@@ -1,5 +1,4 @@
 <?php
-
 use \GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use \GuzzleHttp\Psr7\Response;
@@ -29,15 +28,11 @@ class LoginIntegrationTest extends \PHPUnit_Framework_TestCase
 
     public function testLoginWithUsernamePasswordShouldReturnToken()
     {
-        $credentials = ['username' => 'validuser', 'password' => 'validuserpassword'];
+        $credentials = [
+            'email' => 'dummy@dummy.com',
+            'password' => 'dummy'
+        ];
         $response = $this->api->post('auth/login', ['form_params' => $credentials]);
-        print_r($response->getHeaders());
-        $body = $response->getBody();
-        if ($body->getSize() > 0) {
-            $rspSize = $body->getSize();
-            echo $body->read($rspSize);
-        } else
-            echo "Empty body";
         $this->assertEquals($response->getStatusCode(), 200);
     }
 }
