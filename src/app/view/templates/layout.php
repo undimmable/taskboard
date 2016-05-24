@@ -39,13 +39,17 @@
     <script src="/js/temp_html5shiv.js"></script>
     <script src="/js/temp_respond.js"></script>
     <![endif]-->
-    <link rel="stylesheet" href="/css/bootstrap.css"/>
-    <link rel="stylesheet" href="/css/temp_bootstrap-toggle.min.css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+          integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css"/>
+    <script type="application/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
     <script type="application/javascript" src="/js/eventstream.js"></script>
-    <script type="application/javascript" src="/js/temp_jquery.js"></script>
-    <script type="application/javascript" src="/js/temp_bootstrap.js" crossorigin="anonymous"></script>
-    <script type="application/javascript" src="/js/temp_bootstrap-toggle.js"></script>
+    <script type="application/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
+            integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+            crossorigin="anonymous"></script>
+    <script type="application/javascript"
+            src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
     <script type="application/javascript" src="/js/app.js"></script>
 </head>
 <body>
@@ -78,21 +82,22 @@
     <span id="error-popup-text"></span>
 </div>
 <div class="container">
-        <div class="row">
-            <div class="col-lg-8 col-md-10 col-sm-12 col-xs-12 col-lg-offset-2 col-md-offset-1 col-sm-offset-0 col-xs-offset-0">
-                <div class="feed-wrapper">
-                    <div class="panel panel-info">
-                        <div class="panel-heading">
-                            Task feed
-                        </div>
-                        <div class="panel-body">
-                            <ul id="task-feed" class="media-list">
-                            </ul>
-                        </div>
+    <div class="row">
+        <div
+            class="col-lg-8 col-md-10 col-sm-12 col-xs-12 col-lg-offset-2 col-md-offset-1 col-sm-offset-0 col-xs-offset-0">
+            <div class="feed-wrapper">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        Task feed
+                    </div>
+                    <div class="panel-body">
+                        <ul id="task-feed" class="media-list">
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 </body>
 </html>
