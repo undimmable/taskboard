@@ -119,12 +119,12 @@ Vagrant.configure(2) do |config|
     rm -rf /tmp/mmonit-3.5.1-linux-x64.tar.gz
 
     echo "Provisioning: firewall rules"
-    ufw --force allow ssh
-    ufw --force allow 2222/tcp
+    ufw allow ssh
+    ufw allow 2222/tcp
     ufw --force default deny incoming
-    ufw --force allow 3736
-    ufw --force allow 80
-    ufw --force allow 443
+    ufw allow 3736
+    ufw allow 80
+    ufw allow 443
     ufw --force enable
 
     echo "Provisioning: starting services"
