@@ -6,6 +6,7 @@ function Taskboard() {
     var responseRenderData = 'render_data';
     var taskboardApplication = this;
     this.initialized = false;
+    this.disableModals = false;
     this.currentForm = null;
     this.logger = function () {
         var oldConsoleLog = null;
@@ -25,39 +26,65 @@ function Taskboard() {
         return pub;
     }();
 
-    this.task = function (taskJson) {
+    this.Task = function (taskJson) {
         this.id = taskJson['id'];
         this.description = taskJson['description'];
         this.customer_id = taskJson['customer_id'];
         this.performer_id = taskJson['performer_id'];
         this.created_at = taskJson['created_at'];
+        if (this.created_at == null)
+            this.created_at = Date.now();
         this.price = taskJson['amount'];
         this.asHTML = function () {
             return ''.concat(
-                '<div class="task-feed-item">',
-                '<span class="task-description">', this.description, '</span>',
+                '<li class="task-feed-item media">',
+                '<div class="media-body">',
+                '<p class="task-description">', this.description, '</p>',
                 '<span class="task-price">', this.price, '</span>',
                 '<span class="task_created_at">', this.created_at, '</span>',
+                '</li>',
                 '</div>'
             );
         };
         return this;
     };
 
-    this.initializePopup = function (storageItemName, autohide) {
+    this.initializePopup = function (storageItemName) {
         var popupItem = taskboardApplication.localStorageGetItem(storageItemName);
         if (popupItem === null)
             return;
         $('#'.concat(storageItemName, '-text')).text(popupItem);
         var popup = $('#'.concat(storageItemName));
         popup.removeClass('hidden');
-        // if (autohide) {
         popup.fadeTo(2000, 500).slideUp(500, function () {
             popup.hide();
             $(popup.find('span')).text('');
         });
-        // }
         taskboardApplication.localStorageRemoveItem(storageItemName);
+    };
+
+    this.initializeEventStream = function () {
+        if (window.es === undefined) {
+            window.es = new EventSource("/api/v1/sse");
+            window.es.onmessage = function (e) {
+                window.msg = e.data;
+                console.log("EventStream: ".concat(window.msg));
+            };
+            window.es.onerror = function (e) {
+                e = e || event;
+                window.msg = '';
+
+                switch (e.target.readyState) {
+                    case EventSource.CONNECTING:
+                        window.msg = 'Reconnecting…';
+                        break;
+                    case EventSource.CLOSED:
+                        window.msg = 'Connection failed. Will create new one.';
+                        break;
+                }
+                console.log("EventStream: ".concat(window.msg));
+            };
+        }
     };
 
     this.initializeSearch = function () {
@@ -92,6 +119,9 @@ function Taskboard() {
         $(modal).find('.error-description').each(function () {
             $(this).empty();
         });
+        $(modal).find('button').each(function () {
+            $(this).prop('disabled', false);
+        });
     };
 
     this.addFormSpinner = function () {
@@ -109,6 +139,10 @@ function Taskboard() {
         });
     };
 
+    this.enableModals = function () {
+        taskboardApplication.disableModals = false;
+    };
+
     this.localStorageAddItem = function (key, value) {
         localStorage.removeItem(key);
         localStorage.setItem(key, value);
@@ -123,7 +157,7 @@ function Taskboard() {
     };
 
     this.render = function (data) {
-        console.log(JSON.stringify(data));
+        $('#task-feed').prepend((new taskboardApplication.Task(data['task'])).asHTML());
     };
 
     this.processResponseEvent = function (event, response) {
@@ -135,11 +169,14 @@ function Taskboard() {
         }
         var renderData = event[responseRenderData];
         if (renderData != null) {
-            taskboardApplication.render(renderData, response['data']);
+            taskboardApplication.render(response['data']);
         }
     };
 
     this.finalizeForm = function () {
+        $(taskboardApplication.currentForm).find('button').each(function () {
+            $(this).prop('disabled', false);
+        });
         taskboardApplication.currentForm = null;
     };
 
@@ -157,9 +194,10 @@ function Taskboard() {
 
     this.onFormSuccess = function (response) {
         taskboardApplication.removeFormSpinner();
+        taskboardApplication.enableModals();
         taskboardApplication.closeFormModal();
-        taskboardApplication.initializePopup(successPopupKey, true);
         taskboardApplication.finalizeForm();
+        taskboardApplication.initializePopup(successPopupKey);
         if (response == null) {
             console.error("Something went extremely wrong here, response is not JSON");
             console.error(response);
@@ -174,12 +212,13 @@ function Taskboard() {
     this.closeFormOnUnknownError = function (message) {
         taskboardApplication.localStorageAddItem(errorPopupKey, message);
         taskboardApplication.closeFormModal();
-        taskboardApplication.initializePopup(errorPopupKey, false);
+        taskboardApplication.initializePopup(errorPopupKey);
         taskboardApplication.finalizeForm();
     };
 
     this.onFormError = function (response) {
         taskboardApplication.removeFormSpinner();
+        taskboardApplication.enableModals();
         var json = response['responseJSON'];
         if (json == null) {
             taskboardApplication.closeFormOnUnknownError("Something went extremely wrong here, response is not a JSON.");
@@ -189,10 +228,13 @@ function Taskboard() {
             taskboardApplication.closeFormOnUnknownError("Something went extremely wrong here, response is JSON of error type, but doesn't have any explanatory fields.");
             return;
         }
-        $(taskboardApplication.currentForm).find('input').one('change', function () {
-            $(this).closest('form').find('button').each(function () {
-                $(this).prop('disabled', false);
-            });
+        $(taskboardApplication.currentForm).find('input').on('change keyup', function () {
+            if (!taskboardApplication.disableModals) {
+                $(this).off('change keyup');
+                $(this).closest('form').find('button').each(function () {
+                    $(this).prop('disabled', false);
+                });
+            }
         });
         $.each(json.error, function (error_name, error_description) {
             var $errorSpan = $('#'.concat(taskboardApplication.currentFormId(), '-error-', error_name));
@@ -200,17 +242,33 @@ function Taskboard() {
             $errorSpan.text(error_description);
         });
         taskboardApplication.processResponseEvents(response);
-        taskboardApplication.initializePopup(errorPopupKey, false);
+        taskboardApplication.initializePopup(errorPopupKey);
         taskboardApplication.currentForm = null;
     };
 
     this.initializeFormModals = function () {
-        $('.modal').on('hide.bs.modal', function (e) {
-            if (taskboardApplication.currentForm != null) {
+        var $modal = $('.modal');
+        $modal.on('hide.bs.modal', function (e) {
+            if (taskboardApplication.disableModals) {
                 e.preventDefault();
             } else {
                 taskboardApplication.cleanupModal(this);
             }
+        });
+        $modal.on('shown.bs.modal', function () {
+            var request = $(this).data('type');
+            var csrfInput = $(this).find('form').find('input[name=csrf_token]');
+            $.ajax({
+                url: 'https://taskboard.dev/api/v1/csrf/'.concat(request),
+                contentType: 'application/json; charset=UTF-8',
+                type: "GET",
+                success: function (response) {
+                    $(csrfInput).val(response);
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
         });
     };
 
@@ -220,6 +278,7 @@ function Taskboard() {
             if (taskboardApplication.currentForm != null) {
                 return;
             }
+            taskboardApplication.disableModals = true;
             taskboardApplication.currentForm = this;
             taskboardApplication.cleanupModal($(this).closest('.modal'));
             $(this).find('button').each(function () {
@@ -251,11 +310,13 @@ function Taskboard() {
             return this;
         taskboardApplication.initialized = true;
         [successPopupKey, errorPopupKey].forEach(function (entry) {
-            taskboardApplication.initializePopup(entry, true);
+            taskboardApplication.initializePopup(entry);
         });
         taskboardApplication.initializeListeners();
         taskboardApplication.initializeFormListeners();
         taskboardApplication.initializeFormModals();
+        taskboardApplication.initializeEventStream();
+        taskboardApplication.initializeSearch();
         return taskboardApplication;
     };
     return taskboardApplication.initialize();
@@ -279,5 +340,5 @@ $(document).ready(function () {
         });
         return o;
     };
-    var taskboard = new Taskboard();
+    new Taskboard();
 });
