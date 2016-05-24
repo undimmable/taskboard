@@ -1,0 +1,98 @@
+<?php
+?>
+<!DOCTYPE html>
+<!--[if lt IE 7]>
+<html class="lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]>
+<html class="lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]>
+<html class="lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html lang="en"><!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,height=device-height,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <title><?php echo $page_title ?></title>
+    <link rel="apple-touch-icon-precomposed" sizes="57x57" href="/icons/apple-touch-icon-57x57.png"/>
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/icons/apple-touch-icon-114x114.png"/>
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/icons/apple-touch-icon-72x72.png"/>
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/icons/apple-touch-icon-144x144.png"/>
+    <link rel="apple-touch-icon-precomposed" sizes="60x60" href="/icons/apple-touch-icon-60x60.png"/>
+    <link rel="apple-touch-icon-precomposed" sizes="120x120" href="/icons/apple-touch-icon-120x120.png"/>
+    <link rel="apple-touch-icon-precomposed" sizes="76x76" href="/icons/apple-touch-icon-76x76.png"/>
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="/icons/apple-touch-icon-152x152.png"/>
+    <link rel="icon" type="image/png" href="/icons/favicon-196x196.png" sizes="196x196"/>
+    <link rel="icon" type="image/png" href="/icons/favicon-96x96.png" sizes="96x96"/>
+    <link rel="icon" type="image/png" href="/icons/favicon-32x32.png" sizes="32x32"/>
+    <link rel="icon" type="image/png" href="/icons/favicon-16x16.png" sizes="16x16"/>
+    <link rel="icon" type="image/png" href="/icons/favicon-128.png" sizes="128x128"/>
+    <meta name="application-name" content="&nbsp;"/>
+    <meta name="msapplication-TileColor" content="#FFFFFF"/>
+    <meta name="msapplication-TileImage" content="/icons/mstile-144x144.png"/>
+    <meta name="msapplication-square70x70logo" content="/icons/mstile-70x70.png"/>
+    <meta name="msapplication-square150x150logo" content="/icons/mstile-150x150.png"/>
+    <meta name="msapplication-wide310x150logo" content="/icons/mstile-310x150.png"/>
+    <meta name="msapplication-square310x310logo" content="/icons/mstile-310x310.png"/>
+    <!--[if lt IE 9]>
+    <script src="/js/temp_html5shiv.js"></script>
+    <script src="/js/temp_respond.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" href="/css/bootstrap.css"/>
+    <link rel="stylesheet" href="/css/temp_bootstrap-toggle.min.css"/>
+    <link rel="stylesheet" href="/css/style.css"/>
+    <script type="application/javascript" src="/js/eventstream.js"></script>
+    <script type="application/javascript" src="/js/temp_jquery.js"></script>
+    <script type="application/javascript" src="/js/temp_bootstrap.js" crossorigin="anonymous"></script>
+    <script type="application/javascript" src="/js/temp_bootstrap-toggle.js"></script>
+    <script type="application/javascript" src="/js/app.js"></script>
+</head>
+<body>
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a href="#" class="pull-left navbar-brand logo"></a>
+            <a class="navbar-brand" href="#">TaskBoards</a>
+        </div>
+        <div>
+            <form class="navbar-form navbar-left">
+                <div class="form-group has-feedback">
+                    <input type="text" class="form-control" placeholder="Search" id="search"/>
+                    <i class="form-control-feedback glyphicon glyphicon-search"
+                       data-icon="glyphicon glyphicon-search"></i>
+                </div>
+            </form>
+            <?php
+            require 'right_menu.html.php';
+            ?>
+        </div>
+    </div>
+</nav>
+<div id="success-popup" class="alert alert-success hidden fade in">
+    <a href="#" class="close alert-close">&times;</a>
+    <span id="success-popup-text"></span>
+</div>
+<div id="error-popup" class="alert alert-danger hidden fade in">
+    <a href="#" class="close alert-close">&times;</a>
+    <span id="error-popup-text"></span>
+</div>
+<div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-md-10 col-sm-12 col-xs-12 col-lg-offset-2 col-md-offset-1 col-sm-offset-0 col-xs-offset-0">
+                <div class="feed-wrapper">
+                    <div class="panel panel-info">
+                        <div class="panel-heading">
+                            Task feed
+                        </div>
+                        <div class="panel-body">
+                            <ul id="task-feed" class="media-list">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
