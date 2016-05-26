@@ -48,6 +48,7 @@
     <script type="application/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
             integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
             crossorigin="anonymous"></script>
+    <script type="application/javascript" src="/js/localization.js"></script>
     <script type="application/javascript"
             src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
     <script type="application/javascript" src="/js/app.js"></script>
@@ -93,6 +94,12 @@
                     <div class="panel-body">
                         <ul id="task-feed" class="media-list">
                         </ul>
+                    </div>
+                    <div id="loading" class="panel-footer" hidden>
+                        Loading...
+                    </div>
+                    <div id="nomorecontent" class="panel-footer" hidden>
+                        No more content
                     </div>
                 </div>
             </div>
