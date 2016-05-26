@@ -33,5 +33,8 @@ define('FIELDS', 'fields');
 define('UID', 'uid');
 define('UIDS', 'uids');
 define('CREATED_AT', 'created_at');
+define('UPDATED_AT', 'created_at');
+define('CREATED_AT_OFFSET', 'created_at_offset');
+define('UPDATED_AT_OFFSET', 'created_at_offset');
 define('TASK_DESCRIPTION_IDX', 'TD');
 ini_set('sendmail_from', 'signup@taskboards.top');

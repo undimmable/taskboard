@@ -72,7 +72,7 @@ function dal_task_fetch($task_id)
         add_error(mysqli_error($connection), $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "SELECT id, created_at, customer_id, performer_id, amount, description FROM db_task.task WHERE id=?");
+    $stmt = mysqli_prepare($connection, "SELECT id, timestampdiff(SECOND, now(), created_at), customer_id, performer_id, amount, description FROM db_task.task WHERE id=?");
     if (!$stmt) {
         add_error(mysqli_error($connection), $db_errors);
         return false;
@@ -113,7 +113,7 @@ function dal_task_fetch($task_id)
         DESCRIPTION => $description,
         CUSTOMER_ID => $customer_id,
         PERFORMER_ID => $performer_id,
-        CREATED_AT => $created_at,
+        CREATED_AT_OFFSET => $created_at,
         AMOUNT => $amount
     ];
 }
@@ -128,7 +128,7 @@ function dal_task_fetch_all_tasks($user_id, $user_role, $limit = 100, $last_id =
     }
     $last_id_clause = $last_id === null ? '' : "AND id < $last_id";
     if ($user_id === null) {
-        $stmt = mysqli_prepare($connection, "SELECT id, created_at, customer_id, performer_id, amount, description FROM db_task.task WHERE performer_id IS NULL $last_id_clause ORDER BY id DESC LIMIT ?");
+        $stmt = mysqli_prepare($connection, "SELECT id, timestampdiff(SECOND, now(), created_at), customer_id, performer_id, amount, description FROM db_task.task WHERE performer_id IS NULL $last_id_clause ORDER BY id DESC LIMIT ?");
         if (!$stmt) {
             add_error(mysqli_error($connection), $db_errors);
             return false;
@@ -136,11 +136,11 @@ function dal_task_fetch_all_tasks($user_id, $user_role, $limit = 100, $last_id =
     } else {
         $stmt = null;
         if (is_performer($user_role)) {
-            $stmt = mysqli_prepare($connection, "SELECT id, created_at, customer_id, performer_id, amount, description FROM db_task.task WHERE performer_id = ? $last_id_clause ORDER BY ID DESC LIMIT ?");
+            $stmt = mysqli_prepare($connection, "SELECT id, timestampdiff(SECOND, now(), created_at), customer_id, performer_id, amount, description FROM db_task.task WHERE performer_id = ? $last_id_clause ORDER BY ID DESC LIMIT ?");
         } elseif (is_customer($user_role)) {
-            $stmt = mysqli_prepare($connection, "SELECT id, created_at, customer_id, performer_id, amount, description FROM db_task.task WHERE customer_id = ? $last_id_clause ORDER BY ID DESC LIMIT ?");
+            $stmt = mysqli_prepare($connection, "SELECT id, timestampdiff(SECOND, now(), created_at), customer_id, performer_id, amount, description FROM db_task.task WHERE customer_id = ? $last_id_clause ORDER BY ID DESC LIMIT ?");
         } else {
-            $stmt = mysqli_prepare($connection, "SELECT id, created_at, customer_id, performer_id, amount, description FROM db_task.task WHERE TRUE $last_id_clause ORDER BY ID DESC LIMIT ?");
+            $stmt = mysqli_prepare($connection, "SELECT id, timestampdiff(SECOND, now(), created_at), customer_id, performer_id, amount, description FROM db_task.task WHERE TRUE $last_id_clause ORDER BY ID DESC LIMIT ?");
         }
         if (!$stmt) {
             add_error(mysqli_error($connection), $db_errors);
@@ -164,7 +164,7 @@ function dal_task_fetch_all_tasks($user_id, $user_role, $limit = 100, $last_id =
     while ($row = mysqli_stmt_fetch($stmt)) {
         $json[] = [
             ID => $id,
-            CREATED_AT => $created_at,
+            CREATED_AT_OFFSET => $created_at,
             CUSTOMER_ID => $customer_id,
             PERFORMER_ID => $performer_id,
             AMOUNT => $amount,
