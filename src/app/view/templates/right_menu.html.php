@@ -6,7 +6,7 @@
         require 'login_form.html.php';
         require 'signup_form.html.php';
     } else {
-        if (is_customer($user)) {
+        if (is_customer($user[ROLE])) {
             require 'create_task_button.html.php';
             require 'create_task_form.html.php';
         }

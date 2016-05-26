@@ -16,7 +16,6 @@
 }
 
 .feed-wrapper .panel-body {
-    max-height: 650px;
     overflow: auto;
 }
 
