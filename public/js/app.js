@@ -26,24 +26,103 @@ function Taskboard() {
         return pub;
     }();
 
+    this.Feed = function (limit) {
+        this.lastTaskId = null;
+        this.loading = false;
+        var feed = this;
+        this.buildQuery = function (limit) {
+            if (feed.lastTaskId == null)
+                return "limit=".concat(limit.toString());
+            else {
+                return "limit=".concat(limit.toString(), "&", "last_id=", feed.lastTaskId);
+            }
+        };
+        this.initialize = function () {
+            feed.load(limit);
+            var win = $(window);
+            win.scroll(function () {
+                if (!feed.loading && !(feed.lastTaskId == -1)) {
+                    if ($(document).height() - win.height() == win.scrollTop()) {
+                        feed.loading = true;
+                        feed.showLoading();
+                        feed.load();
+                    }
+                }
+            });
+        };
+        this.hideLoading = function () {
+            $('#loading').hide();
+        };
+        this.showLoading = function () {
+            $('#loading').show();
+        };
+        this.noMoreContent = function () {
+            $('#nomorecontent').show();
+        };
+        this.load = function () {
+            if (feed.lastTaskId == -1) {
+                feed.loading = false;
+                return;
+            }
+            $.ajax({
+                url: 'https://taskboard.dev/api/v1/task',
+                data: feed.buildQuery(limit),
+                contentType: 'application/json; charset=UTF-8',
+                type: "GET",
+                success: function (response) {
+                    feed.hideLoading();
+                    feed.loading = false;
+                    var jsonResponse = $.parseJSON(response);
+                    if (jsonResponse instanceof Array) {
+                        var arrLength = jsonResponse.length;
+                        if (jsonResponse.length == 0) {
+                            feed.lastTaskId = -1;
+                            feed.noMoreContent();
+                        }
+                        var lastTaskId = null;
+                        for (var i = 0; i < arrLength; i++) {
+                            var task = jsonResponse[i];
+                            if(lastTaskId == null)
+                                lastTaskId = task['id'];
+                            if (lastTaskId != null || lastTaskId > task['id'])
+                                lastTaskId = task['id'];
+                            taskboardApplication.render(task);
+                        }
+                        if (lastTaskId != null)
+                            feed.lastTaskId = lastTaskId;
+                    } else {
+                        console.log(response);
+                    }
+                },
+                error: function (error) {
+                    taskboardApplication.closeFormOnUnknownError(error);
+                    feed.loading = false;
+                    feed.hideLoading();
+                    console.log(error);
+                }
+            });
+        }
+    };
+
     this.Task = function (taskJson) {
         this.id = taskJson['id'];
         this.description = taskJson['description'];
         this.customer_id = taskJson['customer_id'];
         this.performer_id = taskJson['performer_id'];
-        this.created_at = taskJson['created_at'];
-        if (this.created_at == null)
-            this.created_at = Date.now();
+        this.created_at_offset = taskJson['created_at_offset'];
+        this.updated_at_offset = taskJson['updated_at_offset'];
         this.price = taskJson['amount'];
+        var currentDate = new Date().getTime();
+        var createdAt = this.created_at_offset == null ? "" : currentDate - this.created_at_offset;
         this.asHTML = function () {
             return ''.concat(
                 '<li class="task-feed-item media">',
                 '<div class="media-body">',
                 '<p class="task-description">', this.description, '</p>',
                 '<span class="task-price">', this.price, '</span>',
-                '<span class="task_created_at">', this.created_at, '</span>',
-                '</li>',
-                '</div>'
+                '<span class="timestamp created_at" data-timestamp="', createdAt.toString(), '"></span>',
+                '</div>',
+                '</li>'
             );
         };
         return this;
@@ -182,7 +261,10 @@ function Taskboard() {
     };
 
     this.render = function (data) {
-        $('#task-feed').prepend((new taskboardApplication.Task(data['task'])).asHTML());
+        var task = (new taskboardApplication.Task(data)).asHTML();
+        var feed = $('#task-feed');
+        feed.prepend(task);
+        feed.find('> li :first').find('.timestamp').substituteTime();
     };
 
     this.processResponseEvent = function (event, response) {
@@ -194,7 +276,8 @@ function Taskboard() {
         }
         var renderData = event[responseRenderData];
         if (renderData != null) {
-            taskboardApplication.render(response['data']);
+            if (response['data'].hasOwnProperty('task'))
+                taskboardApplication.render(response['data']['task']);
         }
     };
 
@@ -278,15 +361,17 @@ function Taskboard() {
     this.initializeFormModals = function () {
         var $modal = $('.modal');
         $modal.on('hide.bs.modal', function (e) {
+            $(this).find('form :input[name=csrf_token]').val('');
             if (taskboardApplication.disableModals) {
                 e.preventDefault();
             } else {
                 taskboardApplication.cleanupModal(this);
             }
         });
-        $modal.on('shown.bs.modal', function (e) {
+        $modal.on('show.bs.modal', function (e) {
+            var modal = $(this);
             var csrfInput = $(this).find('form').find('input[name=csrf_token]');
-            if (csrfInput.val() !== undefined) {
+            if (csrfInput.val() == null || csrfInput.val() == "") {
                 e.preventDefault();
                 var request = $(this).data('type');
                 if (request !== undefined) {
@@ -295,10 +380,11 @@ function Taskboard() {
                         contentType: 'application/json; charset=UTF-8',
                         type: "GET",
                         success: function (response) {
-                            $(csrfInput).val(response);
-                            $modal.trigger(e);
+                            csrfInput.val(response);
+                            modal.modal('show');
                         },
                         error: function (error) {
+                            taskboardApplication.closeFormOnUnknownError(error);
                             console.log(error);
                         }
                     });
@@ -359,7 +445,40 @@ function Taskboard() {
 
 $(document).ready(function () {
     "use strict";
-    //noinspection JSUnusedLocalSymbols
+    window.localization = new Localization();
+    window.taskboard = new Taskboard();
+    window.feed = new window.taskboard.Feed(10);
+    window.feed.initialize();
+    // window.feed.load();
+    $.fn.substituteTime = function () {
+        var milliseconds = new Date().getTime() - $(this).data('timestamp');
+        var prefix = localization.prefixAgo;
+        var suffix = localization.suffixAgo;
+        var seconds = Math.abs(milliseconds) / 1000;
+        var minutes = seconds / 60;
+        var hours = minutes / 60;
+        var days = hours / 24;
+        var years = days / 365;
+
+        function substituteNumber(number) {
+            return (localization.numbers && localization.numbers[number]) || number;
+        }
+
+        var words = seconds < 45 && localization.seconds.format(substituteNumber(Math.round(seconds))) ||
+            seconds < 90 && localization.minute.format(substituteNumber(1)) ||
+            minutes < 45 && localization.minutes.format(substituteNumber(Math.round(minutes))) ||
+            minutes < 90 && localization.hour.format(substituteNumber(1)) ||
+            hours < 24 && localization.hours.format(substituteNumber(Math.round(hours))) ||
+            hours < 42 && localization.day.format(substituteNumber(1)) ||
+            days < 30 && localization.days.format(substituteNumber(Math.round(days))) ||
+            days < 45 && localization.month.format(substituteNumber(1)) ||
+            days < 365 && localization.months.format(substituteNumber(Math.round(days / 30))) ||
+            years < 1.5 && localization.year.format(substituteNumber(1)) ||
+            localization.years.format(substituteNumber(Math.round(years)));
+        var value = $.trim([prefix, words, suffix].join(localization.wordSeparator));
+        $(this).text(value);
+    };
+
     $.fn.serializeObject = function () {
         var o = {};
         var a = this.serializeArray();
@@ -375,5 +494,4 @@ $(document).ready(function () {
         });
         return o;
     };
-    new Taskboard();
 });
