@@ -27,10 +27,10 @@ function role_value_exists($key)
     return array_key_exists($key, $roles);
 }
 
-function is_customer($user)
+function is_customer($key)
 {
     global $roles_reversed;
-    return $user[ROLE] === $roles_reversed[CUSTOMER];
+    return $key === $roles_reversed[CUSTOMER];
 }
 
 function is_performer($key)
