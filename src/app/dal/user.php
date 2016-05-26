@@ -111,7 +111,7 @@ function db_fetch_user_by_email($email)
         add_error(mysqli_error($mysqli), $db_errors);
         return false;
     }
-    if (mysqli_stmt_num_rows($stmt) < 1) {
+    if (is_null($id)) {
         return null;
     }
     if (!mysqli_stmt_close($stmt)) {
