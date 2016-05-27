@@ -36,8 +36,8 @@
     <meta name="msapplication-wide310x150logo" content="/icons/mstile-310x150.png"/>
     <meta name="msapplication-square310x310logo" content="/icons/mstile-310x310.png"/>
     <!--[if lt IE 9]>
-    <script src="/js/temp_html5shiv.js"></script>
-    <script src="/js/temp_respond.js"></script>
+    <script type="application/javascript" src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script type="application/javascript" src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
           integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">

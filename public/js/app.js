@@ -1,13 +1,16 @@
-function Taskboard() {
+function Taskboard($) {
     "use strict";
     var successPopupKey = 'success-popup';
     var errorPopupKey = 'error-popup';
     var responseLocalStorage = 'local_storage';
     var responseRenderData = 'render_data';
     var taskboardApplication = this;
+    var localization = null;
+    var feed = null;
     this.initialized = false;
     this.disableModals = false;
     this.currentForm = null;
+    this.supportEvents = false;
     this.logger = function () {
         var oldConsoleLog = null;
         var pub = {};
@@ -82,7 +85,7 @@ function Taskboard() {
                         var lastTaskId = null;
                         for (var i = 0; i < arrLength; i++) {
                             var task = jsonResponse[i];
-                            if(lastTaskId == null)
+                            if (lastTaskId == null)
                                 lastTaskId = task['id'];
                             if (lastTaskId != null || lastTaskId > task['id'])
                                 lastTaskId = task['id'];
@@ -128,6 +131,53 @@ function Taskboard() {
         return this;
     };
 
+    this.initializeExtentions = function () {
+        $.fn.substituteTime = function () {
+            var milliseconds = new Date().getTime() - $(this).data('timestamp');
+            var prefix = localization.prefixAgo;
+            var suffix = localization.suffixAgo;
+            var seconds = Math.abs(milliseconds) / 1000;
+            var minutes = seconds / 60;
+            var hours = minutes / 60;
+            var days = hours / 24;
+            var years = days / 365;
+
+            function substituteNumber(number) {
+                return (localization.numbers && localization.numbers[number]) || number;
+            }
+
+            var words = seconds < 45 && localization.seconds.format(substituteNumber(Math.round(seconds))) ||
+                seconds < 90 && localization.minute.format(substituteNumber(1)) ||
+                minutes < 45 && localization.minutes.format(substituteNumber(Math.round(minutes))) ||
+                minutes < 90 && localization.hour.format(substituteNumber(1)) ||
+                hours < 24 && localization.hours.format(substituteNumber(Math.round(hours))) ||
+                hours < 42 && localization.day.format(substituteNumber(1)) ||
+                days < 30 && localization.days.format(substituteNumber(Math.round(days))) ||
+                days < 45 && localization.month.format(substituteNumber(1)) ||
+                days < 365 && localization.months.format(substituteNumber(Math.round(days / 30))) ||
+                years < 1.5 && localization.year.format(substituteNumber(1)) ||
+                localization.years.format(substituteNumber(Math.round(years)));
+            var value = $.trim([prefix, words, suffix].join(localization.wordSeparator));
+            $(this).text(value);
+        };
+
+        $.fn.serializeObject = function () {
+            var o = {};
+            var a = this.serializeArray();
+            $.each(a, function () {
+                if (o[this.name] !== undefined) {
+                    if (!o[this.name].push) {
+                        o[this.name] = [o[this.name]];
+                    }
+                    o[this.name].push(this.value || '');
+                } else {
+                    o[this.name] = this.value || '';
+                }
+            });
+            return o;
+        };
+    };
+
     this.initializePopup = function (storageItemName) {
         var popupItem = taskboardApplication.localStorageGetItem(storageItemName);
         if (popupItem === null)
@@ -143,6 +193,8 @@ function Taskboard() {
     };
 
     this.initializeEventStream = function () {
+        if (!taskboardApplication.supportEvents)
+            return;
         if (window.es === undefined) {
             window.es = new EventSource("/api/v1/sse");
             window.es.onmessage = function (e) {
@@ -426,6 +478,9 @@ function Taskboard() {
 
     this.initialize = function () {
         "use strict";
+        taskboardApplication.initializeExtentions();
+        localization = new Localization();
+        feed = new taskboardApplication.Feed(100);
         taskboardApplication.logger.enableLogger();
         if (taskboardApplication.initialized)
             return this;
@@ -436,8 +491,9 @@ function Taskboard() {
         taskboardApplication.initializeListeners();
         taskboardApplication.initializeFormListeners();
         taskboardApplication.initializeFormModals();
-        // taskboardApplication.initializeEventStream();
         taskboardApplication.initializeSearch();
+        feed.initialize();
+        taskboardApplication.initializeEventStream();
         return taskboardApplication;
     };
     return taskboardApplication.initialize();
@@ -445,53 +501,5 @@ function Taskboard() {
 
 $(document).ready(function () {
     "use strict";
-    window.localization = new Localization();
-    window.taskboard = new Taskboard();
-    window.feed = new window.taskboard.Feed(10);
-    window.feed.initialize();
-    // window.feed.load();
-    $.fn.substituteTime = function () {
-        var milliseconds = new Date().getTime() - $(this).data('timestamp');
-        var prefix = localization.prefixAgo;
-        var suffix = localization.suffixAgo;
-        var seconds = Math.abs(milliseconds) / 1000;
-        var minutes = seconds / 60;
-        var hours = minutes / 60;
-        var days = hours / 24;
-        var years = days / 365;
-
-        function substituteNumber(number) {
-            return (localization.numbers && localization.numbers[number]) || number;
-        }
-
-        var words = seconds < 45 && localization.seconds.format(substituteNumber(Math.round(seconds))) ||
-            seconds < 90 && localization.minute.format(substituteNumber(1)) ||
-            minutes < 45 && localization.minutes.format(substituteNumber(Math.round(minutes))) ||
-            minutes < 90 && localization.hour.format(substituteNumber(1)) ||
-            hours < 24 && localization.hours.format(substituteNumber(Math.round(hours))) ||
-            hours < 42 && localization.day.format(substituteNumber(1)) ||
-            days < 30 && localization.days.format(substituteNumber(Math.round(days))) ||
-            days < 45 && localization.month.format(substituteNumber(1)) ||
-            days < 365 && localization.months.format(substituteNumber(Math.round(days / 30))) ||
-            years < 1.5 && localization.year.format(substituteNumber(1)) ||
-            localization.years.format(substituteNumber(Math.round(years)));
-        var value = $.trim([prefix, words, suffix].join(localization.wordSeparator));
-        $(this).text(value);
-    };
-
-    $.fn.serializeObject = function () {
-        var o = {};
-        var a = this.serializeArray();
-        $.each(a, function () {
-            if (o[this.name] !== undefined) {
-                if (!o[this.name].push) {
-                    o[this.name] = [o[this.name]];
-                }
-                o[this.name].push(this.value || '');
-            } else {
-                o[this.name] = this.value || '';
-            }
-        });
-        return o;
-    };
+    new Taskboard($);
 });
