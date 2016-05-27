@@ -60,7 +60,7 @@ function Taskboard($) {
             $('#loading').show();
         };
         this.noMoreContent = function () {
-            $('#nomorecontent').show();
+            $('#no-more-content').show();
         };
         this.load = function () {
             if (feed.lastTaskId == -1) {
@@ -131,7 +131,7 @@ function Taskboard($) {
         return this;
     };
 
-    this.initializeExtentions = function () {
+    this.initializeExtensions = function () {
         $.fn.substituteTime = function () {
             var milliseconds = new Date().getTime() - $(this).data('timestamp');
             var prefix = localization.prefixAgo;
@@ -478,7 +478,7 @@ function Taskboard($) {
 
     this.initialize = function () {
         "use strict";
-        taskboardApplication.initializeExtentions();
+        taskboardApplication.initializeExtensions();
         localization = new Localization();
         feed = new taskboardApplication.Feed(100);
         taskboardApplication.logger.enableLogger();

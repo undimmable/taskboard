@@ -98,7 +98,7 @@
                     <div id="loading" class="panel-footer" hidden>
                         Loading...
                     </div>
-                    <div id="nomorecontent" class="panel-footer" hidden>
+                    <div id="no-more-content" class="panel-footer" hidden>
                         No more content
                     </div>
                 </div>
