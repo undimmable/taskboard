@@ -83,11 +83,11 @@ function api_task_get_last_n()
     if (!is_authorized())
         render_not_authorized_json();
     $user = get_authorized_user();
-    $tasks = dal_task_fetch_all_tasks($user[ID], $user[ROLE], parse_integer_param('limit'), parse_integer_param('last_id'));
-    if ($tasks === false) {
+    $tasks = dal_task_fetch_all_tasks("api_render_task", $user[ID], $user[ROLE], parse_integer_param('limit'), parse_integer_param('last_id'));
+    if (is_null($tasks)) {
+        render_no_content();
+    } else if ($tasks === false) {
         render_bad_request_json($tasks);
-    } else {
-        render_ok_json($tasks);
     }
 }
 
@@ -123,22 +123,17 @@ function api_task_create()
     $task = dal_task_fetch($task_id);
     if (!$task) {
         render_bad_request_json(['error' => get_db_errors()]);
-        die;
+        return false;
     } else {
         send_index_event($task[ID], TASK_DESCRIPTION_IDX, $task[DESCRIPTION]);
-        $response = [
-            'data' => [
-                'task' => $task
-            ],
-            'event' => [
-                [
-                    'render_data' => 'task'
-                ]
-            ]
-        ];
-        render_ok_json($response);
+        api_render_task($task);
         return true;
     }
+}
+
+function api_render_task(/** @noinspection PhpUnusedParameterInspection */$task)
+{
+    require '../view/templates/task.html.php';
 }
 
 route_request($routes);

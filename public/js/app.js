@@ -70,35 +70,20 @@ function Taskboard($) {
             $.ajax({
                 url: 'https://taskboard.dev/api/v1/task',
                 data: feed.buildQuery(limit),
-                contentType: 'application/json; charset=UTF-8',
+                contentType: 'text/html; charset=UTF-8',
                 type: "GET",
-                success: function (response) {
+                success: function (response, status) {
                     feed.hideLoading();
                     feed.loading = false;
-                    var jsonResponse = $.parseJSON(response);
-                    if (jsonResponse instanceof Array) {
-                        var arrLength = jsonResponse.length;
-                        if (jsonResponse.length == 0) {
-                            feed.lastTaskId = -1;
-                            feed.noMoreContent();
-                        }
-                        var lastTaskId = null;
-                        for (var i = 0; i < arrLength; i++) {
-                            var task = jsonResponse[i];
-                            if (lastTaskId == null)
-                                lastTaskId = task['id'];
-                            if (lastTaskId != null || lastTaskId > task['id'])
-                                lastTaskId = task['id'];
-                            taskboardApplication.render(task);
-                        }
-                        if (lastTaskId != null)
-                            feed.lastTaskId = lastTaskId;
+                    if (status == "nocontent") {
+                        feed.noMoreContent();
+                        feed.lastTaskId = -1;
                     } else {
-                        console.log(response);
+                        taskboardApplication.renderHtmlTask(response, false);
                     }
                 },
-                error: function (error) {
-                    taskboardApplication.closeFormOnUnknownError(error);
+                error: function (error, status) {
+                    taskboardApplication.closeFormOnUnknownError(status);
                     feed.loading = false;
                     feed.hideLoading();
                     console.log(error);
@@ -132,6 +117,12 @@ function Taskboard($) {
     };
 
     this.initializeExtensions = function () {
+        $.fn.setTimestamp = function () {
+            if ($(this).data('timestamp') == null) {
+                var timestamp = new Date().getTime() - $(this).data('timestamp-offset');
+                $(this).data('timestamp', timestamp);
+            }
+        };
         $.fn.substituteTime = function () {
             var milliseconds = new Date().getTime() - $(this).data('timestamp');
             var prefix = localization.prefixAgo;
@@ -312,11 +303,37 @@ function Taskboard($) {
         return localStorage.getItem(storageItemName);
     };
 
+    this.renderHtmlTask = function (html, prepend) {
+        var feedHtml = $('#task-feed');
+        var lastElementIndex = feedHtml.children().length - 1;
+        if (lastElementIndex < 0)
+            lastElementIndex = 0;
+        if (prepend) {
+            feedHtml.prepend(html);
+            var timestamp = feedHtml.find(' >li:first>.timestamp').find('.timestamp');
+            timestamp.setTimestamp();
+            timestamp.substituteTime();
+        } else {
+            feedHtml.append(html);
+            feedHtml.find('li:gt('.concat(lastElementIndex.toString(), ")")).each(function () {
+                var currentElement = $(this);
+                var id = parseInt(currentElement.data('id'));
+                if (feed.lastTaskId == null || feed.lastTaskId > id) {
+                    feed.lastTaskId = id;
+                }
+                var timestamp = currentElement.find('.timestamp');
+                timestamp.setTimestamp();
+                timestamp.substituteTime();
+            });
+        }
+    };
+
     this.render = function (data) {
         var task = (new taskboardApplication.Task(data)).asHTML();
         var feed = $('#task-feed');
         feed.prepend(task);
-        feed.find('> li :first').find('.timestamp').substituteTime();
+        var currentElement = feed.find('> li :first').find('.timestamp');
+        currentElement.substituteTime();
     };
 
     this.processResponseEvent = function (event, response) {
@@ -352,12 +369,21 @@ function Taskboard($) {
         $(taskboardApplication.currentForm).closest('.modal').modal('toggle');
     };
 
+    this.isTaskForm = function (form) {
+        return $(form).attr('id') == 'task-form';
+    };
+
     this.onFormSuccess = function (response) {
+        var taskForm = taskboardApplication.isTaskForm(taskboardApplication.currentForm);
         taskboardApplication.removeFormSpinner();
         taskboardApplication.enableModals();
         taskboardApplication.closeFormModal();
         taskboardApplication.finalizeForm();
         taskboardApplication.initializePopup(successPopupKey);
+        if (taskForm) {
+            taskboardApplication.renderHtmlTask(response, true);
+            return;
+        }
         if (response == null) {
             console.error("Something went extremely wrong here, response is not JSON");
             console.error(response);
@@ -448,6 +474,7 @@ function Taskboard($) {
     this.initializeFormListeners = function () {
         $('#login-form,#signup-form,#task-form').submit(function (e) {
             e.preventDefault();
+            var isTaskForm = $(this).attr('id') == 'task-form';
             if (taskboardApplication.currentForm != null) {
                 return;
             }
@@ -462,7 +489,7 @@ function Taskboard($) {
             taskboardApplication.addFormSpinner();
             $.ajax({
                 url: action,
-                dataType: 'json',
+                dataType: isTaskForm ? 'html' : 'json',
                 contentType: 'application/json; charset=UTF-8',
                 type: "POST",
                 data: data,
@@ -472,15 +499,26 @@ function Taskboard($) {
         });
     };
 
+    this.initializeTimestampRefresher = function (interval) {
+        setInterval(function () {
+            $('.timestamp').substituteTime();
+        }, interval);
+    };
+
     this.serializeForm = function () {
         return JSON.stringify($(taskboardApplication.currentForm).serializeObject());
+    };
+
+    //noinspection JSUnusedGlobalSymbols
+    this.initializeFeed = function () {
+        feed = new taskboardApplication.Feed(10);
+        feed.initialize();
     };
 
     this.initialize = function () {
         "use strict";
         taskboardApplication.initializeExtensions();
         localization = new Localization();
-        feed = new taskboardApplication.Feed(100);
         taskboardApplication.logger.enableLogger();
         if (taskboardApplication.initialized)
             return this;
@@ -492,7 +530,7 @@ function Taskboard($) {
         taskboardApplication.initializeFormListeners();
         taskboardApplication.initializeFormModals();
         taskboardApplication.initializeSearch();
-        feed.initialize();
+        taskboardApplication.initializeTimestampRefresher(60000);
         taskboardApplication.initializeEventStream();
         return taskboardApplication;
     };
@@ -501,5 +539,5 @@ function Taskboard($) {
 
 $(document).ready(function () {
     "use strict";
-    new Taskboard($);
+    window.taskboard = new Taskboard($);
 });

@@ -42,16 +42,20 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
           integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
     <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/css/style.css"/>
+    <link rel="stylesheet" href="/css/style.css?__nocache=true"/>
     <script type="application/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
     <script type="application/javascript" src="/js/eventstream.js"></script>
     <script type="application/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
             integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
             crossorigin="anonymous"></script>
-    <script type="application/javascript" src="/js/localization.js"></script>
+    <script type="application/javascript" src="/js/localization.js?__nocache=true"></script>
     <script type="application/javascript"
             src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
-    <script type="application/javascript" src="/js/app.js"></script>
+    <script type="application/javascript" src="/js/app.js?__nocache=true"></script>
+    <?php if (is_authorized()) {
+        echo '<script type="application/javascript">$(document).ready(function(){console.log(window.taskboard);window.taskboard.initializeFeed()});</script>';
+    }
+    ?>
 </head>
 <body>
 <nav class="navbar navbar-default">
@@ -84,26 +88,13 @@
 </div>
 <div class="container">
     <div class="row">
-        <div
-            class="col-lg-8 col-md-10 col-sm-12 col-xs-12 col-lg-offset-2 col-md-offset-1 col-sm-offset-0 col-xs-offset-0">
-            <div class="feed-wrapper">
-                <div class="panel panel-info">
-                    <div class="panel-heading">
-                        Task feed
-                    </div>
-                    <div class="panel-body">
-                        <ul id="task-feed" class="media-list">
-                        </ul>
-                    </div>
-                    <div id="loading" class="panel-footer" hidden>
-                        Loading...
-                    </div>
-                    <div id="no-more-content" class="panel-footer" hidden>
-                        No more content
-                    </div>
-                </div>
-            </div>
-        </div>
+        <?php
+        if(is_authorized()) {
+            require 'feed.html.php';
+        } else {
+            require 'unauthorized.html.php';
+        }
+        ?>
     </div>
 </div>
 </body>

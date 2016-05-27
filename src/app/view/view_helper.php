@@ -10,6 +10,11 @@ function render_ok_json($response)
     render_status_json(200, $response);
 }
 
+function render_no_content()
+{
+    http_response_code(204);
+}
+
 function render_unsupported_media_type()
 {
     render_status_json(415, array('error' => 'Unsupported media type'));
@@ -29,6 +34,7 @@ function render_not_allowed_json()
 function render_bad_request_json($error)
 {
     render_status_json(400, $error);
+    ob_flush();
 }
 
 function render_not_authorized_json()

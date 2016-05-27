@@ -118,7 +118,7 @@ function dal_task_fetch($task_id)
     ];
 }
 
-function dal_task_fetch_all_tasks($user_id, $user_role, $limit = 100, $last_id = null)
+function dal_task_fetch_all_tasks($callback, $user_id, $user_role, $limit = 100, $last_id = null)
 {
     $db_errors = initialize_db_errors();
     $connection = get_task_connection();
@@ -160,9 +160,10 @@ function dal_task_fetch_all_tasks($user_id, $user_role, $limit = 100, $last_id =
         add_error(mysqli_error($connection), $db_errors);
         return false;
     }
-    $json = [];
+    $row_number = 0;
     while ($row = mysqli_stmt_fetch($stmt)) {
-        $json[] = [
+        $row_number++;
+        $task = [
             ID => $id,
             CREATED_AT_OFFSET => $created_at,
             CUSTOMER_ID => $customer_id,
@@ -170,10 +171,14 @@ function dal_task_fetch_all_tasks($user_id, $user_role, $limit = 100, $last_id =
             AMOUNT => $amount,
             DESCRIPTION => $description
         ];
+        call_user_func($callback, $task);
+    }
+    if ($row_number == 0) {
+        return null;
     }
     if (!mysqli_stmt_close($stmt)) {
         add_error(mysqli_error($connection), $db_errors);
         return false;
     }
-    return $json;
+    return true;
 }
