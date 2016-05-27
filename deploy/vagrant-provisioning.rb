@@ -54,6 +54,8 @@ Vagrant.configure(2) do |config|
     ln -s /home/vagrant/config/nginx/taskboards.top /etc/nginx/sites-enabled/
     ln -s /home/vagrant/config/nginx/mobile-rewrite.conf /etc/nginx/mobile-rewrite.conf
     ln -s /home/vagrant/config/fpm/fpm-config.ini /etc/php5/fpm/conf.d/fpm-taskboard.ini
+    rm /etc/php5/fpm/pool.d/www.conf
+    ln -s /home/vagrant/config/fpm/www.conf /etc/php5/fpm/pool.d/www.conf
 
     echo "Provisioning: configure mailutils"
     rm -rf /etc/postfix/main.cf
@@ -129,8 +131,18 @@ Vagrant.configure(2) do |config|
     ufw allow 443
     ufw --force enable
 
+    echo "Tuning system"
+    echo "net.core.somaxconn = 65536" >> /etc/sysctl.conf
+    echo "net.ipv4.tcp_max_tw_buckets = 1440000" >> /etc/sysctl.conf
+    echo "* soft nofile 8192" >> /etc/security/limits.conf
+    echo "* hard nofile 16384" >> /etc/security/limits.conf
+    echo "root soft nofile 8192" >> /etc/security/limits.conf
+    echo "root hard nofile 16384" >> /etc/security/limits.conf
+    echo "session required pam_limits.so" >> /etc/pam.d/common-session
+
     echo "Provisioning: starting services"
     initctl reload-configuration
+    sysctl --system
     service postfix start
     service php5-fpm start
     service nginx start
