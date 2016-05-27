@@ -3,7 +3,6 @@ function Taskboard($) {
     var successPopupKey = 'success-popup';
     var errorPopupKey = 'error-popup';
     var responseLocalStorage = 'local_storage';
-    var responseRenderData = 'render_data';
     var taskboardApplication = this;
     var localization = null;
     var feed = null;
@@ -92,34 +91,10 @@ function Taskboard($) {
         }
     };
 
-    this.Task = function (taskJson) {
-        this.id = taskJson['id'];
-        this.description = taskJson['description'];
-        this.customer_id = taskJson['customer_id'];
-        this.performer_id = taskJson['performer_id'];
-        this.created_at_offset = taskJson['created_at_offset'];
-        this.updated_at_offset = taskJson['updated_at_offset'];
-        this.price = taskJson['amount'];
-        var currentDate = new Date().getTime();
-        var createdAt = this.created_at_offset == null ? "" : currentDate - this.created_at_offset;
-        this.asHTML = function () {
-            return ''.concat(
-                '<li class="task-feed-item media">',
-                '<div class="media-body">',
-                '<p class="task-description">', this.description, '</p>',
-                '<span class="task-price">', this.price, '</span>',
-                '<span class="timestamp created_at" data-timestamp="', createdAt.toString(), '"></span>',
-                '</div>',
-                '</li>'
-            );
-        };
-        return this;
-    };
-
     this.initializeExtensions = function () {
         $.fn.setTimestamp = function () {
             if ($(this).data('timestamp') == null) {
-                var timestamp = new Date().getTime() - $(this).data('timestamp-offset');
+                var timestamp = new Date().getTime() + $(this).data('timestamp-offset') * 1000;
                 $(this).data('timestamp', timestamp);
             }
         };
@@ -310,7 +285,7 @@ function Taskboard($) {
             lastElementIndex = 0;
         if (prepend) {
             feedHtml.prepend(html);
-            var timestamp = feedHtml.find('li:first>.timestamp');
+            var timestamp = feedHtml.find('li:first').find('.timestamp');
             timestamp.setTimestamp();
             timestamp.substituteTime();
         } else {
@@ -329,25 +304,12 @@ function Taskboard($) {
         }
     };
 
-    this.render = function (data) {
-        var task = (new taskboardApplication.Task(data)).asHTML();
-        var feed = $('#task-feed');
-        feed.prepend(task);
-        var currentElement = feed.find('> li :first').find('.timestamp');
-        currentElement.substituteTime();
-    };
-
-    this.processResponseEvent = function (event, response) {
+    this.processResponseEvent = function (event) {
         var localStorageItems = event[responseLocalStorage];
         if (localStorageItems != null) {
             localStorageItems.forEach(function (localStorageItem) {
                 taskboardApplication.localStorageAddItem(localStorageItem['key'], localStorageItem['value']);
             });
-        }
-        var renderData = event[responseRenderData];
-        if (renderData != null) {
-            if (response['data'].hasOwnProperty('task'))
-                taskboardApplication.render(response['data']['task']);
         }
     };
 
@@ -361,7 +323,7 @@ function Taskboard($) {
     this.processResponseEvents = function (response) {
         if (response['event'] != null) {
             response['event'].forEach(function (event) {
-                taskboardApplication.processResponseEvent(event, response);
+                taskboardApplication.processResponseEvent(event);
             });
         }
     };
