@@ -310,12 +310,13 @@ function Taskboard($) {
             lastElementIndex = 0;
         if (prepend) {
             feedHtml.prepend(html);
-            var timestamp = feedHtml.find(' >li:first>.timestamp').find('.timestamp');
+            var timestamp = feedHtml.find('li:first>.timestamp');
             timestamp.setTimestamp();
             timestamp.substituteTime();
         } else {
             feedHtml.append(html);
-            feedHtml.find('li:gt('.concat(lastElementIndex.toString(), ")")).each(function () {
+            var gtSelector = lastElementIndex == 0 ? '' : ':gt('.concat(lastElementIndex.toString(), ')');
+            feedHtml.find('li'.concat(gtSelector)).each(function () {
                 var currentElement = $(this);
                 var id = parseInt(currentElement.data('id'));
                 if (feed.lastTaskId == null || feed.lastTaskId > id) {

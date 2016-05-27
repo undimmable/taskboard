@@ -53,7 +53,7 @@
             src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
     <script type="application/javascript" src="/js/app.js?__nocache=true"></script>
     <?php if (is_authorized()) {
-        echo '<script type="application/javascript">$(document).ready(function(){console.log(window.taskboard);window.taskboard.initializeFeed()});</script>';
+        echo '<script type="application/javascript">$(document).ready(function(){window.taskboard.initializeFeed()});</script>';
     }
     ?>
 </head>
@@ -89,7 +89,7 @@
 <div class="container">
     <div class="row">
         <?php
-        if(is_authorized()) {
+        if (is_authorized()) {
             require 'feed.html.php';
         } else {
             require 'unauthorized.html.php';
