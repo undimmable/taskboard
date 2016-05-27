@@ -49,7 +49,9 @@ Vagrant.configure(2) do |config|
     service postfix stop
     echo "Provisioning: configure nginx"
     rm -rf /etc/nginx/sites-enabled/default
-    ln -s /home/vagrant/config/nginx/nginx.conf /etc/nginx/sites-enabled/taskboards.top
+    rm -rf /etc/nginx/nginx.conf
+    ln -s /home/vagrant/config/nginx/nginx.conf /etc/nginx/
+    ln -s /home/vagrant/config/nginx/taskboards.top /etc/nginx/sites-enabled/
     ln -s /home/vagrant/config/nginx/mobile-rewrite.conf /etc/nginx/mobile-rewrite.conf
     ln -s /home/vagrant/config/fpm/fpm-config.ini /etc/php5/fpm/conf.d/fpm-taskboard.ini
 
