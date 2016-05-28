@@ -52,3 +52,14 @@
         -webkit-transform: rotate(360deg);
     }
 }
+
+.no-shadow {
+    border-width: 0;
+}
+
+.avatar-img {
+    width: 64px;
+    height: 64px;
+    border: 2px solid #e5e7e8;
+    border-radius: 50%;
+}
