@@ -23,7 +23,7 @@ function delete_token_cookie()
 
 function parse_token_from_cookie()
 {
-    if (!array_key_exists('PRIVATE_TOKEN', $_COOKIE))
+    if (!array_key_exists(PRIVATE_TOKEN, $_COOKIE))
         return null;
     $privateToken = $_COOKIE[PRIVATE_TOKEN];
     if (is_null($privateToken))
