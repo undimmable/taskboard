@@ -16,7 +16,6 @@ function Localization() {
     this.minutes = "minutes";
     this.prefixAgo = null;
     this.suffixAgo = "ago";
-    this.inPast = 'any moment now';
     this.seconds = "less than a minute";
     this.minute = "about a minute";
     this.minutes = "{0} minutes";
