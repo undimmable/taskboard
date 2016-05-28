@@ -35,3 +35,8 @@ function get_config_max_task_description_length()
 {
     return get_validation_config()['max_task_description_length'];
 }
+
+function get_config_max_task_selection_limit()
+{
+    return get_validation_config()['max_task_selection_limit'];
+}
