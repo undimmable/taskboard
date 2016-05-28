@@ -2,7 +2,7 @@
 
 require_once "../bootstrap.php";
 
-define('ACCOUNT_DB', 'task');
+define('ACCOUNT_DB', 'account');
 define('LOGIN_DB', 'login');
 define('TASK_DB', 'task');
 define('TEXT_IDX_DB', 'text_idx');
