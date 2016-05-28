@@ -85,13 +85,16 @@ function api_task_get_last_n()
     $user = get_authorized_user();
     $user_id = null;
     $select_user_type = null;
+    $last_id = parse_integer_param('last_id');
+    $limit = parse_integer_param('limit');
+    $limit = $limit < get_config_max_task_selection_limit() ? $limit : get_config_max_task_selection_limit();
     if (is_customer($user)) {
         $user_id = $user[ID];
         $select_user_type = 'customer_id';
     } else {
         $select_user_type = 'performer_id';
     }
-    $tasks = dal_task_fetch_all_tasks("api_render_task", $user_id, $select_user_type, parse_integer_param('limit'), parse_integer_param('last_id'));
+    $tasks = dal_task_fetch_all_tasks("api_render_task", $user_id, $select_user_type, $limit, $last_id);
     if (is_null($tasks)) {
         render_no_content();
     } else if ($tasks === false) {
