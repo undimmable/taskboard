@@ -94,7 +94,7 @@ function api_task_get_last_n()
     } else {
         $select_user_type = 'performer_id';
     }
-    $tasks = dal_task_fetch_all_tasks("api_render_task", $user_id, $select_user_type, $limit, $last_id);
+    $tasks = dal_task_fetch_tasks_less_than_last_id_limit("api_render_task", $user_id, $select_user_type, $limit, $last_id);
     if (is_null($tasks)) {
         render_no_content();
     } else if ($tasks === false) {

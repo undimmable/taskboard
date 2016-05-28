@@ -118,7 +118,7 @@ function dal_task_fetch($task_id)
     ];
 }
 
-function dal_task_fetch_all_tasks($callback, $user_id, $select_user_type, $limit = 100, $last_id = null)
+function dal_task_fetch_tasks_less_than_last_id_limit($callback, $user_id, $select_user_type, $limit = 100, $last_id = null)
 {
     $db_errors = initialize_db_errors();
     $connection = get_task_connection();
