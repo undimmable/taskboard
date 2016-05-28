@@ -99,7 +99,8 @@ function Taskboard($) {
             }
         };
         $.fn.substituteTime = function () {
-            var milliseconds = new Date().getTime() - $(this).data('timestamp');
+            var timestamp = $(this).data('timestamp') || 0;
+            var milliseconds = new Date().getTime() - timestamp;
             var prefix = localization.prefixAgo;
             var suffix = localization.suffixAgo;
             var seconds = Math.abs(milliseconds) / 1000;
