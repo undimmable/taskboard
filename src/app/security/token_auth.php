@@ -23,6 +23,8 @@ function delete_token_cookie()
 
 function parse_token_from_cookie()
 {
+    if (!array_key_exists('PRIVATE_TOKEN', $_COOKIE))
+        return null;
     $privateToken = $_COOKIE[PRIVATE_TOKEN];
     if (is_null($privateToken))
         return null;
@@ -34,6 +36,7 @@ function try_authorize_from_cookie()
     if (!is_null(get_authorized_user()))
         return;
     $token = parse_token_from_cookie();
+    //TODO: add login check from db
     if (is_null($token))
         return;
     set_authorized_user(parse_user_from_token($token));
