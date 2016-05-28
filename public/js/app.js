@@ -6,6 +6,7 @@ function Taskboard($) {
     var taskboardApplication = this;
     var localization = null;
     var feed = null;
+    this.searchProcessing = false;
     this.initialized = false;
     this.disableModals = false;
     this.currentForm = null;
@@ -196,18 +197,41 @@ function Taskboard($) {
     this.initializeSearch = function () {
         var searchInput = $('#search');
         var callback = function () {
-            console.log(searchInput.val());
+            if (taskboardApplication.searchProcessing)
+                return;
+            var text = searchInput.val();
             var icon = searchInput.closest('form').find('i');
+            taskboardApplication.searchProcessing = true;
             taskboardApplication.replaceIconWithSpinner(icon);
-            taskboardApplication.delay(function () {
-                taskboardApplication.replaceSpinnerWithIcon(icon);
-            }, 10000);
+            searchInput.prop('disabled', true);
+            $.ajax({
+                url: "/api/v1/search",
+                dataType: 'html',
+                contentType: 'application/json; charset=UTF-8',
+                type: "GET",
+                data: "q=" + text,
+                success: function (response, status) {
+                    console.log(response);
+                    console.log(status);
+                    searchInput.prop('disabled', false);
+                    taskboardApplication.searchProcessing = false;
+                    taskboardApplication.replaceSpinnerWithIcon(icon);
+                },
+                error: function (response, status) {
+                    console.log(response);
+                    console.log(status);
+                    searchInput.prop('disabled', false);
+                    taskboardApplication.searchProcessing = false;
+                    taskboardApplication.replaceSpinnerWithIcon(icon);
+                }
+            });
         };
         searchInput.closest('form').submit(function (e) {
             e.preventDefault();
+            callback();
         });
         searchInput.keyup(function () {
-            taskboardApplication.delay(callback, 300);
+            taskboardApplication.delay(callback, 1000);
         });
     };
 
