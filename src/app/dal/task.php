@@ -128,7 +128,7 @@ function dal_task_fetch_all_tasks($callback, $user_id, $select_user_type, $limit
     }
     $last_id_clause = $last_id === null ? '' : "AND id < $last_id";
 
-    $query = "SELECT id, timestampdiff(SECOND, now(), created_at), customer_id, performer_id, amount, description FROM db_task.task WHERE $select_user_type=? $last_id_clause ORDER BY is DESC LIMIT ?";
+    $query = "SELECT id, timestampdiff(SECOND, now(), created_at), customer_id, performer_id, amount, description FROM db_task.task WHERE $select_user_type=? $last_id_clause ORDER BY id DESC LIMIT ?";
     $stmt = mysqli_prepare($connection, $query);
     if (!$stmt) {
         add_error($connection, $db_errors);
