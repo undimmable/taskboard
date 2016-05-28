@@ -25,6 +25,11 @@ function render_conflict($error)
     render_status_json(409, $error);
 }
 
+function render_internal_server_error($error)
+{
+    render_status_json(500, $error);
+}
+
 function render_not_allowed_json()
 {
     render_status_json(405, array('error' => 'Method not allowed'));
