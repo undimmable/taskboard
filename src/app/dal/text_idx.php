@@ -71,42 +71,26 @@ function add_object($entity_id, $entity_type, $text)
         add_error($connection, $db_errors);
         return false;
     }
-    mysqli_autocommit($connection, false);
-    $task_tx_started = mysqli_begin_transaction($connection);
-    if (!$task_tx_started) {
-        add_error($connection, $db_errors);
-        return false;
-    }
-
     $stmt = mysqli_prepare($connection, "INSERT INTO db_text_idx.text_idx (entity_id, entity_type, text_val) VALUES (?, ?, ?)");
     if (!$stmt) {
         add_error($connection, $db_errors);
-        mysqli_rollback($connection);
         return false;
     }
     /** @noinspection PhpMethodParametersCountMismatchInspection */
     if (!mysqli_stmt_bind_param($stmt, 'iss', $entity_id, $entity_type, $text)) {
         add_error($connection, $db_errors);
-        mysqli_rollback($connection);
         return false;
     }
     if (!mysqli_stmt_execute($stmt)) {
         add_error($connection, $db_errors);
-        mysqli_rollback($connection);
         return false;
     }
     if (!mysqli_stmt_close($stmt)) {
         add_error($connection, $db_errors);
-        mysqli_rollback($connection);
         return false;
     }
     if (mysqli_errno($connection) !== 0) {
-        mysqli_rollback($connection);
         return false;
     }
-    $id = mysqli_insert_id($connection);
-    if (!mysqli_commit($connection)) {
-        return false;
-    }
-    return $id;
+    return mysqli_insert_id($connection);
 }
