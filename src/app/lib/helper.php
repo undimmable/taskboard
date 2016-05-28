@@ -52,6 +52,8 @@ function array_slice_assoc($array, $keys)
 
 function parse_integer_param($param_name)
 {
+    if (!array_key_exists($param_name, $_GET))
+        return null;
     $param = $_GET[$param_name];
     if ($param !== null) {
         $param = filter_var($param, FILTER_VALIDATE_INT);
