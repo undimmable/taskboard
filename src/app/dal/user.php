@@ -31,7 +31,7 @@ function create_user($email, $role, $hashed_password, $confirmation_token)
         return false;
     }
     /** @noinspection PhpMethodParametersCountMismatchInspection */
-    if (!mysqli_stmt_bind_param($stmt, 'siss', $email, $role, $hashed_password, $confirmation_token)) {
+    if (!mysqli_stmt_bind_param($stmt, 'siss', $email, $role, $hashed_password, hash('md5', $confirmation_token))) {
         add_error($connection, $db_errors);
         return false;
     }
@@ -176,7 +176,7 @@ function verify_user($confirmation_token)
         add_error($connection, $db_errors);
         return false;
     }
-    if (!mysqli_stmt_bind_param($mysqli_stmt, 's', $confirmation_token)) {
+    if (!mysqli_stmt_bind_param($mysqli_stmt, 's', hash('md5', $confirmation_token))) {
         add_error($connection, $db_errors);
         return false;
     }
