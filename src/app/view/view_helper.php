@@ -42,7 +42,7 @@ function render_bad_request_json($error)
     ob_flush();
 }
 
-function render_not_authorized_json($error = ['error' => 'Not authorized'])
+function render_not_authorized_json($error = ['error' => ['reason' => 'Not authorized']])
 {
     render_status_json(401, $error);
 }
