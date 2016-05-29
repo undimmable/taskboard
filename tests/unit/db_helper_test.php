@@ -1,6 +1,6 @@
 <?php
 
-require '../src/app/dal/dal_helper.php';
+include 'src/app/dal/dal_helper.php';
 
 class DBHelperTest extends PHPUnit_Framework_TestCase
 {
