@@ -4,12 +4,12 @@
          convertErrorsToExceptions="true"
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
-         processIsolation="true"
          stopOnFailure="true"
          syntaxCheck="true"
          bootstrap="./tests/init.php">
     <php>
         <env name="MYSQL_PASS" value="123456"/>
+        <env name="MYSQL_USER" value="phpunit"/>
         <env name="MYSQL_CONNECTION_HOST" value="taskboard.dev"/>
         <env name="HOST" value="https://taskboard.dev"/>
         <env name="MYSQL_PORT" value="3306"/>
@@ -19,7 +19,7 @@
             <directory suffix=".php">./tests/unit</directory>
         </testsuite>
         <testsuite name="integration">
-            <directory suffix=".php">./tests/integration</directory>
+            <directory suffix=".php">./tests/integration/testsuite</directory>
         </testsuite>
     </testsuites>
 </phpunit>

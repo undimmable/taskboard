@@ -30,6 +30,8 @@ Vagrant.configure(2) do |config|
     service mysql start
     mysql --user=root --password=$MYSQL_PASS  -e "CREATE USER idea@'%' IDENTIFIED BY '123'"
     mysql --user=root --password=$MYSQL_PASS  -e "GRANT ALL ON *.* TO idea@'%' IDENTIFIED BY '123'"
+    mysql --user=root --password=$MYSQL_PASS  -e "CREATE USER phpunit@'%' IDENTIFIED BY '123456'"
+    mysql --user=root --password=$MYSQL_PASS  -e "GRANT ALL ON *.* TO phpunit@'%' IDENTIFIED BY '123456'"
   SHELL
   config.vm.provision "enable_xdebug", type: "shell", inline: <<-SHELL
     echo "xdebug.remote_enable=true" >> /etc/php5/mods-available/xdebug.ini
