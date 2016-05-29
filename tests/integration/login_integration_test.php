@@ -1,38 +1,29 @@
 <?php
-use \GuzzleHttp\Client;
-use GuzzleHttp\Psr7\Request;
-use \GuzzleHttp\Psr7\Response;
 
-class LoginIntegrationTest extends \PHPUnit_Framework_TestCase
+
+class LoginIntegrationTest extends ApiIntegrationTest
 {
-    /**
-     * @var \GuzzleHttp\Client;
-     */
-    protected $api;
-
     public function setUp()
     {
-        $this->api = new Client([
-            'base_uri' => 'https://taskboard.dev/api/v1/',
-            'timeout' => 0.25,
-            'cookies' => true,
-            'verify' => false
-        ]);
+        parent::setUp();
+        $this->util->createUser("dummy@dummy.com", "123456", get_role_key(CUSTOMER));
+    }
+
+    public function testLoginExistingUserShouldReturnToken()
+    {
+        $credentials = [
+            'email' => 'dummy@dummy.com',
+            'password' => '123456',
+            'is_customer' => 'on',
+            'csrf_token' => '8'
+        ];
+        $response = $this->api->post('auth/login', ['http_errors' => false], ['form_params' => $credentials]);
+        $this->assertEquals(415, $response->getStatusCode());
     }
 
     public function tearDown()
     {
-        unset($this->api);
-    }
-
-
-    public function testLoginWithUsernamePasswordShouldReturnToken()
-    {
-        $credentials = [
-            'email' => 'dummy@dummy.com',
-            'password' => 'dummy'
-        ];
-        $response = $this->api->post('auth/login', ['form_params' => $credentials]);
-        $this->assertEquals($response->getStatusCode(), 200);
+        $this->util->deleteAllCreatedEntities();
+        parent::tearDown();
     }
 }

@@ -8,12 +8,18 @@
          stopOnFailure="true"
          syntaxCheck="true"
          bootstrap="./tests/init.php">
-  <testsuites>
-    <testsuite name="unit">
-      <directory suffix=".php">./tests/unit</directory>
-    </testsuite>
-    <testsuite name="integration">
-      <directory suffix=".php">./tests/integration</directory>
-    </testsuite>
-  </testsuites>
+    <php>
+        <env name="MYSQL_PASS" value="123456"/>
+        <env name="MYSQL_CONNECTION_HOST" value="taskboard.dev"/>
+        <env name="HOST" value="https://taskboard.dev"/>
+        <env name="MYSQL_PORT" value="3306"/>
+    </php>
+    <testsuites>
+        <testsuite name="unit">
+            <directory suffix=".php">./tests/unit</directory>
+        </testsuite>
+        <testsuite name="integration">
+            <directory suffix=".php">./tests/integration</directory>
+        </testsuite>
+    </testsuites>
 </phpunit>
