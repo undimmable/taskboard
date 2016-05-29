@@ -1,5 +1,6 @@
 <?php
 namespace Taskboards;
+/** @noinspection PhpIncludeInspection */
 require 'api_integration_test.php';
 
 class AuthIntegrationTest extends ApiIntegrationTest
