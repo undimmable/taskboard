@@ -40,6 +40,50 @@ abstract class ApiIntegrationTest extends \PHPUnit_Framework_TestCase
         return new \mysqli(getenv("MYSQL_CONNECTION_HOST"), getenv("MYSQL_USER"), getenv("MYSQL_PASS"));
     }
 
+    /**
+     * @param $response \Psr\Http\Message\ResponseInterface
+     * @return mixed
+     */
+    protected function getResponseJson($response)
+    {
+        $json = \GuzzleHttp\json_decode($response->getBody());
+        return $json;
+    }
+
+    /**
+     * @param $response \Psr\Http\Message\ResponseInterface
+     * @param $key \string
+     * @param $message \string
+     */
+    protected function assertResponseError($response, $key, $message)
+    {
+        $this->assertEquals($message, $this->getResponseJson($response)->error->$key);
+    }
+
+    /**
+     * @param $response \Psr\Http\Message\ResponseInterface
+     */
+    protected function assertResponseUnauthorized($response)
+    {
+        $this->assertEquals(401, $response->getStatusCode());
+    }
+
+    /**
+     * @param $response \Psr\Http\Message\ResponseInterface
+     */
+    protected function assertResponseBadRequest($response)
+    {
+        $this->assertEquals(400, $response->getStatusCode());
+    }
+
+    /**
+     * @param $response \Psr\Http\Message\ResponseInterface
+     */
+    protected function assertResponseOk($response)
+    {
+        $this->assertEquals(200, $response->getStatusCode());
+    }
+
     public function tearDown()
     {
         unset($this->api);
