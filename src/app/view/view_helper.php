@@ -47,6 +47,11 @@ function render_not_authorized_json($error = ['error' => ['reason' => 'Not autho
     render_status_json(401, $error);
 }
 
+function render_forbidden($error = ['error' => ['reason' => 'Forbidden']])
+{
+    render_status_json(403, $error);
+}
+
 function render_status_json($code, $message)
 {
     http_response_code($code);
