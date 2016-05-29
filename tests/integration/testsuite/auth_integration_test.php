@@ -1,14 +1,47 @@
 <?php
 namespace Taskboards;
+
 /** @noinspection PhpIncludeInspection */
+use GuzzleHttp\Cookie\SetCookie;
+
 require 'api_integration_test.php';
 
 class AuthIntegrationTest extends ApiIntegrationTest
 {
+    private static $authorizationCookieName = 'PRIVATE-TOKEN';
+
     public function setUp()
     {
         parent::setUp();
         $this->util->createUser("dummy@dummy.com", "123456", 2, false);
+    }
+
+    public function testSignupAuthorizedUserReturnsForbidden()
+    {
+        $this->authorize();
+        $credentials = [
+            'email' => 'dummy@dummy.com',
+            'password' => '123456',
+            'password_repeat' => '123456',
+            'csrf_token' => '8',
+            'is_customer' => 'on'
+        ];
+        $response = $this->api->post('auth/signup', ['form_params' => $credentials]);
+        $this->assertResponseForbidden($response);
+        $this->assertResponseError($response, "reason", "Forbidden");
+    }
+
+    public function testLoginAuthorizedUserReturnsForbidden()
+    {
+        $this->authorize();
+        $credentials = [
+            'email' => 'dummy@dummy.com',
+            'password' => '123456',
+            'csrf_token' => '9',
+        ];
+        $response = $this->api->post('auth/login', ['form_params' => $credentials]);
+        $this->assertResponseForbidden($response);
+        $this->assertResponseError($response, "reason", "Forbidden");
     }
 
     public function testSignupExistingUserReturnsConflict()
@@ -23,6 +56,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
         $response = $this->api->post('auth/signup', ['form_params' => $credentials]);
         $this->assertResponseConflict($response);
         $this->assertResponseError($response, "email", "User with this email already registered");
+        $this->assertNoCookie(AuthIntegrationTest::$authorizationCookieName);
     }
 
     public function testSignupWrongCsrfTokenReturnsUnauthorized()
@@ -35,8 +69,9 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'is_customer' => 'on'
         ];
         $response = $this->api->post('auth/signup', ['form_params' => $credentials]);
-        $this->assertResponseUnauthorized($response);
-        $this->assertResponseError($response, "reason", "Not authorized");
+        $this->assertResponseBadRequest($response);
+        $this->assertResponseError($response, "signup_csrf_token", "wrong");
+        $this->assertNoCookie(AuthIntegrationTest::$authorizationCookieName);
     }
 
     public function testSignupMissingPasswordRepeatReturnsBadRequest()
@@ -50,6 +85,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
         $response = $this->api->post('auth/signup', ['form_params' => $credentials]);
         $this->assertResponseBadRequest($response);
         $this->assertResponseError($response, "password_repeat", "Password repeat not provided");
+        $this->assertNoCookie(AuthIntegrationTest::$authorizationCookieName);
     }
 
     public function testSignupMissingPasswordAndPasswordRepeatReturnsBadRequest()
@@ -62,6 +98,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
         $response = $this->api->post('auth/signup', ['form_params' => $credentials]);
         $this->assertResponseBadRequest($response);
         $this->assertResponseError($response, "password", "Password not provided");
+        $this->assertNoCookie(AuthIntegrationTest::$authorizationCookieName);
     }
 
     public function testSignupMismatchPasswordRepeatReturnsBadRequest()
@@ -76,6 +113,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
         $response = $this->api->post('auth/signup', ['form_params' => $credentials]);
         $this->assertResponseBadRequest($response);
         $this->assertResponseError($response, "password", "Passwords don't match");
+        $this->assertNoCookie(AuthIntegrationTest::$authorizationCookieName);
     }
 
     public function testSignupMissingPasswordReturnsBadRequest()
@@ -89,6 +127,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
         $response = $this->api->post('auth/signup', ['form_params' => $credentials]);
         $this->assertResponseBadRequest($response);
         $this->assertResponseError($response, "password", "Password not provided");
+        $this->assertNoCookie(AuthIntegrationTest::$authorizationCookieName);
     }
 
     public function testSignupInvalidPasswordReturnsBadRequest()
@@ -103,6 +142,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
         $response = $this->api->post('auth/signup', ['form_params' => $credentials]);
         $this->assertResponseBadRequest($response);
         $this->assertResponseError($response, "password", "Password is too short");
+        $this->assertNoCookie(AuthIntegrationTest::$authorizationCookieName);
     }
 
     public function testSignupInvalidEmailReturnsBadRequest()
@@ -117,6 +157,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
         $response = $this->api->post('auth/signup', ['form_params' => $credentials]);
         $this->assertResponseBadRequest($response);
         $this->assertResponseError($response, "email", "Email is invalid");
+        $this->assertNoCookie(AuthIntegrationTest::$authorizationCookieName);
     }
 
     public function testSignupMissingCsrfTokenReturnsUnauthorized()
@@ -128,8 +169,9 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'is_customer' => 'on'
         ];
         $response = $this->api->post('auth/signup', ['form_params' => $credentials]);
-        $this->assertResponseUnauthorized($response);
-        $this->assertResponseError($response, "reason", "Not authorized");
+        $this->assertResponseBadRequest($response);
+        $this->assertResponseError($response, "signup_csrf_token", "wrong");
+        $this->assertNoCookie(AuthIntegrationTest::$authorizationCookieName);
     }
 
     public function testSignupMissingUserReturnsOk()
@@ -143,6 +185,10 @@ class AuthIntegrationTest extends ApiIntegrationTest
         ];
         $response = $this->api->post('auth/signup', ['form_params' => $credentials]);
         $this->assertResponseOk($response);
+        $this->assertCookiePresent(AuthIntegrationTest::$authorizationCookieName);
+        $this->assertCookieHttpOnly(AuthIntegrationTest::$authorizationCookieName);
+        $this->assertCookieSecure(AuthIntegrationTest::$authorizationCookieName);
+        $this->assertCookieHasValue(AuthIntegrationTest::$authorizationCookieName);
     }
 
     public function testLoginExistingUserReturnsToken()
@@ -154,6 +200,10 @@ class AuthIntegrationTest extends ApiIntegrationTest
         ];
         $response = $this->api->post('auth/login', ['form_params' => $credentials]);
         $this->assertResponseOk($response);
+        $this->assertCookiePresent(AuthIntegrationTest::$authorizationCookieName);
+        $this->assertCookieHttpOnly(AuthIntegrationTest::$authorizationCookieName);
+        $this->assertCookieSecure(AuthIntegrationTest::$authorizationCookieName);
+        $this->assertCookieHasValue(AuthIntegrationTest::$authorizationCookieName);
     }
 
     public function testLoginMissingUserReturnsUnauthorized()
@@ -166,6 +216,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
         $response = $this->api->post('auth/login', ['form_params' => $credentials]);
         $this->assertResponseUnauthorized($response);
         $this->assertResponseError($response, "email", "Wrong username and/or password");
+        $this->assertNoCookie(AuthIntegrationTest::$authorizationCookieName);
     }
 
     public function testLoginExistingUserWrongCsrfTokenReturnsUnauthorized()
@@ -176,8 +227,9 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'csrf_token' => '5'
         ];
         $response = $this->api->post('auth/login', ['form_params' => $credentials]);
-        $this->assertResponseUnauthorized($response);
-        $this->assertResponseError($response, "reason", "Not authorized");
+        $this->assertResponseBadRequest($response);
+        $this->assertResponseError($response, "login_csrf_token", "wrong");
+        $this->assertNoCookie(AuthIntegrationTest::$authorizationCookieName);
     }
 
     public function testLoginExistingUserMissingCsrfTokenReturnsUnauthorized()
@@ -187,8 +239,9 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'password' => '123456'
         ];
         $response = $this->api->post('auth/login', ['form_params' => $credentials]);
-        $this->assertResponseUnauthorized($response);
-        $this->assertResponseError($response, "reason", "Not authorized");
+        $this->assertResponseBadRequest($response);
+        $this->assertResponseError($response, "login_csrf_token", "wrong");
+        $this->assertNoCookie(AuthIntegrationTest::$authorizationCookieName);
     }
 
     public function testLoginNonExistingUserWrongTokenReturnsUnauthorized()
@@ -199,8 +252,9 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'csrf_token' => '5'
         ];
         $response = $this->api->post('auth/login', ['form_params' => $credentials]);
-        $this->assertResponseUnauthorized($response);
-        $this->assertResponseError($response, "reason", "Not authorized");
+        $this->assertResponseBadRequest($response);
+        $this->assertResponseError($response, "login_csrf_token", "wrong");
+        $this->assertNoCookie(AuthIntegrationTest::$authorizationCookieName);
     }
 
     public function testLoginMissingEmailReturnsBadRequest()
@@ -212,6 +266,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
         $response = $this->api->post('auth/login', ['form_params' => $credentials]);
         $this->assertResponseBadRequest($response);
         $this->assertResponseError($response, "email", "Email not provided");
+        $this->assertNoCookie(AuthIntegrationTest::$authorizationCookieName);
     }
 
     public function testLoginMissingPasswordReturnsBadRequest()
@@ -223,6 +278,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
         $response = $this->api->post('auth/login', ['form_params' => $credentials]);
         $this->assertResponseBadRequest($response);
         $this->assertResponseError($response, "password", "Password not provided");
+        $this->assertNoCookie(AuthIntegrationTest::$authorizationCookieName);
     }
 
     public function testLoginMissingPasswordAndEmailReturnsBadRequest()
@@ -234,6 +290,27 @@ class AuthIntegrationTest extends ApiIntegrationTest
         $this->assertResponseBadRequest($response);
         $this->assertResponseError($response, "password", "Password not provided");
         $this->assertResponseError($response, "email", "Email not provided");
+        $this->assertNoCookie(AuthIntegrationTest::$authorizationCookieName);
+    }
+
+    public function testLogoutNotLoggedInReturnUnauthorized()
+    {
+        $response = $this->api->get('auth/logout');
+        $this->assertResponseUnauthorized($response);
+        $this->assertResponseError($response, "reason", "Not authorized");
+        $this->assertNoCookie(AuthIntegrationTest::$authorizationCookieName);
+    }
+
+    public function testLogoutLoggedInReturnsRedirect()
+    {
+        $this->authorize();
+        $response = $this->api->get('auth/logout');
+        $this->assertResponseOk($response);
+        $this->assertCookiePresent(AuthIntegrationTest::$authorizationCookieName);
+        $this->assertCookieHttpOnly(AuthIntegrationTest::$authorizationCookieName);
+        $this->assertCookieSecure(AuthIntegrationTest::$authorizationCookieName);
+        $this->assertCookieHasValue(AuthIntegrationTest::$authorizationCookieName);
+        $this->assertCookieDeleted(AuthIntegrationTest::$authorizationCookieName);
     }
 
     public function tearDown()
