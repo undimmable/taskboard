@@ -66,6 +66,7 @@ class Util
      * @param $password \string
      * @param $role \integer
      * @param $confirmed \bool
+     * @return int
      */
     public function createUser($email, $password, $role, $confirmed)
     {
@@ -75,7 +76,25 @@ class Util
         $confirmed_int = (integer)$confirmed;
         $mysqli_stmt->bind_param("ssisi", $email, $hashed_password, $role, $confirmation_token, $confirmed_int);
         $mysqli_stmt->execute();
+        $id = $mysqli_stmt->insert_id;
         $mysqli_stmt->close();
+        return $id;
+    }
+
+    /**
+     * @param $user_id        \integer
+     * @param $balance        \integer
+     * @param $locked_balance \integer
+     * @return int
+     */
+    public function createAccount($user_id, $balance, $locked_balance)
+    {
+        $mysqli_stmt = $this->connection->prepare("INSERT INTO db_account.account (user_id, balance, last_tx_id, locked_balance) VALUES (?, ?, -1, ?)");
+        $mysqli_stmt->bind_param("idd", $user_id, $balance, $locked_balance);
+        $mysqli_stmt->execute();
+        $id = $mysqli_stmt->insert_id;
+        $mysqli_stmt->close();
+        return $id;
     }
 
     /**
