@@ -7,7 +7,7 @@ define('TEXT_IDX_DB', 'text_idx');
 define('TX_DB', 'tx');
 define('USER_DB', 'user');
 define('USER_INFO_DB', 'user_info');
-mysqli_report(MYSQLI_REPORT_ALL);
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 function &initialize_db_errors()
 {
