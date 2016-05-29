@@ -2,6 +2,8 @@
 
 function send_verification_confirmed_email($email, $host)
 {
+    if (INTEGRATION_TESTS)
+        return;
     $to = $email;
     $subject = 'Thanks for the registration on taskboards.top';
     $message = '<html><body>';
@@ -16,6 +18,8 @@ function send_verification_confirmed_email($email, $host)
 
 function send_verification_request_email($email, $host, $signup_token)
 {
+    if (INTEGRATION_TESTS)
+        return;
     $to = $email;
     $subject = 'Confirm registration on taskboards.top';
     $message = '<html><body>';

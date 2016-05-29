@@ -39,4 +39,5 @@ define('UPDATED_AT_OFFSET', 'created_at_offset');
 define('TASK_DESCRIPTION_IDX', 'TD');
 define('DEFAULT_BALANCE', 100.00);
 define('CREATE_ACCOUNT_RETRIES', 2);
+define('INTEGRATION_TESTS', true);
 ini_set('sendmail_from', 'signup@taskboards.top');
