@@ -1,5 +1,6 @@
 <?php
 
+namespace Taskboards;
 /**
  * @author dimyriy
  * @version 1.0
@@ -31,13 +32,15 @@ class Util
      * @param $password string
      * @param $role integer
      */
-    public function createUser($email, $password, $role)
+    public function createUser($email, $password, $role, $confirmed)
     {
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        $confirmation_token = create_confirmation_token($email);
-        $mysqli_result = $this->connection->query("INSERT INTO db_user.user (email, hashed_password, role, confirmation_token, confirmed) VALUES ($email, $hashed_password, $role, $confirmation_token, FALSE)");
+        $confirmation_token = hash("sha256", $email . 'confirmation_secret');
+        $mysqli_stmt = $this->connection->prepare("INSERT INTO db_user.user (email, hashed_password, role, confirmation_token, confirmed) VALUES (?, ?, ?, ?, ?)");
+        $mysqli_stmt->bind_param("ssisi", $email, $hashed_password, $role, $confirmation_token, $confirmed);
+        $mysqli_stmt->execute();
+        $mysqli_stmt->close();
         $this->putCreatedEntity("db_user.user", $this->connection->insert_id);
-        $mysqli_result->close();
     }
 
     private function putCreatedEntity($key, $id)
