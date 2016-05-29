@@ -29,6 +29,8 @@ function is_password_valid($password, &$validation_context)
 
 function is_password_repeat_valid($password, $password_repeat, &$validation_context)
 {
+    if(!$password)
+        return false;
     if (is_null($password_repeat)) {
         add_validation_error($validation_context, PASSWORD_REPEAT, 'Password repeat not provided');
         return false;

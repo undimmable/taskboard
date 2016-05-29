@@ -39,6 +39,45 @@ class AuthIntegrationTest extends ApiIntegrationTest
         $this->assertResponseError($response, "reason", "Not authorized");
     }
 
+    public function testSignupMissingPasswordRepeatReturnsBadRequest()
+    {
+        $credentials = [
+            'email' => 'dummy@dummy.com',
+            'password' => '123456',
+            'csrf_token' => '8',
+            'is_customer' => 'on'
+        ];
+        $response = $this->api->post('auth/signup', ['form_params' => $credentials]);
+        $this->assertResponseBadRequest($response);
+        $this->assertResponseError($response, "password_repeat", "Password repeat not provided");
+    }
+
+    public function testSignupMissingPasswordReturnsBadRequest()
+    {
+        $credentials = [
+            'email' => 'dummy@dummy.com',
+            'password_repeat' => '123456',
+            'csrf_token' => '8',
+            'is_customer' => 'on'
+        ];
+        $response = $this->api->post('auth/signup', ['form_params' => $credentials]);
+        $this->assertResponseBadRequest($response);
+        $this->assertResponseError($response, "password", "Password not provided");
+    }
+
+    public function testSignupMissingCsrfTokenReturnsUnauthorized()
+    {
+        $credentials = [
+            'email' => 'dummy@dummy.com',
+            'password' => '123456',
+            'password_repeat' => '123456',
+            'is_customer' => 'on'
+        ];
+        $response = $this->api->post('auth/signup', ['form_params' => $credentials]);
+        $this->assertResponseUnauthorized($response);
+        $this->assertResponseError($response, "reason", "Not authorized");
+    }
+
     public function testSignupMissingUserReturnsOk()
     {
         $credentials = [
