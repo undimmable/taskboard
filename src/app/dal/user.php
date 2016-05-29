@@ -107,12 +107,12 @@ function db_fetch_user_by_email($email)
         add_error($connection, $db_errors);
         return false;
     }
-    if (!mysqli_stmt_fetch($stmt)) {
+    $fetched = mysqli_stmt_fetch($stmt);
+    if (is_null($fetched))
+        return null;
+    else if (!$fetched) {
         add_error($connection, $db_errors);
         return false;
-    }
-    if (is_null($id)) {
-        return null;
     }
     if (!mysqli_stmt_close($stmt)) {
         add_error($connection, $db_errors);
