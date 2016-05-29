@@ -2,7 +2,7 @@
 namespace Taskboards;
 require 'api_integration_test.php';
 
-class LoginIntegrationTest extends ApiIntegrationTest
+class AuthIntegrationTest extends ApiIntegrationTest
 {
     public function setUp()
     {
