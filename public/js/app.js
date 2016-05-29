@@ -393,7 +393,7 @@ function Taskboard($) {
     this.onFormError = function (response) {
         taskboardApplication.removeFormSpinner();
         taskboardApplication.enableModals();
-        var json = response['responseJSON'];
+        var json = response['responseJSON'] || $.parseJSON(response['responseText']);
         if (json == null) {
             taskboardApplication.closeFormOnUnknownError("Something went extremely wrong here, response is not a JSON.");
             return;
