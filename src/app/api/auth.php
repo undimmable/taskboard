@@ -16,6 +16,7 @@
 require_once "../bootstrap.php";
 require_once "../lib/mail.php";
 require_once "../dal/user.php";
+require_once "../dal/payment.php";
 
 $routes = [
     'POST' => [
@@ -78,7 +79,7 @@ function api_auth_login_action()
     __validate_login_input($email, $password);
     $user = db_fetch_user_by_email($email);
     if ($user === null || !password_verify($password, $user[HASHED_PASSWORD])) {
-        render_bad_request_json([
+        render_not_authorized_json([
             'error' => [EMAIL => 'Wrong username and/or password'],
             'event' => [
                 [
@@ -152,6 +153,12 @@ function api_auth_signup_action()
         } else {
             render_conflict($db_errors);
         }
+    }
+    $retries = 0;
+    $account = false;
+    while (!$account && $retries <= CREATE_ACCOUNT_RETRIES) {
+        $retries++;
+        $account = payment_create_account($user[ID], DEFAULT_BALANCE);
     }
     $token = create_jwt_token($email, $role, $user[ID]);
     set_token_cookie($token);
