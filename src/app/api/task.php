@@ -2,6 +2,7 @@
 
 require_once "../bootstrap.php";
 require_once "../dal/task.php";
+require_once "../dal/payment.php";
 
 $routes = [
     POST => [
@@ -138,7 +139,7 @@ function api_task_create()
     }
     if (!payment_check_able_to_process($customer_id, $amount)) {
         render_conflict([
-            "error" => "Not enough money"
+            "error" => ["amount" => "Not enough money"]
         ]);
         return;
     }
@@ -147,12 +148,12 @@ function api_task_create()
     $success = payment_lock_balance($customer_id, $lock_tx_id, $amount);
     if (is_null($success)) {
         render_conflict([
-            "error" => "Not enough money"
+            "error" => ["amount" => "Not enough money"]
         ]);
         return;
     } elseif (!$success) {
         render_internal_server_error([
-            "error" => "Something went wrong"
+            "error" => ["unknown" => "Something went wrong"]
         ]);
         return;
     }

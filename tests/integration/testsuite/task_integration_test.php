@@ -73,6 +73,19 @@ class TaskIntegrationTest extends ApiIntegrationTest
         $this->assertResponseError($response, "reason", "Forbidden");
     }
 
+    public function testCreateTaskNotEnoughMoneyReturnsError()
+    {
+        $this->authorize('customer@dummy.com', '123456');
+        $task = [
+            'description' => 'Lorem ipsum',
+            'amount' => 1000.00,
+            'csrf_token' => '10'
+        ];
+        $response = $this->api->post('task', ['form_params' => $task]);
+        $this->assertResponseConflict($response);
+        $this->assertResponseError($response, "amount", "Not enough money");
+    }
+
     public function tearDown()
     {
         $this->util->deleteAllCreatedEntities();

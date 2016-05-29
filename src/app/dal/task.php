@@ -16,6 +16,36 @@ function get_task_connection()
     return $task_connection;
 }
 
+function dal_task_update_set_lock_tx_id($tx_id, $task_id)
+{
+    $db_errors = initialize_db_errors();
+    $connection = get_task_connection();
+    if (!$connection) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    $stmt = mysqli_prepare($connection, "UPDATE db_task.task SET lock_tx_id = ? WHERE id = ? AND lock_tx_id != -1");
+    if (!$stmt) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    /** @noinspection PhpMethodParametersCountMismatchInspection */
+    if (!mysqli_stmt_bind_param($stmt, 'ii', $tx_id, $task_id)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (!mysqli_stmt_execute($stmt)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (mysqli_stmt_affected_rows($stmt) != 1) {
+        mysqli_stmt_close($stmt);
+        return null;
+    }
+    mysqli_stmt_close($stmt);
+    return true;
+}
+
 function dal_task_create($customer_id, $amount, $description)
 {
     $db_errors = initialize_db_errors();
@@ -24,44 +54,29 @@ function dal_task_create($customer_id, $amount, $description)
         add_error($connection, $db_errors);
         return false;
     }
-    mysqli_autocommit($connection, false);
-    $task_tx_started = mysqli_begin_transaction($connection);
-    if (!$task_tx_started) {
-        add_error($connection, $db_errors);
-        return false;
-    }
-
-    $stmt = mysqli_prepare($connection, "INSERT INTO db_task.task (customer_id, amount, description) VALUES (?, ?, ?)");
+    $stmt = mysqli_prepare($connection, "INSERT INTO db_task.task (customer_id, amount, description, lock_tx_id) VALUES (?, ?, ?, NULL)");
     if (!$stmt) {
         add_error($connection, $db_errors);
-        mysqli_rollback($connection);
         return false;
     }
     /** @noinspection PhpMethodParametersCountMismatchInspection */
     if (!mysqli_stmt_bind_param($stmt, 'ids', $customer_id, $amount, $description)) {
         add_error($connection, $db_errors);
-        mysqli_rollback($connection);
         return false;
     }
     if (!mysqli_stmt_execute($stmt)) {
         add_error($connection, $db_errors);
-        mysqli_rollback($connection);
         return false;
     }
     if (!mysqli_stmt_close($stmt)) {
         add_error($connection, $db_errors);
-        mysqli_rollback($connection);
         return false;
     }
     if (mysqli_errno($connection) !== 0) {
-        mysqli_rollback($connection);
         return false;
     }
-    $task_id = mysqli_insert_id($connection);
-    if (!mysqli_commit($connection)) {
-        return false;
-    }
-    return $task_id;
+    $id = mysqli_insert_id($connection);
+    return $id;
 }
 
 function dal_task_fetch($task_id)
@@ -128,7 +143,7 @@ function dal_task_fetch_tasks_less_than_last_id_limit($callback, $user_id, $sele
     }
     $last_id_clause = $last_id === null ? '' : "AND id < $last_id";
 
-    $query = "SELECT id, timestampdiff(SECOND, now(), created_at), customer_id, performer_id, amount, description FROM db_task.task WHERE $select_user_type <=> ? $last_id_clause ORDER BY id DESC LIMIT ?";
+    $query = "SELECT id, timestampdiff(SECOND, now(), created_at), customer_id, performer_id, amount, description FROM db_task.task WHERE lock_tx_id IS NOT NULL AND $select_user_type <=> ? $last_id_clause ORDER BY id DESC LIMIT ?";
     $stmt = mysqli_prepare($connection, $query);
     if (!$stmt) {
         add_error($connection, $db_errors);

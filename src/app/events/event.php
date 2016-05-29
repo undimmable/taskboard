@@ -21,12 +21,10 @@ function send_generic_event($entity_id, $json, $type)
  */
 function send_index_event($entity_id, $entity_type, $text)
 {
-//    $json = json_encode([
-//        'entity_id' => $entity_id,
-//        'entity_type' => $entity_type,
-//        'text' => $text
-//    ]);
-
-    add_object($entity_id, $entity_type, $text);
-//    send_generic_event($entity_id, $json, 'text_idx');
+    $json = json_encode([
+        'entity_id' => $entity_id,
+        'entity_type' => $entity_type,
+        'text' => $text
+    ]);
+    send_generic_event($entity_id, $json, 'text_idx');
 }
