@@ -32,33 +32,40 @@ $routes = [
     'DELETE' => []
 ];
 
-function __validate_signup_input($email, $role, $password, $password_repeat)
+function __validate_signup_input($email, $role, $password, $password_repeat, $csrf)
 {
     $validation_context = initialize_validation_context();
+    is_csrf_token_valid("signup", $csrf, $validation_context);
     is_email_valid($email, $validation_context);
     is_role_valid($role, $validation_context);
     is_password_valid($password, $validation_context);
     is_password_repeat_valid($password, $password_repeat, $validation_context);
     if (validation_context_has_errors($validation_context)) {
-        header('Content-Type: application/json');
         render_bad_request_json(['error' => get_all_validation_errors($validation_context)]);
-        die;
+        return false;
     }
+    return true;
 }
 
-function __validate_login_input($email, $password)
+function __validate_login_input($email, $password, $csrf)
 {
     $validation_context = initialize_validation_context();
+    is_csrf_token_valid("login", $csrf, $validation_context);
     is_email_valid($email, $validation_context);
     is_password_valid($password, $validation_context);
     if (validation_context_has_errors($validation_context)) {
         render_bad_request_json(['error' => get_all_validation_errors($validation_context)]);
-        die;
+        return false;
     }
+    return true;
 }
 
 function api_auth_login_action()
 {
+    if (is_authorized()) {
+        render_forbidden();
+        return;
+    }
     $data = null;
     if (is_request_www_form()) {
         $data = $_POST;
@@ -72,11 +79,9 @@ function api_auth_login_action()
     $password = $data[PASSWORD];
     $remember_me = is_checked($data[REMEMBER_ME]);
     $csrf = $data['csrf_token'];
-    if (!is_csrf_token_valid("login", $csrf)) {
-        render_not_authorized_json();
-        die;
+    if (!__validate_login_input($email, $password, $csrf)) {
+        return;
     }
-    __validate_login_input($email, $password);
     $user = db_fetch_user_by_email($email);
     if ($user === null || !password_verify($password, $user[HASHED_PASSWORD])) {
         render_not_authorized_json([
@@ -92,7 +97,7 @@ function api_auth_login_action()
                 ]
             ]
         ]);
-        die();
+        return;
     }
     $token = create_jwt_token($user[EMAIL], $user[ROLE], $user[ID]);
     set_token_cookie($token, !$remember_me);
@@ -113,6 +118,10 @@ function api_auth_login_action()
 
 function api_auth_signup_action()
 {
+    if (is_authorized()) {
+        render_forbidden();
+        return;
+    }
     $email = $is_customer = $password = $password_repeat = null;
     $csrf = null;
     if (is_request_www_form()) {
@@ -131,28 +140,24 @@ function api_auth_signup_action()
     } else {
         render_unsupported_media_type();
     }
-    if (!is_csrf_token_valid("signup", $csrf)) {
-        render_not_authorized_json();
-        die;
-    }
     if (is_checked($is_customer)) {
         $role = get_role_key(CUSTOMER);
     } else {
         $role = get_role_key(PERFORMER);
     }
-    __validate_signup_input($email, $role, $password, $password_repeat);
+    if (!__validate_signup_input($email, $role, $password, $password_repeat, $csrf)) {
+        return;
+    }
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
     $confirmation_token = create_confirmation_token($email);
     $user = create_user($email, $role, $hashed_password, $confirmation_token);
     if (!$user) {
-        $db_errors = get_db_errors();
-        if ($db_errors[LOGIN] === "duplicate entity") {
-            render_conflict([
-                'error' => [EMAIL => "User with this email already registered"]
-            ]);
-        } else {
-            render_conflict($db_errors);
+        $errors = get_db_errors();
+        if ($errors[LOGIN] === "duplicate entity") {
+            $errors = ['error' => [EMAIL => "User with this email already registered"]];
         }
+        render_conflict($errors);
+        return;
     }
     $retries = 0;
     $account = false;
