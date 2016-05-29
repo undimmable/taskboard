@@ -12,6 +12,7 @@ function route_request($routes)
     if (!is_null($path_param)) {
         if (array_key_exists($path_param, $routes[$request_method])) {
             if (function_exists($routes[$request_method][$path_param])) {
+                try_authorize_from_cookie();
                 call_user_func($routes[$request_method][$path_param]);
                 $rendered = true;
             }
@@ -19,6 +20,7 @@ function route_request($routes)
             if (preg_match('/\d+/', $path_param)) {
                 $id = $path_param;
                 if (function_exists($routes[$request_method]['/\d+/'])) {
+                    try_authorize_from_cookie();
                     call_user_func($routes[$request_method]['/\d+/'], $id);
                     $rendered = true;
                 }
