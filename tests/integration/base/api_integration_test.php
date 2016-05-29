@@ -47,11 +47,11 @@ abstract class ApiIntegrationTest extends \PHPUnit_Framework_TestCase
         return new \mysqli(getenv("MYSQL_CONNECTION_HOST"), getenv("MYSQL_USER"), getenv("MYSQL_PASS"));
     }
 
-    protected function authorize()
+    protected function authorize($email, $password)
     {
         $credentials = [
-            'email' => 'dummy@dummy.com',
-            'password' => '123456',
+            'email' => $email,
+            'password' => $password,
             'csrf_token' => '9'
         ];
         $this->api->post('auth/login', ['form_params' => $credentials]);

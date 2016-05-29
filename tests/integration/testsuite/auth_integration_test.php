@@ -18,7 +18,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
 
     public function testSignupAuthorizedUserReturnsForbidden()
     {
-        $this->authorize();
+        $this->authorize('dummy@dummy.com', '123456');
         $credentials = [
             'email' => 'dummy@dummy.com',
             'password' => '123456',
@@ -33,7 +33,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
 
     public function testLoginAuthorizedUserReturnsForbidden()
     {
-        $this->authorize();
+        $this->authorize('dummy@dummy.com', '123456');
         $credentials = [
             'email' => 'dummy@dummy.com',
             'password' => '123456',
@@ -303,7 +303,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
 
     public function testLogoutLoggedInReturnsRedirect()
     {
-        $this->authorize();
+        $this->authorize('dummy@dummy.com', '123456');
         $response = $this->api->get('auth/logout');
         $this->assertResponseOk($response);
         $this->assertCookiePresent(AuthIntegrationTest::$authorizationCookieName);
