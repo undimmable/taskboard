@@ -1,16 +1,17 @@
 <?php
 
-function is_csrf_token_valid($type, $payload)
+function is_csrf_token_valid($type, $payload, &$validation_context)
 {
-    if ($type == 'task') {
-        return $payload == 10;
+    if ($type == 'task' && $payload == 10) {
+        return true;
     }
-    if ($type == 'login') {
-        return $payload == 9;
+    if ($type == 'login' && $payload == 9) {
+        return true;
     }
-    if ($type == 'signup') {
-        return $payload == 8;
+    if ($type == 'signup' && $payload == 8) {
+        return true;
     }
+    add_validation_error($validation_context, $type . '_csrf_token', 'wrong');
     return false;
 }
 
@@ -29,7 +30,7 @@ function is_password_valid($password, &$validation_context)
 
 function is_password_repeat_valid($password, $password_repeat, &$validation_context)
 {
-    if(!$password)
+    if (!$password)
         return false;
     if (is_null($password_repeat)) {
         add_validation_error($validation_context, PASSWORD_REPEAT, 'Password repeat not provided');
