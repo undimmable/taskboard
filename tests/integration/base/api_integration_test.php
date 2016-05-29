@@ -1,7 +1,9 @@
 <?php
+namespace Taskboards;
+
 use \GuzzleHttp\Client;
-use GuzzleHttp\Psr7\Request;
-use \GuzzleHttp\Psr7\Response;
+
+require_once 'util.php';
 
 abstract class ApiIntegrationTest extends \PHPUnit_Framework_TestCase
 {
@@ -14,7 +16,7 @@ abstract class ApiIntegrationTest extends \PHPUnit_Framework_TestCase
      */
     protected $mysqli;
     /**
-     * @var \Util
+     * @var Util
      */
     protected $util;
 
@@ -24,8 +26,10 @@ abstract class ApiIntegrationTest extends \PHPUnit_Framework_TestCase
         $this->mysqli = $this->createMysqlConnection();
         $this->util = new Util($this->mysqli);
         $this->api = new Client([
+            'connect_timeout' => 10,
+            'timeout' => 10,
+            'http_errors' => false,
             'base_uri' => getenv('HOST') . '/api/v1/',
-            'timeout' => 0.25,
             'cookies' => true,
             'verify' => false
         ]);
@@ -33,10 +37,14 @@ abstract class ApiIntegrationTest extends \PHPUnit_Framework_TestCase
 
     protected function createMysqlConnection()
     {
-        return new mysqli(getenv("MYSQL_CONNECTION_HOST"), getenv("MYSQL_USER"), getenv("MYSQL_PASS"));
+        return new \mysqli(getenv("MYSQL_CONNECTION_HOST"), getenv("MYSQL_USER"), getenv("MYSQL_PASS"));
     }
 
     public function tearDown()
     {
+        unset($this->api);
+        unset($this->util);
+        unset($this->mysqli);
+        parent::tearDown();
     }
 }
