@@ -71,6 +71,14 @@ abstract class ApiIntegrationTest extends \PHPUnit_Framework_TestCase
     /**
      * @param $response \Psr\Http\Message\ResponseInterface
      */
+    protected function assertResponseConflict($response)
+    {
+        $this->assertEquals(409, $response->getStatusCode());
+    }
+
+    /**
+     * @param $response \Psr\Http\Message\ResponseInterface
+     */
     protected function assertResponseBadRequest($response)
     {
         $this->assertEquals(400, $response->getStatusCode());

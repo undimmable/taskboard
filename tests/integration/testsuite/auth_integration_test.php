@@ -21,9 +21,22 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'is_customer' => 'on'
         ];
         $response = $this->api->post('auth/signup', ['form_params' => $credentials]);
-        $this->assertEquals(409, $response->getStatusCode());
-        $entity = $this->getResponseJson($response);
-        $this->assertEquals("User with this email already registered", $entity->error->email);
+        $this->assertResponseConflict($response);
+        $this->assertResponseError($response, "email", "User with this email already registered");
+    }
+
+    public function testSignupWrongCsrfTokenReturnsUnauthorized()
+    {
+        $credentials = [
+            'email' => 'dummy@dummy.com',
+            'password' => '123456',
+            'password_repeat' => '123456',
+            'csrf_token' => '0',
+            'is_customer' => 'on'
+        ];
+        $response = $this->api->post('auth/signup', ['form_params' => $credentials]);
+        $this->assertResponseUnauthorized($response);
+        $this->assertResponseError($response, "reason", "Not authorized");
     }
 
     public function testSignupMissingUserReturnsOk()
@@ -36,7 +49,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'is_customer' => 'on'
         ];
         $response = $this->api->post('auth/signup', ['form_params' => $credentials]);
-        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertResponseOk($response);
     }
 
     public function testLoginExistingUserReturnsToken()
@@ -82,7 +95,8 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'csrf_token' => '5'
         ];
         $response = $this->api->post('auth/login', ['form_params' => $credentials]);
-        $this->assertEquals(401, $response->getStatusCode());
+        $this->assertResponseUnauthorized($response);
+        $this->assertResponseError($response, "reason", "Not authorized");
     }
 
     public function tearDown()
