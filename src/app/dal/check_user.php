@@ -4,7 +4,7 @@ require_once 'dal/dal_helper.php';
 function check_logged_in($user_id, $user_agent, $ip)
 {
     $result = false;
-    $mysqli = get_mysqli_connection(LOGIN);
+    $mysqli = get_mysqli_connection(LOGIN_DB);
     if ($mysqli) {
         $stmt = mysqli_prepare($mysqli, "SELECT * FROM db_login.login WHERE user_id=? AND user_client=? AND ip=?");
         if ($stmt) {
