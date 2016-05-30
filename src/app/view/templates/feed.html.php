@@ -3,6 +3,12 @@
         <div class="panel panel-info">
             <div class="panel-heading">
                 Task feed
+                <span class="pull-right">
+                    <label>
+                        Hide completed
+                        <input type="checkbox" id="hide-completed">
+                    </label>
+                </span>
             </div>
             <div class="panel-body">
                 <ul id="task-feed" class="media-list">

@@ -69,9 +69,36 @@
 }
 
 .task-inactive {
-    color: #d3d3d3;
+    color: lightgray !important;
+}
+
+.task-active {
+    color: cadetblue !important;
 }
 
 .task-completed {
-    color: darkcyan;
+    color: slategrey !important;
+}
+
+.system-price {
+    color: lightcoral !important;
+}
+
+.task-header.task-inactive, .fix-task {
+    color: lightcoral !important;
+}
+
+#user-data {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+#task-feed[data-hide-completed=true] > li.task-completed {
+    visibility: hidden !important;
+    display: none !important;
+}
+
+#task-feed[data-hide-inactive=true] > li.task-completed {
+    visibility: hidden !important;
+    display: none !important;
 }

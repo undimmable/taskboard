@@ -52,12 +52,13 @@
     <script type="application/javascript"
             src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
     <script type="application/javascript" src="/js/app.js?__nocache=true"></script>
-    <?php if (is_authorized()) {
-        echo '<script type="application/javascript">$(document).ready(function(){window.taskboard.initializeFeed()});</script>';
-    }
-    ?>
 </head>
 <body>
+<div id="user-data" data-role="<?php if (is_authorized()) {
+    echo get_authorized_user()[ROLE];
+} else {
+    echo 0;
+} ?>"></div>
 <nav class="navbar navbar-default">
     <div class="container-fluid">
         <div class="navbar-header">

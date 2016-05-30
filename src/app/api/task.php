@@ -122,7 +122,7 @@ function api_task_create()
         return;
     }
     $user = get_authorized_user();
-    if (!is_customer(get_authorized_user()[ROLE])) {
+    if (!is_customer($user[ROLE])) {
         render_forbidden();
         return;
     }

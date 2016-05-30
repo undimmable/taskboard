@@ -87,20 +87,30 @@ function is_task_completed($task)
     return array_key_exists(PERFORMER_ID, $task) && $task[PERFORMER_ID] != null;
 }
 
-function get_performer_img($performer_id)
+function get_performer_img()
 {
     return "/img/m.png";
 }
 
-function get_default_img()
+function get_customer_img()
+{
+    return "/img/w.png";
+}
+
+function get_system_img()
 {
     return "/icons/favicon-96x96.png";
 }
 
-function get_task_img($task)
+function get_task_img($task, $user)
 {
-    if (array_key_exists(PERFORMER_ID, $task) && $task[PERFORMER_ID] != null)
-        return get_performer_img($task[PERFORMER_ID]);
-    else
-        return get_default_img();
+    if (is_task_completed($task)) {
+        return get_performer_img();
+    } else {
+        if (is_customer($user[ROLE])) {
+            return get_system_img();
+        } else {
+            return get_customer_img();
+        }
+    }
 }
