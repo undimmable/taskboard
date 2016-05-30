@@ -61,6 +61,31 @@ function payment_lock_balance($user_id, $tx_id, $amount)
     return true;
 }
 
+function payment_unlock_balance($user_id, $amount)
+{
+    $connection = get_account_connection();
+    $stmt = mysqli_prepare($connection, "UPDATE db_account.account SET locked_balance = locked_balance - $amount WHERE user_id=?");
+    if (!$stmt) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    /** @noinspection PhpMethodParametersCountMismatchInspection */
+    if (!mysqli_stmt_bind_param($stmt, 'i', $user_id)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (!mysqli_stmt_execute($stmt)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (mysqli_stmt_affected_rows($stmt) != 1) {
+        mysqli_stmt_close($stmt);
+        return null;
+    }
+    mysqli_stmt_close($stmt);
+    return true;
+}
+
 function payment_create_account($user_id, $balance = DEFAULT_BALANCE)
 {
     $db_errors = initialize_db_errors();
