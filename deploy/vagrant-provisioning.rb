@@ -24,6 +24,7 @@ Vagrant.configure(2) do |config|
 
     echo "Provisioning: install PHP, FPM and mailutils"
     apt-get install -y mysql-client nginx php5-fpm php5-mysql php5-common php5-dev php5-cli php5-fpm php5-xdebug mailutils 2>/dev/null
+    yes | pecl install channel://pecl.php.net/libevent-0.1.0 >/dev/null 2>&1
 
     echo "Provisioning: creating MySQL users"
     mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_account identified by '$MYSQL_ACCOUNT_PASS'"
@@ -54,6 +55,7 @@ Vagrant.configure(2) do |config|
     ln -s /home/vagrant/config/nginx/taskboards.top /etc/nginx/sites-enabled/
     ln -s /home/vagrant/config/nginx/mobile-rewrite.conf /etc/nginx/mobile-rewrite.conf
     ln -s /home/vagrant/config/fpm/fpm-config.ini /etc/php5/fpm/conf.d/fpm-taskboard.ini
+    echo "extension=libevent.so" > /etc/php5/mods-available/libevent.ini
     rm /etc/php5/fpm/pool.d/www.conf
     ln -s /home/vagrant/config/fpm/www.conf /etc/php5/fpm/pool.d/www.conf
 
