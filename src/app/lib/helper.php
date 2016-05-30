@@ -79,5 +79,28 @@ function parse_user_client()
 
 function is_task_active($task)
 {
-    return !array_key_exists('lock_tx_id', $task) || ($task['lock_tx_id'] == -1);
+    return array_key_exists(LOCK_TX_ID, $task) && ($task[LOCK_TX_ID] != -1);
+}
+
+function is_task_completed($task)
+{
+    return array_key_exists(PERFORMER_ID, $task) && $task[PERFORMER_ID] != null;
+}
+
+function get_performer_img($performer_id)
+{
+    return "/img/m.png";
+}
+
+function get_default_img()
+{
+    return "/icons/favicon-96x96.png";
+}
+
+function get_task_img($task)
+{
+    if (array_key_exists(PERFORMER_ID, $task) && $task[PERFORMER_ID] != null)
+        return get_performer_img($task[PERFORMER_ID]);
+    else
+        return get_default_img();
 }

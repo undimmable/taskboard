@@ -210,9 +210,10 @@ function api_task_delete_by_id($task_id)
     return;
 }
 
-function api_render_task(/** @noinspection PhpUnusedParameterInspection */
-    $task)
+function api_render_task($task)
 {
+    global $current_task;
+    $current_task = $task;
     require 'view/templates/task.html.php';
 }
 

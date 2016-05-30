@@ -71,3 +71,7 @@
 .task-inactive {
     color: #d3d3d3;
 }
+
+.task-completed {
+    color: darkcyan;
+}

@@ -4,6 +4,7 @@ define('USER_ID', 'user_id');
 define('CUSTOMER_ID', 'customer_id');
 define('PERFORMER_ID', 'performer_id');
 define('SYSTEM_ID', 'system_id');
+define('LOCK_TX_ID', 'lock_tx_id');
 define('EMAIL', 'email');
 define('PASSWORD', 'password');
 define('REMEMBER_ME', 'remember_me');
