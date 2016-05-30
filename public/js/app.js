@@ -528,4 +528,24 @@ function Taskboard($) {
 $(document).ready(function () {
     "use strict";
     window.taskboard = new Taskboard($);
+    $(document).on('click', '.delete-task', function () {
+        var task = $(this).closest('.task-feed-item');
+        var id = task.data('id');
+        var csrf = $(this).data('csrf');
+        $.ajax({
+            url: 'api/v1/task/' + id,
+            contentType: 'application/json; charset=UTF-8',
+            type: "DELETE",
+            headers: {
+                "X-CSRF-TOKEN": csrf
+            },
+            success: function () {
+                task.remove();
+            },
+            error: function (response, statusText) {
+                console.log(response);
+                console.log(statusText);
+            }
+        });
+    });
 });
