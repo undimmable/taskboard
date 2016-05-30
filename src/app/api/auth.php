@@ -145,8 +145,6 @@ function api_auth_signup_action()
         $retries++;
         $account = payment_create_account($user[ID], DEFAULT_BALANCE);
     }
-    $token = create_jwt_token($email, $role, $user[ID]);
-    set_token_cookie($token);
     send_verification_request_email($email, $_SERVER['HTTP_HOST'], $confirmation_token);
 }
 
