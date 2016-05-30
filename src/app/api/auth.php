@@ -151,10 +151,12 @@ function api_auth_signup_action()
 
 function api_auth_logout_action()
 {
-    if (delete_token_cookie())
+    if (is_authorized()) {
+        delete_token_cookie();
         https_redirect("/");
-    else
+    } else {
         render_not_authorized_json();
+    }
 }
 
 function api_auth_verify_action()
