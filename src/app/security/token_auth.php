@@ -42,6 +42,14 @@ function try_authorize_from_cookie()
     set_authorized_user(parse_user_from_token($token));
 }
 
+function parse_csrf_token_header()
+{
+    if (array_key_exists('HTTP_X_CSRF_TOKEN', $_SERVER))
+        return $_SERVER['HTTP_X_CSRF_TOKEN'];
+    else
+        return null;
+}
+
 function parse_user_from_token($token)
 {
     if (!array_key_exists(EMAIL, $token) || !array_key_exists(ROLE, $token) || !array_key_exists(ID, $token))

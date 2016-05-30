@@ -135,7 +135,7 @@ function api_task_create()
     $customer_id = $user[ID];
     $amount = $data[AMOUNT];
     $description = $data[DESCRIPTION];
-    $csrf = $data['csrf_token'];
+    $csrf = parse_csrf_token_header();
     if (!__validate_task_input($amount, $description, $csrf)) {
         return;
     }
@@ -190,7 +190,7 @@ function api_task_delete_by_id($task_id)
         return;
     }
     $customer_id = $user[ID];
-    $csrf = $_SERVER['HTTP_X_CSRF_TOKEN'];
+    $csrf = parse_csrf_token_header();
     $validation_context = initialize_validation_context();
     if (!is_csrf_token_valid("task", $csrf, $validation_context)) {
         if (validation_context_has_errors($validation_context)) {
