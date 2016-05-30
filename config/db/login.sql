@@ -12,3 +12,5 @@ CREATE TABLE login (
 )
   ENGINE = InnoDB
   DEFAULT CHARSET UTF8;
+ALTER TABLE login
+  ADD UNIQUE unique_ip_agent (ip, user_client);
