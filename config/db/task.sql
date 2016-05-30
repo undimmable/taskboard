@@ -10,6 +10,7 @@ CREATE TABLE task (
   amount       NUMERIC(10, 2)          NOT NULL,
   description  MEDIUMTEXT              NOT NULL,
   lock_tx_id   BIGINT                  NOT NULL DEFAULT -1,
+  commission   NUMERIC(10, 2)          NOT NULL,
   deleted      BOOL DEFAULT FALSE      NOT NULL
 )
   ENGINE = InnoDB

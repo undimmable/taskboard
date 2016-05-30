@@ -115,6 +115,11 @@ function get_task_img($task, $user)
     }
 }
 
+function get_system_commission()
+{
+    return 30;
+}
+
 function get_balance($user_id)
 {
     require_once 'dal/payment.php';

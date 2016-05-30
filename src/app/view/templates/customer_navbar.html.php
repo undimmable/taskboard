@@ -1,15 +1,16 @@
 <?php
+$commission = get_system_commission();
 $balance = get_balance(get_authorized_user()[ID]);
 ?>
 <li>
     <a type="button" class="btn btn-lg btn-link" data-toggle="modal" data-type="account"
-            data-target="#account-form-modal">
-           $<span id="user-balance"><?php echo $balance; ?></span> Refill Account
+       data-target="#account-form-modal">
+        $<span id="user-balance"><?php echo $balance; ?></span> Refill Account
     </a>
 </li>
 <li>
     <a type="button" class="btn btn-lg btn-link" data-toggle="modal" data-type="task"
-            data-target="#task-form-modal">
+       data-target="#task-form-modal">
         <i class="glyphicon glyphicon-plus" aria-hidden="true"></i> Create Task
     </a>
 </li>
@@ -48,6 +49,7 @@ $balance = get_balance(get_authorized_user()[ID]);
             </div>
             <div class="modal-footer">
                 <div class="col-md-12">
+                    Note that the system commission <?php echo $commission; ?>% will be applied
                 </div>
             </div>
         </div>
