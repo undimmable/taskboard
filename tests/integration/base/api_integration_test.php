@@ -37,6 +37,7 @@ abstract class ApiIntegrationTest extends \PHPUnit_Framework_TestCase
             'timeout' => 10,
             'http_errors' => false,
             'base_uri' => getenv('HOST') . '/api/v1/',
+            'cookie' => true,
             'cookies' => $this->jar,
             'verify' => false
         ]);
@@ -54,7 +55,9 @@ abstract class ApiIntegrationTest extends \PHPUnit_Framework_TestCase
             'password' => $password,
             'csrf_token' => '9'
         ];
-        $this->api->post('auth/login', ['form_params' => $credentials]);
+        $this->api->post('auth/login', ['form_params' => $credentials, 'headers' => [
+            'X-CSRF-TOKEN' => 9
+        ]]);
     }
 
     /**

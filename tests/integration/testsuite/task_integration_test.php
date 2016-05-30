@@ -42,7 +42,9 @@ class TaskIntegrationTest extends ApiIntegrationTest
             'amount' => 10.00,
             'csrf_token' => '10'
         ];
-        $response = $this->api->post('task', ['form_params' => $task]);
+        $response = $this->api->post('task', ['form_params' => $task, 'headers' => [
+            'X-CSRF-TOKEN' => 10
+        ]]);
         $this->assertResponseUnauthorized($response);
         $this->assertResponseError($response, "reason", "Not authorized");
     }
@@ -55,7 +57,9 @@ class TaskIntegrationTest extends ApiIntegrationTest
             'amount' => 10.00,
             'csrf_token' => '10'
         ];
-        $response = $this->api->post('task', ['form_params' => $task]);
+        $response = $this->api->post('task', ['form_params' => $task, 'headers' => [
+            'X-CSRF-TOKEN' => 10
+        ]]);
         $this->assertResponseForbidden($response);
         $this->assertResponseError($response, "reason", "Forbidden");
     }
@@ -68,7 +72,9 @@ class TaskIntegrationTest extends ApiIntegrationTest
             'amount' => 10.00,
             'csrf_token' => '10'
         ];
-        $response = $this->api->post('task', ['form_params' => $task]);
+        $response = $this->api->post('task', ['form_params' => $task, 'headers' => [
+            'X-CSRF-TOKEN' => 10
+        ]]);
         $this->assertResponseForbidden($response);
         $this->assertResponseError($response, "reason", "Forbidden");
     }
@@ -81,7 +87,9 @@ class TaskIntegrationTest extends ApiIntegrationTest
             'amount' => 1000.00,
             'csrf_token' => '10'
         ];
-        $response = $this->api->post('task', ['form_params' => $task]);
+        $response = $this->api->post('task', ['form_params' => $task, 'headers' => [
+            'X-CSRF-TOKEN' => 10
+        ]]);
         $this->assertResponseConflict($response);
         $this->assertResponseError($response, "amount", "Not enough money");
     }
