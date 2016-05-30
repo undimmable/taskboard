@@ -91,13 +91,15 @@ function api_task_get_last_n()
     $last_id = parse_integer_param('last_id');
     $limit = parse_integer_param('limit');
     $limit = $limit < get_config_max_task_selection_limit() ? $limit : get_config_max_task_selection_limit();
-    if (is_customer($user)) {
+    $lock_tx_id_clause = "TRUE";
+    if (is_customer($user[ROLE])) {
         $user_id = $user[ID];
         $select_user_type = 'customer_id';
     } else {
         $select_user_type = 'performer_id';
+        $lock_tx_id_clause = "lock_tx_id IS NOT NULL AND task.lock_tx_id != -1";
     }
-    $tasks = dal_task_fetch_tasks_less_than_last_id_limit("api_render_task", $user_id, $select_user_type, $limit, $last_id);
+    $tasks = dal_task_fetch_tasks_less_than_last_id_limit("api_render_task", $user_id, $lock_tx_id_clause, $select_user_type, $limit, $last_id);
     if (is_null($tasks)) {
         render_no_content();
     } else if ($tasks === false) {
@@ -173,6 +175,39 @@ function api_task_create()
         api_render_task($task);
         return;
     }
+}
+
+
+function api_task_delete_by_id($task_id)
+{
+    if (!is_authorized()) {
+        render_not_authorized_json();
+        return;
+    }
+    $user = get_authorized_user();
+    if (!is_customer(get_authorized_user()[ROLE])) {
+        render_forbidden();
+        return;
+    }
+    $customer_id = $user[ID];
+    $csrf = $_SERVER['HTTP_X_CSRF_TOKEN'];
+    $validation_context = initialize_validation_context();
+    if (!is_csrf_token_valid("task", $csrf, $validation_context)) {
+        if (validation_context_has_errors($validation_context)) {
+            render_bad_request_json(['error' => get_all_validation_errors($validation_context)]);
+            return;
+        }
+    }
+    $task = dal_task_fetch($task_id);
+    if (!$task || $task[CUSTOMER_ID] != $customer_id) {
+        render_forbidden();
+        return;
+    }
+    $task_deleted = dal_task_delete($task_id);
+    if ($task_deleted) {
+        payment_unlock_balance($customer_id, $task[AMOUNT]);
+    }
+    return;
 }
 
 function api_render_task(/** @noinspection PhpUnusedParameterInspection */
