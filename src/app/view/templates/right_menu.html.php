@@ -7,8 +7,7 @@
         require 'view/templates/signup_form.html.php';
     } else {
         if (is_customer($user[ROLE])) {
-            require 'view/templates/create_task_button.html.php';
-            require 'view/templates/create_task_form.html.php';
+            require 'view/templates/customer_navbar.html.php';
         }
         require 'view/templates/logout_button.html.php';
     }

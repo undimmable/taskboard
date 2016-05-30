@@ -1,3 +1,15 @@
+<li>
+    <button type="button" class="btn btn-lg btn-link" data-toggle="modal" data-type="account"
+            data-target="#account-form-modal">
+        <i class="glyphicon glyphicon-plus" aria-hidden="true"></i> Refill Account
+    </button>
+</li>
+<li>
+    <button type="button" class="btn btn-lg btn-link" data-toggle="modal" data-type="task"
+            data-target="#task-form-modal">
+        <i class="glyphicon glyphicon-plus" aria-hidden="true"></i> Create Task
+    </button>
+</li>
 <div id="task-form-modal" class="modal fade" data-type="task" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -27,6 +39,40 @@
                         <button class="btn btn-primary btn-lg btn-block">
                             <i class="glyphicon glyphicon-plus" aria-hidden="true"
                                id="task-form-spinner" data-icon="glyphicon glyphicon-plus"></i> Create Task
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <div class="col-md-12">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="account-form-modal" class="modal fade" data-type="account" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h1 class="text-center">Refill Account</h1>
+            </div>
+            <div class="modal-body col-md-12">
+                <!--suppress HtmlUnknownTarget -->
+                <form id="account-form" class="form col-md-12 center-block" action="/api/v1/account">
+                    <div class="form-group">
+                        <label for="account-<?php echo AMOUNT ?>">Amount</label>
+                        <input id="account-<?php echo AMOUNT ?>" type="number" class="form-control input-lg"
+                               placeholder="Amount" name="<?php echo AMOUNT ?>" min="1"
+                               max="<?php echo get_config_max_amount() ?>">
+                        <span id="account-form-error-<?php echo AMOUNT ?>" class="error-description"></span>
+                    </div>
+                    <input type="hidden" name="csrf_token">
+                    <div class="form-group">
+                        <button class="btn btn-primary btn-lg btn-block">
+                            <i class="glyphicon glyphicon-plus" aria-hidden="true"
+                               id="account-form-spinner" data-icon="glyphicon glyphicon-plus"></i> Refill
                         </button>
                     </div>
                 </form>
