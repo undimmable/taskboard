@@ -6,6 +6,12 @@ function Taskboard($) {
     var taskboardApplication = this;
     var localization = null;
     var feed = null;
+    var role = null;
+    var performerRole = 3;
+    var customerRole = 2;
+    var systemRole = 1;
+    var unauthorizedRole = 0;
+    var timestampRefreshPeriod = 60000;
     this.searchProcessing = false;
     this.initialized = false;
     this.disableModals = false;
@@ -204,22 +210,21 @@ function Taskboard($) {
             taskboardApplication.searchProcessing = true;
             taskboardApplication.replaceIconWithSpinner(icon);
             searchInput.prop('disabled', true);
+            var query = "q=" + text;
             $.ajax({
-                url: "/api/v1/search",
+                url: '/api/v1/search',
                 dataType: 'html',
                 contentType: 'application/json; charset=UTF-8',
                 type: "GET",
-                data: "q=" + text,
-                success: function (response, status) {
+                data: query,
+                success: function (response) {
                     console.log(response);
-                    console.log(status);
                     searchInput.prop('disabled', false);
                     taskboardApplication.searchProcessing = false;
                     taskboardApplication.replaceSpinnerWithIcon(icon);
                 },
-                error: function (response, status) {
+                error: function (response) {
                     console.log(response);
-                    console.log(status);
                     searchInput.prop('disabled', false);
                     taskboardApplication.searchProcessing = false;
                     taskboardApplication.replaceSpinnerWithIcon(icon);
@@ -505,12 +510,20 @@ function Taskboard($) {
     this.initializeFeed = function () {
         feed = new taskboardApplication.Feed(10);
         feed.initialize();
+        $('#hide-completed').change(function () {
+            if (this.checked) {
+                $('#task-feed').attr('data-hide-completed', true);
+            } else {
+                $('#task-feed').attr('data-hide-completed', false);
+            }
+        });
     };
 
     this.initialize = function () {
         "use strict";
         taskboardApplication.initializeExtensions();
         localization = new Localization();
+        role = $('#user-data').data('role');
         taskboardApplication.logger.enableLogger();
         if (taskboardApplication.initialized)
             return this;
@@ -522,8 +535,55 @@ function Taskboard($) {
         taskboardApplication.initializeFormListeners();
         taskboardApplication.initializeFormModals();
         taskboardApplication.initializeSearch();
-        taskboardApplication.initializeTimestampRefresher(60000);
+        taskboardApplication.initializeTimestampRefresher(timestampRefreshPeriod);
         taskboardApplication.initializeEventStream();
+        if (role != unauthorizedRole) {
+            taskboardApplication.initializeFeed();
+        }
+        if (role == customerRole) {
+            $(document).on('click', '.delete-task', function () {
+                var task = $(this).closest('.task-feed-item');
+                var id = task.data('id');
+                var csrf = $(this).data('csrf');
+                $.ajax({
+                    url: 'api/v1/task/' + id,
+                    contentType: 'application/json; charset=UTF-8',
+                    type: "DELETE",
+                    headers: {
+                        "X-CSRF-TOKEN": csrf
+                    },
+                    success: function () {
+                        task.remove();
+                    },
+                    error: function (response, statusText) {
+                        console.log(response);
+                        console.log(statusText);
+                    }
+                });
+            });
+        }
+        if (role == performerRole) {
+            $(document).on('click', '.complete-task', function () {
+                var task = $(this).closest('.task-feed-item');
+                var id = task.data('id');
+                var csrf = $(this).data('csrf');
+                $.ajax({
+                    url: 'api/v1/task/' + id,
+                    contentType: 'application/json; charset=UTF-8',
+                    type: "PUT",
+                    headers: {
+                        "X-CSRF-TOKEN": csrf
+                    },
+                    success: function () {
+                        task.remove();
+                    },
+                    error: function (response, statusText) {
+                        console.log(response);
+                        console.log(statusText);
+                    }
+                });
+            });
+        }
         return taskboardApplication;
     };
     return taskboardApplication.initialize();
@@ -532,24 +592,4 @@ function Taskboard($) {
 $(document).ready(function () {
     "use strict";
     window.taskboard = new Taskboard($);
-    $(document).on('click', '.delete-task', function () {
-        var task = $(this).closest('.task-feed-item');
-        var id = task.data('id');
-        var csrf = $(this).data('csrf');
-        $.ajax({
-            url: 'api/v1/task/' + id,
-            contentType: 'application/json; charset=UTF-8',
-            type: "DELETE",
-            headers: {
-                "X-CSRF-TOKEN": csrf
-            },
-            success: function () {
-                task.remove();
-            },
-            error: function (response, statusText) {
-                console.log(response);
-                console.log(statusText);
-            }
-        });
-    });
 });
