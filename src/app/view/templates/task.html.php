@@ -21,15 +21,15 @@ echo $task[ID] ?>">
                 <span class="timestamp created_at"
                       data-timestamp-offset="<?php echo $task[CREATED_AT_OFFSET] ?>"></span>
             </small>
-                        <?php if (is_performer($user[ROLE])) {
-                            echo '<button type="button" class="delete-task btn-primary btn pull-right no-shadow">$' . $task[AMOUNT]. '</button>';
-                        }
-                        ?>
+            <?php if (is_performer($user[ROLE])) {
+                echo '<button type="button" class="perform-task btn-primary btn pull-right no-shadow">$' . $task[AMOUNT] . '</button>';
+            }
+            ?>
 
         </div>
     </div>
-<?php if (is_customer($user[ROLE])) {
-    echo '<button type="button" class="delete-task btn-primary btn-sm btn-link pull-right">Delete</button>';
-}
+    <?php if (is_customer($user[ROLE])) {
+        echo '<button type="button" class="delete-task btn-primary btn-sm btn-link pull-right" data-csrf="10">Delete</button>';
+    }
     ?>
 </li>
