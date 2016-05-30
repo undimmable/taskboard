@@ -14,9 +14,9 @@
  * @since     1.0.0
  */
 require_once "../bootstrap.php";
-require_once "../lib/mail.php";
-require_once "../dal/user.php";
-require_once "../dal/payment.php";
+require_once "lib/mail.php";
+require_once "dal/user.php";
+require_once "dal/payment.php";
 
 $routes = [
     'POST' => [

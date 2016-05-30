@@ -1,8 +1,8 @@
 <?php
 
-require_once "../bootstrap.php";
-require_once "../dal/task.php";
-require_once "../dal/payment.php";
+require_once "bootstrap.php";
+require_once "dal/task.php";
+require_once "dal/payment.php";
 
 $routes = [
     POST => [
@@ -213,7 +213,7 @@ function api_task_delete_by_id($task_id)
 function api_render_task(/** @noinspection PhpUnusedParameterInspection */
     $task)
 {
-    require '../view/templates/task.html.php';
+    require 'view/templates/task.html.php';
 }
 
 route_request($routes);

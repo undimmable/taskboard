@@ -73,7 +73,7 @@
                 </div>
             </form>
             <?php
-            require 'right_menu.html.php';
+            require 'view/templates/right_menu.html.php';
             ?>
         </div>
     </div>
@@ -90,9 +90,9 @@
     <div class="row">
         <?php
         if (is_authorized()) {
-            require 'feed.html.php';
+            require 'view/templates/feed.html.php';
         } else {
-            require 'unauthorized.html.php';
+            require 'view/templates/unauthorized.html.php';
         }
         ?>
     </div>

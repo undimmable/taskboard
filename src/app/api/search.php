@@ -1,7 +1,7 @@
 <?php
 
 require_once "../bootstrap.php";
-require_once "../dal/text_idx.php";
+require_once "dal/text_idx.php";
 $routes = [
     'POST' => [
     ],
