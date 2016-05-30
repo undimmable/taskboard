@@ -83,8 +83,10 @@ function api_task_get_by_id($task_id)
 
 function api_task_get_last_n()
 {
-    if (!is_authorized())
+    if (!is_authorized()) {
         render_not_authorized_json();
+        return;
+    }
     $user = get_authorized_user();
     $user_id = null;
     $select_user_type = null;
