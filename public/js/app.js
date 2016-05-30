@@ -465,7 +465,7 @@ function Taskboard($) {
     };
 
     this.initializeFormListeners = function () {
-        $('#login-form,#signup-form,#task-form').submit(function (e) {
+        $('#login-form,#signup-form,#task-form,#account-form').submit(function (e) {
             e.preventDefault();
             var isTaskForm = $(this).attr('id') == 'task-form';
             if (taskboardApplication.currentForm != null) {

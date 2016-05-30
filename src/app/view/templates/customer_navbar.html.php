@@ -1,7 +1,7 @@
 <li>
     <button type="button" class="btn btn-lg btn-link" data-toggle="modal" data-type="account"
             data-target="#account-form-modal">
-        <i class="glyphicon glyphicon-plus" aria-hidden="true"></i> Refill Account
+        <i class="glyphicon glyphicon-usd" aria-hidden="true"></i> Refill Account
     </button>
 </li>
 <li>
@@ -71,8 +71,8 @@
                     <input type="hidden" name="csrf_token">
                     <div class="form-group">
                         <button class="btn btn-primary btn-lg btn-block">
-                            <i class="glyphicon glyphicon-plus" aria-hidden="true"
-                               id="account-form-spinner" data-icon="glyphicon glyphicon-plus"></i> Refill
+                            <i class="glyphicon glyphicon-usd" aria-hidden="true"
+                               id="account-form-spinner" data-icon="glyphicon glyphicon-usd"></i> Refill
                         </button>
                     </div>
                 </form>
