@@ -6,8 +6,8 @@ CREATE TABLE login (
   id             BIGINT PRIMARY KEY AUTO_INCREMENT,
   user_id        BIGINT             DEFAULT NULL,
   ip             VARBINARY(16)           NOT NULL,
-  user_client    VARCHAR(31)             NOT NULL,
-  created_at     TIMESTAMP DEFAULT now() NOT NULL,
+  user_client    VARCHAR(255)             NOT NULL,
+  last_login     TIMESTAMP DEFAULT now() NOT NULL,
   failed_attepts TINYINT            DEFAULT NULL
 )
   ENGINE = InnoDB
