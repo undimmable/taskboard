@@ -1,7 +1,10 @@
+<?php
+$balance = get_balance(get_authorized_user()[ID]);
+?>
 <li>
     <button type="button" class="btn btn-lg btn-link" data-toggle="modal" data-type="account"
             data-target="#account-form-modal">
-        <i class="glyphicon glyphicon-usd" aria-hidden="true"></i> Refill Account
+        $<span id="user-balance"><?php echo $balance; ?></span> Refill Account
     </button>
 </li>
 <li>

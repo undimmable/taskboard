@@ -366,8 +366,13 @@ function Taskboard($) {
         return $(form).attr('id') == 'task-form';
     };
 
+    this.isBalanceForm = function (form) {
+        return $(form).attr('id') == 'account-form';
+    };
+
     this.onFormSuccess = function (response) {
         var taskForm = taskboardApplication.isTaskForm(taskboardApplication.currentForm);
+        var balanceForm = taskboardApplication.isBalanceForm(taskboardApplication.currentForm);
         taskboardApplication.removeFormSpinner();
         taskboardApplication.enableModals();
         taskboardApplication.closeFormModal();
@@ -381,6 +386,9 @@ function Taskboard($) {
             console.error("Something went extremely wrong here, response is not JSON");
             console.error(response);
             return;
+        }
+        if(balanceForm) {
+            $('#user-balance').text(response['balance']);
         }
         taskboardApplication.processResponseEvents(response);
         if (response['redirect'] != null) {
@@ -467,10 +475,10 @@ function Taskboard($) {
     this.initializeFormListeners = function () {
         $('#login-form,#signup-form,#task-form,#account-form').submit(function (e) {
             e.preventDefault();
-            var isTaskForm = $(this).attr('id') == 'task-form';
             if (taskboardApplication.currentForm != null) {
                 return;
             }
+            var isTaskForm = $(this).attr('id') == 'task-form';
             taskboardApplication.disableModals = true;
             taskboardApplication.currentForm = this;
             taskboardApplication.cleanupModal($(this).closest('.modal'));

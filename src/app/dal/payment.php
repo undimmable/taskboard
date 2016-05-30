@@ -4,8 +4,7 @@
  * @version 1.0
  */
 
-require_once "../bootstrap.php";
-require_once "dal_helper.php";
+require_once "dal/dal_helper.php";
 $payment_connection = null;
 $account_connection = null;
 

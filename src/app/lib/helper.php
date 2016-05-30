@@ -114,3 +114,9 @@ function get_task_img($task, $user)
         }
     }
 }
+
+function get_balance($user_id)
+{
+    require_once 'dal/payment.php';
+    return payment_fetch_balance($user_id);
+}
