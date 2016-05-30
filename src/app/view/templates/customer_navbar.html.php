@@ -2,16 +2,16 @@
 $balance = get_balance(get_authorized_user()[ID]);
 ?>
 <li>
-    <button type="button" class="btn btn-lg btn-link" data-toggle="modal" data-type="account"
+    <a type="button" class="btn btn-lg btn-link" data-toggle="modal" data-type="account"
             data-target="#account-form-modal">
-        $<span id="user-balance"><?php echo $balance; ?></span> Refill Account
-    </button>
+           $<span id="user-balance"><?php echo $balance; ?></span> Refill Account
+    </a>
 </li>
 <li>
-    <button type="button" class="btn btn-lg btn-link" data-toggle="modal" data-type="task"
+    <a type="button" class="btn btn-lg btn-link" data-toggle="modal" data-type="task"
             data-target="#task-form-modal">
         <i class="glyphicon glyphicon-plus" aria-hidden="true"></i> Create Task
-    </button>
+    </a>
 </li>
 <div id="task-form-modal" class="modal fade" data-type="task" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog">
