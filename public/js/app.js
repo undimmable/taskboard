@@ -402,10 +402,10 @@ function Taskboard($) {
             taskboardApplication.closeFormOnUnknownError("Something went extremely wrong here, response is JSON of error type, but doesn't have any explanatory fields.");
             return;
         }
-        if (response.status === 401) {
-            taskboardApplication.closeFormOnUnknownError(json.error);
-            return;
-        }
+        // if (response.status === 401) {
+        //     taskboardApplication.closeFormOnUnknownError(json.error);
+        //     return;
+        // }
         $(taskboardApplication.currentForm).find('input').on('change keyup', function () {
             if (!taskboardApplication.disableModals) {
                 $(this).off('change keyup');
