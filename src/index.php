@@ -5,5 +5,5 @@ $user = get_authorized_user();
 $verification_popup = $_GET['verification_popup'];
 $page_title = "TaskBoards";
 ob_start();
-require 'app/view/templates/layout.php';
+require 'view/templates/layout.php';
 ob_end_flush();
