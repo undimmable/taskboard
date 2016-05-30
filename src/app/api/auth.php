@@ -85,34 +85,14 @@ function api_auth_login_action()
     $user = db_fetch_user_by_email($email);
     if ($user === null || !password_verify($password, $user[HASHED_PASSWORD])) {
         render_not_authorized_json([
-            'error' => [EMAIL => 'Wrong username and/or password'],
-            'event' => [
-                [
-                    'local_storage' => [
-                        [
-                            'key' => 'error-popup',
-                            'value' => 'Login error'
-                        ]
-                    ]
-                ]
-            ]
+            'error' => [EMAIL => 'Wrong username and/or password']
         ]);
         return;
     }
     $token = create_jwt_token($user[EMAIL], $user[ROLE], $user[ID]);
     set_token_cookie($token, !$remember_me);
     render_ok_json([
-        'redirect' => '/',
-        'event' => [
-            [
-                'local_storage' => [
-                    [
-                        'key' => 'success-popup',
-                        'value' => 'Login successful'
-                    ]
-                ]
-            ]
-        ]
+        'redirect' => '/'
     ]);
 }
 
