@@ -1,4 +1,7 @@
 <?php
+
+require_once "../bootstrap.php";
+
 $routes = [
     'POST' => [
     ],

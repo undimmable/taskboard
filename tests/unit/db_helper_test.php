@@ -1,6 +1,7 @@
 <?php
 
-include 'src/app/dal/dal_helper.php';
+/** @noinspection PhpIncludeInspection */
+require 'dal/dal_helper.php';
 
 class DBHelperTest extends PHPUnit_Framework_TestCase
 {
