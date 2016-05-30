@@ -475,11 +475,15 @@ function Taskboard($) {
             var data = taskboardApplication.serializeForm();
             var action = $(taskboardApplication.currentForm).attr('action');
             taskboardApplication.addFormSpinner();
+            var csrf = $(this).find('input[name=csrf_token]').val();
             $.ajax({
                 url: action,
                 dataType: isTaskForm ? 'html' : 'json',
                 contentType: 'application/json; charset=UTF-8',
                 type: "POST",
+                headers: {
+                    "X-CSRF-TOKEN": csrf
+                },
                 data: data,
                 success: taskboardApplication.onFormSuccess,
                 error: taskboardApplication.onFormError
