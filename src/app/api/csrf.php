@@ -9,7 +9,8 @@ $routes = [
     'GET' => [
         'task' => 'csrf_task',
         'login' => 'csrf_login',
-        'signup' => 'csrf_signup'
+        'signup' => 'csrf_signup',
+        'account' => 'csrf_account',
     ]
 ];
 
@@ -26,6 +27,11 @@ function csrf_login()
 function csrf_signup()
 {
     echo 8;
+}
+
+function csrf_account()
+{
+    echo 7;
 }
 
 route_request($routes);
