@@ -8,7 +8,8 @@ CREATE TABLE task (
   customer_id  BIGINT                  NOT NULL,
   performer_id BIGINT             DEFAULT NULL,
   amount       NUMERIC(10, 2)          NOT NULL,
-  description  MEDIUMTEXT              NOT NULL
+  description  MEDIUMTEXT              NOT NULL,
+  deleted      BOOL DEFAULT FALSE      NOT NULL
 )
   ENGINE = InnoDB
   DEFAULT CHARSET UTF8;
