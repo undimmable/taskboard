@@ -22,7 +22,7 @@ function create_user($email, $role, $hashed_password, $confirmation_token)
         return false;
     }
     initialize_db_errors();
-    $connection = get_mysqli_connection(USER_DB);
+    $connection = get_user_connection();
     if (!$connection)
         add_error($connection, $db_errors);
     $stmt = mysqli_prepare($connection, "INSERT INTO db_user.user (email, role, hashed_password, confirmation_token) VALUES (?,?,?,?)");
@@ -53,7 +53,7 @@ function create_user($email, $role, $hashed_password, $confirmation_token)
 function user_exists($email)
 {
     initialize_db_errors();
-    $connection = get_mysqli_connection(USER_DB);
+    $connection = get_user_connection();
     if (!$connection)
         add_error($connection, $db_errors);
     $mysqli_stmt = mysqli_prepare($connection, "SELECT count(*) AS count FROM db_user.user WHERE email = ?");
@@ -87,7 +87,7 @@ function user_exists($email)
 function db_fetch_user_by_email($email)
 {
     initialize_db_errors();
-    $connection = get_mysqli_connection(USER_DB);
+    $connection = get_user_connection();
     if (!$connection)
         add_error($connection, $db_errors);
     $stmt = mysqli_prepare($connection, "SELECT id, email, hashed_password, role FROM db_user.user WHERE email = ?");
@@ -129,7 +129,7 @@ function db_fetch_user_by_email($email)
 function get_user_by_id($id)
 {
     initialize_db_errors();
-    $connection = get_mysqli_connection(USER_DB);
+    $connection = get_user_connection();
     if (!$connection)
         add_error($connection, $db_errors);
     $mysqli_stmt = mysqli_prepare($connection, "SELECT id, email, hashed_password, role FROM db_user.user WHERE id = ?");
@@ -168,7 +168,7 @@ function get_user_by_id($id)
 function verify_user($confirmation_token)
 {
     initialize_db_errors();
-    $connection = get_mysqli_connection(USER_DB);
+    $connection = get_user_connection();
     if (!$connection)
         add_error($connection, $db_errors);
     $mysqli_stmt = mysqli_prepare($connection, "UPDATE db_user.user SET confirmed=TRUE WHERE NOT confirmed AND confirmation_token = ? AND LAST_INSERT_ID(id) OR LAST_INSERT_ID(0)");
