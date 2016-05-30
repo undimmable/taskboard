@@ -66,13 +66,6 @@
             <a class="navbar-brand" href="#">TaskBoards</a>
         </div>
         <div>
-            <form class="navbar-form navbar-left">
-                <div class="form-group has-feedback">
-                    <input type="text" class="form-control" placeholder="Search" id="search"/>
-                    <i class="form-control-feedback glyphicon glyphicon-search"
-                       data-icon="glyphicon glyphicon-search"></i>
-                </div>
-            </form>
             <?php
             require 'view/templates/right_menu.html.php';
             ?>

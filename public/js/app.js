@@ -12,7 +12,6 @@ function Taskboard($) {
     var systemRole = 1;
     var unauthorizedRole = 0;
     var timestampRefreshPeriod = 60000;
-    this.searchProcessing = false;
     this.initialized = false;
     this.disableModals = false;
     this.currentForm = null;
@@ -199,46 +198,6 @@ function Taskboard($) {
             timer = setTimeout(callback, ms);
         };
     })();
-
-    this.initializeSearch = function () {
-        var searchInput = $('#search');
-        var callback = function () {
-            if (taskboardApplication.searchProcessing)
-                return;
-            var text = searchInput.val();
-            var icon = searchInput.closest('form').find('i');
-            taskboardApplication.searchProcessing = true;
-            taskboardApplication.replaceIconWithSpinner(icon);
-            searchInput.prop('disabled', true);
-            var query = "q=" + text;
-            $.ajax({
-                url: '/api/v1/search',
-                dataType: 'html',
-                contentType: 'application/json; charset=UTF-8',
-                type: "GET",
-                data: query,
-                success: function (response) {
-                    console.log(response);
-                    searchInput.prop('disabled', false);
-                    taskboardApplication.searchProcessing = false;
-                    taskboardApplication.replaceSpinnerWithIcon(icon);
-                },
-                error: function (response) {
-                    console.log(response);
-                    searchInput.prop('disabled', false);
-                    taskboardApplication.searchProcessing = false;
-                    taskboardApplication.replaceSpinnerWithIcon(icon);
-                }
-            });
-        };
-        searchInput.closest('form').submit(function (e) {
-            e.preventDefault();
-            callback();
-        });
-        searchInput.keyup(function () {
-            taskboardApplication.delay(callback, 1000);
-        });
-    };
 
     this.initializeListeners = function () {
         $('#btn-logout').click(function () {
@@ -542,7 +501,6 @@ function Taskboard($) {
         taskboardApplication.initializeListeners();
         taskboardApplication.initializeFormListeners();
         taskboardApplication.initializeFormModals();
-        taskboardApplication.initializeSearch();
         taskboardApplication.initializeTimestampRefresher(timestampRefreshPeriod);
         taskboardApplication.initializeEventStream();
         if (role != unauthorizedRole) {
