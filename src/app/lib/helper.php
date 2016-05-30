@@ -62,3 +62,17 @@ function parse_integer_param($param_name)
     }
     return $param;
 }
+
+function parse_ip()
+{
+    return inet_pton($_SERVER['REMOTE_ADDR']);
+}
+
+function parse_user_client()
+{
+    $agent = $_SERVER['HTTP_USER_AGENT'];
+    if (strlen($agent <= 256))
+        return $agent;
+    else
+        return substr($agent, 0, 255);
+}

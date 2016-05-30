@@ -40,3 +40,13 @@ function get_config_max_task_selection_limit()
 {
     return get_validation_config()['max_task_selection_limit'];
 }
+
+function get_config_failed_attempt_timeout()
+{
+    return get_validation_config()['failed_attempt_timeout'];
+}
+
+function get_config_failed_attempt_retry()
+{
+    return get_validation_config()['failed_attempt_retry'];
+}

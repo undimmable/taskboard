@@ -83,8 +83,17 @@ function api_auth_login_action()
     if (!__validate_login_input($email, $password, $csrf)) {
         return;
     }
+    $ip = parse_ip();
+    $client = parse_user_client();
+    $interval = get_config_failed_attempt_timeout();
+    $failed_attempts = dal_login_being_failed($ip, $client, get_config_failed_attempt_retry(), $interval);
+    if ($failed_attempts) {
+        render_not_authorized_json(['error' => [EMAIL => "Max attempts number exceeded. Try again in $interval seconds"]]);
+        return;
+    }
     $user = db_fetch_user_by_email($email);
     if ($user === null || !password_verify($password, $user[HASHED_PASSWORD])) {
+        dal_login_log_failed($ip, $client);
         render_not_authorized_json([
             'error' => [EMAIL => 'Wrong username and/or password']
         ]);
