@@ -54,7 +54,7 @@ function dal_task_delete($task_id)
         add_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "UPDATE db_task.task SET deleted=true WHERE id=?");
+    $stmt = mysqli_prepare($connection, "UPDATE db_task.task SET deleted=TRUE WHERE id=?");
     if (!$stmt) {
         add_error($connection, $db_errors);
         return false;
@@ -84,7 +84,7 @@ function dal_task_create($customer_id, $amount, $description)
         add_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "INSERT INTO db_task.task (customer_id, amount, description, lock_tx_id) VALUES (?, ?, ?, -1)");
+    $stmt = mysqli_prepare($connection, "INSERT INTO db_task.task (customer_id, amount, description) VALUES (?, ?, ?)");
     if (!$stmt) {
         add_error($connection, $db_errors);
         return false;
@@ -173,7 +173,7 @@ function dal_task_fetch_tasks_less_than_last_id_limit($callback, $user_id, $lock
     }
     $last_id_clause = $last_id === null ? '' : "AND id < $last_id";
 
-    $query = "SELECT id, timestampdiff(SECOND, now(), created_at), customer_id, performer_id, amount, description FROM db_task.task WHERE $lock_tx_id_clause AND not deleted AND $select_user_type <=> ? $last_id_clause ORDER BY id DESC LIMIT ?";
+    $query = "SELECT id, timestampdiff(SECOND, now(), created_at), customer_id, performer_id, amount, description, lock_tx_id FROM db_task.task WHERE $lock_tx_id_clause AND not deleted AND $select_user_type <=> ? $last_id_clause ORDER BY id DESC LIMIT ?";
     $stmt = mysqli_prepare($connection, $query);
     if (!$stmt) {
         add_error($connection, $db_errors);
@@ -189,7 +189,7 @@ function dal_task_fetch_tasks_less_than_last_id_limit($callback, $user_id, $lock
         add_error($connection, $db_errors);
         return false;
     }
-    if (!mysqli_stmt_bind_result($stmt, $id, $created_at, $customer_id, $performer_id, $amount, $description)) {
+    if (!mysqli_stmt_bind_result($stmt, $id, $created_at, $customer_id, $performer_id, $amount, $description, $lock_tx_id)) {
         add_error($connection, $db_errors);
         return false;
     }
@@ -202,7 +202,8 @@ function dal_task_fetch_tasks_less_than_last_id_limit($callback, $user_id, $lock
             CUSTOMER_ID => $customer_id,
             PERFORMER_ID => $performer_id,
             AMOUNT => $amount,
-            DESCRIPTION => $description
+            DESCRIPTION => $description,
+            'lock_tx_id' => $lock_tx_id
         ];
         call_user_func($callback, $task);
     }

@@ -76,3 +76,8 @@ function parse_user_client()
     else
         return substr($agent, 0, 255);
 }
+
+function is_task_active($task)
+{
+    return !array_key_exists('lock_tx_id', $task) || ($task['lock_tx_id'] == -1);
+}

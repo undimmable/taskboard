@@ -3,8 +3,9 @@ global $user;
 ?>
 
 
-<li class="task-feed-item media" data-id="<?php /** @noinspection PhpUndefinedVariableInspection */
-echo $task[ID] ?>">
+<li class="task-feed-item media<?php if (!is_task_active($task)) {
+    echo ' task-inactive';
+} ?>" data-id="<?php echo $task[ID] ?>">
     <a href="#" class="pull-left">
         <img class="avatar-img" src="/img/404.jpg" alt="">
     </a>

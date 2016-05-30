@@ -97,7 +97,7 @@ function api_task_get_last_n()
         $select_user_type = 'customer_id';
     } else {
         $select_user_type = 'performer_id';
-        $lock_tx_id_clause = "lock_tx_id IS NOT NULL AND task.lock_tx_id != -1";
+        $lock_tx_id_clause = "lock_tx_id != -1";
     }
     $tasks = dal_task_fetch_tasks_less_than_last_id_limit("api_render_task", $user_id, $lock_tx_id_clause, $select_user_type, $limit, $last_id);
     if (is_null($tasks)) {
