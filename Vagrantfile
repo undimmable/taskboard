@@ -23,20 +23,22 @@ Vagrant.configure(2) do |config|
     push.app = "taskboard-development"
   end
   config.vm.provision "mysql_dev", type: "shell", inline: <<-SHELL
+    export INSTALL_LOG=/var/log/taskboards-provisioning.log
     source /home/vagrant/config/env
-    service mysql stop
-    sed -i -e 's/127\.0\.0\.1/0\.0\.0\.0/g' /etc/mysql/my.cnf
-    ufw allow 3306
-    service mysql start
-    mysql --user=root --password=$MYSQL_PASS  -e "CREATE USER idea@'%' IDENTIFIED BY '123'"
-    mysql --user=root --password=$MYSQL_PASS  -e "GRANT ALL ON *.* TO idea@'%' IDENTIFIED BY '123'"
-    mysql --user=root --password=$MYSQL_PASS  -e "CREATE USER phpunit@'%' IDENTIFIED BY '123456'"
-    mysql --user=root --password=$MYSQL_PASS  -e "GRANT ALL ON *.* TO phpunit@'%' IDENTIFIED BY '123456'"
+    service mysql stop >> $INSTALL_LOG 2>&1
+    sed -i -e 's/127\.0\.0\.1/0\.0\.0\.0/g' /etc/mysql/my.cnf >> $INSTALL_LOG 2>&1
+    ufw allow 3306 >> $INSTALL_LOG 2>&1
+    service mysql start >> $INSTALL_LOG 2>&1
+    mysql --user=root --password=$MYSQL_PASS  -e "CREATE USER idea@'%' IDENTIFIED BY '123'"  >> $INSTALL_LOG 2>&1
+    mysql --user=root --password=$MYSQL_PASS  -e "GRANT ALL ON *.* TO idea@'%' IDENTIFIED BY '123'" >> $INSTALL_LOG 2>&1
+    mysql --user=root --password=$MYSQL_PASS  -e "CREATE USER phpunit@'%' IDENTIFIED BY '123456'" >> $INSTALL_LOG 2>&1
+    mysql --user=root --password=$MYSQL_PASS  -e "GRANT ALL ON *.* TO phpunit@'%' IDENTIFIED BY '123456'" >> $INSTALL_LOG 2>&1
   SHELL
   config.vm.provision "enable_xdebug", type: "shell", inline: <<-SHELL
+    export INSTALL_LOG=/var/log/taskboards-provisioning.log
     echo "xdebug.remote_enable=true" >> /etc/php5/mods-available/xdebug.ini
     echo "xdebug.profiler_enable=1" >> /etc/php5/mods-available/xdebug.ini
     echo "xdebug.remote_host=192.168.56.1" >> /etc/php5/mods-available/xdebug.ini
-    service php5-fpm restart
+    service php5-fpm restart >> $INSTALL_LOG 2>&1
   SHELL
 end
