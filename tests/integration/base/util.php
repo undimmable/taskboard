@@ -29,8 +29,7 @@ class Util
             "db_user.user" => "id",
             "db_tx.tx" => "id",
             "db_task.task" => "id",
-            "db_login.login" => "user_id",
-            "db_text_idx.text_idx" => "entity_id"
+            "db_login.login" => "user_id"
         ];
         try {
             foreach ($collect as $collect_db => $collect_column) {
