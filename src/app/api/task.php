@@ -198,7 +198,7 @@ function api_task_create()
         return;
     } else {
         send_index_event($task[ID], TASK_DESCRIPTION_IDX, $task[DESCRIPTION]);
-        $create_csrf = get_customer_task_create_csrf($user[ID], $task);
+        $create_csrf = get_customer_task_create_csrf($user[ID], $task[ID]);
         echo "<!--json-$create_csrf-json-->";
         __render_task($task);
         return;
