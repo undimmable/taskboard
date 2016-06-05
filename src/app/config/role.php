@@ -68,5 +68,5 @@ function auth_check_authorization($required_level)
 
 function auth_authorized($required_level, $role)
 {
-    return $role & $required_level != 0;
+    return ($role & $required_level) != 0;
 }

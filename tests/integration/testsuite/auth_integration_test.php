@@ -479,7 +479,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
     {
         $response = $this->api->request(
             'GET',
-            'auth/logout?XDEBUG_SESSION_START=PHPStorm_Remote',
+            'auth/logout',
             [
                 'cookies' => $this->jar
             ]
@@ -492,7 +492,13 @@ class AuthIntegrationTest extends ApiIntegrationTest
     public function testLogoutLoggedInReturnsRedirect()
     {
         $this->login('dummy@dummy.com', '123456');
-        $response = $this->api->request('GET', 'auth/logout', ['cookies' => $this->jar]);
+        $response = $this->api->request(
+            'GET',
+            'auth/logout',
+            [
+                'cookies' => $this->jar
+            ]
+        );
         $this->assertResponseOk($response);
         $this->assertCookiePresent(ApiIntegrationTest::$authorizationCookieName);
         $this->assertCookieHttpOnly(ApiIntegrationTest::$authorizationCookieName);
