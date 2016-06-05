@@ -1,6 +1,6 @@
 <?php
 
-require_once "../bootstrap.php";
+require_once "bootstrap.php";
 require_once "dal_helper.php";
 
 $login_connection = null;
@@ -55,7 +55,7 @@ function dal_login_fetch($user_id, $ip, $client)
         add_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "INSERT INTO db_login.login (user_id, ip, user_client) VALUES (?,?,?)");
+    $stmt = mysqli_prepare($connection, "SELECT id FROM db_login.login WHERE user_id=? AND ip=? AND user_client=?");
     if (!$stmt) {
         add_error($connection, $db_errors);
         return false;
@@ -69,6 +69,21 @@ function dal_login_fetch($user_id, $ip, $client)
         add_error($connection, $db_errors);
         return false;
     }
+    if (!mysqli_stmt_store_result($stmt)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (mysqli_stmt_num_rows($stmt) < 1) {
+        return null;
+    }
+    if (!mysqli_stmt_bind_result($stmt, $id, $usr_id)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (!mysqli_stmt_fetch($stmt)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
     if (!mysqli_stmt_close($stmt)) {
         add_error($connection, $db_errors);
         return false;
@@ -76,7 +91,6 @@ function dal_login_fetch($user_id, $ip, $client)
     if (mysqli_errno($connection) !== 0) {
         return false;
     }
-    $id = mysqli_insert_id($connection);
     return $id;
 }
 
