@@ -1,7 +1,21 @@
+.navbar-nav>li>a {
+    padding-top: 13px;
+    padding-bottom: 13px;
+}
+
 .navbar-brand.logo {
-    background: url('/icons/favicon-96x96.png') no-repeat center;
-    background-size: 32px 32px;
-    width: 40px;
+    /*background: url('/icons/favicon-96x96.png') no-repeat center;*/
+    /*background-size: 32px 32px;*/
+    /*width: 40px;*/
+    padding-top: 12px;
+    padding-bottom: 18px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.btn-270 {
+    padding-top: 11px;
+    padding-bottom: 15px;
 }
 
 .feed-wrapper .panel-body {
@@ -28,6 +42,10 @@
     -ms-transform: rotate(270deg);
     -o-transform: rotate(270deg);
     transform: rotate(270deg);
+    padding-top: 2px;
+    padding-bottom: -2px;
+    padding-left: 0px;
+    padding-right: 0px;
 }
 
 .glyphicon.spinning {
