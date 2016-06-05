@@ -34,8 +34,8 @@ abstract class ApiIntegrationTest extends \PHPUnit_Framework_TestCase
         $this->util = new Util($this->mysqli);
         $this->jar = new CookieJar();
         $this->api = new Client([
-            'connect_timeout' => 30,
-            'timeout' => 30,
+            'connect_timeout' => 60,
+            'timeout' => 60,
             'http_errors' => false,
             'base_uri' => getenv('HOST') . '/api/v1/',
             'cookies' => true,
@@ -53,6 +53,7 @@ abstract class ApiIntegrationTest extends \PHPUnit_Framework_TestCase
         $credentials = [
             'email' => $email,
             'password' => $password,
+            'remember_me' => 'on',
             'csrf_token' => '9'
         ];
         $this->api->request(
@@ -67,6 +68,7 @@ abstract class ApiIntegrationTest extends \PHPUnit_Framework_TestCase
             ]
         );
         $this->assertCookiePresent(ApiIntegrationTest::$authorizationCookieName);
+        $this->assertCookieNotDeleted(ApiIntegrationTest::$authorizationCookieName);
     }
 
     /**
@@ -177,6 +179,14 @@ abstract class ApiIntegrationTest extends \PHPUnit_Framework_TestCase
     protected function assertCookieDeleted($cookieName)
     {
         $this->assertEquals("deleted", $this->getCookie($cookieName)->getValue());
+    }
+
+    /**
+     * @param $cookieName \string
+     */
+    protected function assertCookieNotDeleted($cookieName)
+    {
+        $this->assertNotEquals("deleted", $this->getCookie($cookieName)->getValue());
     }
 
     /**
