@@ -9,6 +9,9 @@ namespace integration\testsuite;
 
 use Taskboards\ApiIntegrationTest;
 
+require_once 'config/constants.php';
+require_once 'config/role.php';
+
 class TaskIntegrationTest extends ApiIntegrationTest
 {
     /**
@@ -27,9 +30,9 @@ class TaskIntegrationTest extends ApiIntegrationTest
     public function setUp()
     {
         parent::setUp();
-        $system_id = $this->util->createUser("system@dummy.com", "123456", 1, false);
-        $customer_id = $this->util->createUser("customer@dummy.com", "123456", 2, false);
-        $performer_id = $this->util->createUser("performer@dummy.com", "123456", 3, false);
+        $system_id = $this->util->createUser("system@dummy.com", "123456", get_role_key(SYSTEM), false);
+        $customer_id = $this->util->createUser("customer@dummy.com", "123456", get_role_key(CUSTOMER), false);
+        $performer_id = $this->util->createUser("performer@dummy.com", "123456", get_role_key(PERFORMER), false);
         $this->util->createAccount($system_id, 100.0, 100.0);
         $this->util->createAccount($customer_id, 100.0, 100.0);
         $this->util->createAccount($performer_id, 100.0, 100.0);
