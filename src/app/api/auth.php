@@ -33,6 +33,14 @@ $routes = [
     'DELETE' => []
 ];
 
+$authorization = [
+    'api_auth_login_action' => auth_unauthenticated(),
+    'api_auth_signup_action' => auth_unauthenticated(),
+    'api_auth_verify_action' => auth_unauthenticated(),
+    'api_auth_logout_action' => auth_any_authenticated(),
+    'api_auth_signup_vk_action' => auth_unauthenticated()
+];
+
 function __validate_signup_input($email, $role, $password, $password_repeat, $csrf)
 {
     $validation_context = initialize_validation_context();
@@ -63,19 +71,11 @@ function __validate_login_input($email, $password, $csrf)
 
 function api_auth_login_action()
 {
-    if (is_authorized()) {
-        render_forbidden();
-        return;
-    }
-    $data = null;
-    if (is_request_www_form()) {
-        $data = $_POST;
-    } elseif (is_request_json()) {
-        $data = json_decode(file_get_contents('php://input'), true);
-    } else {
+    if (!is_request_json()) {
         render_unsupported_media_type();
         return;
     }
+    $data = json_decode(file_get_contents('php://input'), true);
     $email = $data[EMAIL];
     $password = $data[PASSWORD];
     $remember_me = is_checked($data[REMEMBER_ME]);
@@ -99,6 +99,7 @@ function api_auth_login_action()
         ]);
         return;
     }
+    dal_login_create_or_update($user, $ip, $client);
     $token = create_jwt_token($user[EMAIL], $user[ROLE], $user[ID]);
     set_token_cookie($token, !$remember_me);
     render_ok_json([
@@ -108,26 +109,15 @@ function api_auth_login_action()
 
 function api_auth_signup_action()
 {
-    if (is_authorized()) {
-        render_forbidden();
+    if (!is_request_json()) {
+        render_unsupported_media_type();
         return;
     }
-    $email = $is_customer = $password = $password_repeat = null;
-    $csrf = null;
-    if (is_request_www_form()) {
-        $email = $_POST[EMAIL];
-        $is_customer = $_POST[IS_CUSTOMER];
-        $password = $_POST[PASSWORD];
-        $password_repeat = $_POST[PASSWORD_REPEAT];
-    } elseif (is_request_json()) {
-        $data = json_decode(file_get_contents('php://input'), true);
-        $email = $data[EMAIL];
-        $is_customer = $data[IS_CUSTOMER];
-        $password = $data[PASSWORD];
-        $password_repeat = $data[PASSWORD_REPEAT];
-    } else {
-        render_unsupported_media_type();
-    }
+    $data = json_decode(file_get_contents('php://input'), true);
+    $email = $data[EMAIL];
+    $is_customer = $data[IS_CUSTOMER];
+    $password = $data[PASSWORD];
+    $password_repeat = $data[PASSWORD_REPEAT];
     if (is_checked($is_customer)) {
         $role = get_role_key(CUSTOMER);
     } else {
@@ -159,17 +149,13 @@ function api_auth_signup_action()
 
 function api_auth_logout_action()
 {
-    if (is_authorized()) {
-        delete_token_cookie();
-        https_redirect("/");
-    } else {
-        render_not_authorized_json();
-    }
+    delete_token_cookie();
+    https_redirect("/");
 }
 
 function api_auth_verify_action()
 {
-    if (isset($_GET[CONFIRMATION_TOKEN])) {
+    if (array_key_exists(CONFIRMATION_TOKEN, $_GET)) {
         $user = verify_user($_GET[CONFIRMATION_TOKEN]);
         if (!is_null($user)) {
             $token = create_jwt_token($user[EMAIL], $user[ROLE], $user[ID]);
@@ -183,4 +169,4 @@ function api_auth_verify_action()
     }
 }
 
-route_request($routes);
+route_request($routes, $authorization);

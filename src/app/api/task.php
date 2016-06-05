@@ -13,11 +13,19 @@ $routes = [
         '/\d+/' => 'api_task_get_by_id'
     ],
     PUT => [
-        '/\d+/' => 'api_task_update_by_id'
+        'perform' => 'api_task_perform'
     ],
     DELETE => [
         '/\d+/' => 'api_task_delete_by_id'
     ]
+];
+
+$authorization = [
+    'api_task_create' => get_role_key(CUSTOMER),
+    'api_task_get_last_n' => get_role_key(PERFORMER) + get_role_key(CUSTOMER) + get_role_key(SYSTEM),
+    'api_task_get_by_id' => get_role_key(CUSTOMER),
+    'api_task_perform' => get_role_key(PERFORMER),
+    'api_task_delete_by_id' => get_role_key(CUSTOMER)
 ];
 
 
@@ -83,10 +91,6 @@ function api_task_get_by_id($task_id)
 
 function api_task_get_last_n()
 {
-    if (!is_authorized()) {
-        render_not_authorized_json();
-        return;
-    }
     $user = get_authorized_user();
     $user_id = null;
     $select_user_type = null;
@@ -109,31 +113,19 @@ function api_task_get_last_n()
     }
 }
 
-function api_task_update_by_id($id, $task)
+function api_task_perform()
 {
-    echo $task;
-    echo $id;
+//    $user = get_authorized_user();
 }
 
 function api_task_create()
 {
-    if (!is_authorized()) {
-        render_not_authorized_json();
-        return;
-    }
-    $user = get_authorized_user();
-    if (!is_customer($user[ROLE])) {
-        render_forbidden();
-        return;
-    }
-    if (is_request_www_form()) {
-        $data = $_POST;
-    } elseif (is_request_json()) {
-        $data = json_decode(file_get_contents('php://input'), true);
-    } else {
+    if (!is_request_json()) {
         render_unsupported_media_type();
         return;
     }
+    $user = get_authorized_user();
+    $data = json_decode(file_get_contents('php://input'), true);
     $customer_id = $user[ID];
     $amount = $data[AMOUNT];
     $description = $data[DESCRIPTION];
@@ -174,7 +166,7 @@ function api_task_create()
         return;
     } else {
         send_index_event($task[ID], TASK_DESCRIPTION_IDX, $task[DESCRIPTION]);
-        api_render_task($task);
+        __render_task($task);
         return;
     }
 }
@@ -182,15 +174,7 @@ function api_task_create()
 
 function api_task_delete_by_id($task_id)
 {
-    if (!is_authorized()) {
-        render_not_authorized_json();
-        return;
-    }
     $user = get_authorized_user();
-    if (!is_customer(get_authorized_user()[ROLE])) {
-        render_forbidden();
-        return;
-    }
     $customer_id = $user[ID];
     $csrf = parse_csrf_token_header();
     $validation_context = initialize_validation_context();
@@ -212,11 +196,11 @@ function api_task_delete_by_id($task_id)
     return;
 }
 
-function api_render_task($task)
+function __render_task($task)
 {
     global $current_task;
     $current_task = $task;
     require 'view/templates/task.html.php';
 }
 
-route_request($routes);
+route_request($routes, $authorization);

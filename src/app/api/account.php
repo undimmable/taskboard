@@ -18,6 +18,11 @@ $routes = [
     'DELETE' => []
 ];
 
+$authorization = [
+    'api_get_balance' => get_role_key(SYSTEM) + get_role_key(CUSTOMER) + get_role_key(PERFORMER),
+    'api_refill_balance' => get_role_key(CUSTOMER)
+];
+
 function __validate_amount($amount, &$validation_context)
 {
     if (is_null($amount)) {
@@ -54,10 +59,6 @@ function __validate_account_input($amount, $csrf)
 
 function api_get_balance()
 {
-    if (!is_authorized()) {
-        render_not_authorized_json();
-        return;
-    }
     $user_id = get_authorized_user()[ID];
     $balance = payment_fetch_balance($user_id);
     if (!$balance) {
@@ -69,27 +70,20 @@ function api_get_balance()
 
 function api_refill_balance()
 {
-    if (!is_authorized()) {
-        render_not_authorized_json();
-        return;
-    }
     $user = get_authorized_user();
     if (!is_customer($user[ROLE])) {
         render_forbidden();
         return;
     }
-    if (is_request_www_form()) {
-        $data = $_POST;
-    } elseif (is_request_json()) {
-        $data = json_decode(file_get_contents('php://input'), true);
-    } else {
+    if (!is_request_json()) {
         render_unsupported_media_type();
         return;
     }
+    $data = json_decode(file_get_contents('php://input'), true);
     $customer_id = $user[ID];
     $amount = $data[AMOUNT];
     $csrf = parse_csrf_token_header();
-    if(!__validate_amount($amount, $csrf)) {
+    if (!__validate_amount($amount, $csrf)) {
         return;
     }
     $updated = payment_refill_balance($customer_id, $amount);
@@ -101,5 +95,4 @@ function api_refill_balance()
     }
 }
 
-route_request($routes);
-    
+route_request($routes, $authorization);
