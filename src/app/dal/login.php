@@ -14,7 +14,9 @@ function get_login_connection()
     return $login_connection;
 }
 
-function dal_login_create($user_id, $ip, $client)
+
+
+function dal_login_create_or_update($user_id, $ip, $client)
 {
     $db_errors = initialize_db_errors();
     $connection = get_login_connection();
@@ -22,13 +24,13 @@ function dal_login_create($user_id, $ip, $client)
         add_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "INSERT INTO db_login.login (user_id, ip, user_client, last_login) VALUES (?,?,?, now())");
+    $stmt = mysqli_prepare($connection, "INSERT INTO db_login.login (user_id, ip, user_client) VALUES (?,?,?) ON DUPLICATE KEY UPDATE user_id=?, failed_attepts = 0, last_login=now()");
     if (!$stmt) {
         add_error($connection, $db_errors);
         return false;
     }
     /** @noinspection PhpMethodParametersCountMismatchInspection */
-    if (!mysqli_stmt_bind_param($stmt, 'iss', $user_id, $ip, $client)) {
+    if (!mysqli_stmt_bind_param($stmt, 'issi', $user_id, $ip, $client, $user_id)) {
         add_error($connection, $db_errors);
         return false;
     }
