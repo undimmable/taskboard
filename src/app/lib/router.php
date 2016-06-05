@@ -15,10 +15,7 @@ function route_request($routes, $authorization = null)
             if (function_exists($func_name)) {
                 if (array_key_exists($func_name, $authorization)) {
                     try_authenticate_from_cookie();
-                    $auth = auth_check_authorization($authorization[$func_name]);
-                    if (is_null($auth))
-                        render_not_authorized_json();
-                    else if (!$auth)
+                    if (!auth_check_authorization($authorization[$func_name]))
                         render_forbidden();
                     else
                         call_user_func($func_name);
@@ -36,10 +33,7 @@ function route_request($routes, $authorization = null)
                 if (function_exists($func_name)) {
                     if (array_key_exists($func_name, $authorization)) {
                         try_authenticate_from_cookie();
-                        $auth = auth_check_authorization($authorization[$func_name]);
-                        if (is_null($auth))
-                            render_not_authorized_json();
-                        else if (!$auth)
+                        if (!auth_check_authorization($authorization[$func_name]))
                             render_forbidden();
                         else
                             call_user_func($func_name, $id);

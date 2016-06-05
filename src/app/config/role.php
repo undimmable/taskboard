@@ -56,7 +56,7 @@ function auth_check_authorization($required_level)
         if ($required_level === 0)
             return true;
         else
-            return null;
+            return false;
     } else {
         if ($required_level === 0)
             return false;
