@@ -55,10 +55,17 @@ abstract class ApiIntegrationTest extends \PHPUnit_Framework_TestCase
             'password' => $password,
             'csrf_token' => '9'
         ];
-        $this->api->request('POST', 'auth/login', ['json' => $credentials, 'headers' => [
-            'X-CSRF-TOKEN' => 9
-        ], 'cookies' => $this->jar
-        ]);
+        $this->api->request(
+            'POST',
+            'auth/login',
+            [
+                'json' => $credentials,
+                'headers' => [
+                    'X-CSRF-TOKEN' => 9
+                ],
+                'cookies' => $this->jar
+            ]
+        );
         $this->assertCookiePresent(ApiIntegrationTest::$authorizationCookieName);
     }
 
