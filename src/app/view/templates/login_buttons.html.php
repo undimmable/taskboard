@@ -4,7 +4,7 @@
     </a>
 </li>
 <li>
-    <a type="button" class="btn btn-lg btn-link" data-toggle="modal" data-target="#signup-form-modal">
+    <a type="button" class="btn btn-lg btn-link  btn-270" data-toggle="modal" data-target="#signup-form-modal">
         <i class="glyphicon glyphicon-log-in glyphicon-270"></i> Sign Up
     </a>
 </li>
