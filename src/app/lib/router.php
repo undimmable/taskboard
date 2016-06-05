@@ -1,6 +1,6 @@
 <?php
 
-function route_request($routes)
+function route_request($routes, $authorization = null)
 {
     ob_start();
     $rendered = false;
@@ -11,18 +11,44 @@ function route_request($routes)
 
     if (!is_null($path_param)) {
         if (array_key_exists($path_param, $routes[$request_method])) {
-            if (function_exists($routes[$request_method][$path_param])) {
-                try_authorize_from_cookie();
-                call_user_func($routes[$request_method][$path_param]);
-                $rendered = true;
+            $func_name = $routes[$request_method][$path_param];
+            if (function_exists($func_name)) {
+                if (array_key_exists($func_name, $authorization)) {
+                    try_authenticate_from_cookie();
+                    $auth = auth_check_authorization($authorization[$func_name]);
+                    if (is_null($auth))
+                        render_not_authorized_json();
+                    else if (!$auth)
+                        render_forbidden();
+                    else
+                        call_user_func($func_name);
+                    $rendered = true;
+                } else {
+                    error_log(sprintf("Function %s exists but no authorization defined", $func_name));
+                }
+            } else {
+                error_log(sprintf("Function %s not exists", $func_name));
             }
         } else if (array_key_exists('/\d+/', $routes[$request_method])) {
             if (preg_match('/\d+/', $path_param)) {
                 $id = $path_param;
-                if (function_exists($routes[$request_method]['/\d+/'])) {
-                    try_authorize_from_cookie();
-                    call_user_func($routes[$request_method]['/\d+/'], $id);
-                    $rendered = true;
+                $func_name = $routes[$request_method]['/\d+/'];
+                if (function_exists($func_name)) {
+                    if (array_key_exists($func_name, $authorization)) {
+                        try_authenticate_from_cookie();
+                        $auth = auth_check_authorization($authorization[$func_name]);
+                        if (is_null($auth))
+                            render_not_authorized_json();
+                        else if (!$auth)
+                            render_forbidden();
+                        else
+                            call_user_func($func_name, $id);
+                        $rendered = true;
+                    } else {
+                        error_log(sprintf("Function %s exists but no authorization defined", $func_name));
+                    }
+                } else {
+                    error_log(sprintf("Function %s not exists", $func_name));
                 }
             }
         }

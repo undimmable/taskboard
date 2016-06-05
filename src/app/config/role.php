@@ -1,6 +1,6 @@
 <?php
 
-$roles = array(1 => SYSTEM, 2 => CUSTOMER, 3 => PERFORMER);
+$roles = array(1 => SYSTEM, 2 => CUSTOMER, 4 => PERFORMER);
 $roles_reversed = array_flip($roles);
 
 function get_role_value($key)
@@ -37,4 +37,36 @@ function is_performer($key)
 {
     global $roles_reversed;
     return $key === $roles_reversed[PERFORMER];
+}
+
+function auth_unauthenticated()
+{
+    return 0;
+}
+
+function auth_any_authenticated()
+{
+    return 1 + 2 + 4;
+}
+
+function auth_check_authorization($required_level)
+{
+    $user = get_authorized_user();
+    if (is_null($user)) {
+        if ($required_level === 0)
+            return true;
+        else
+            return null;
+    } else {
+        if ($required_level === 0)
+            return false;
+        else {
+            return auth_authorized($required_level, $user[ROLE]);
+        }
+    }
+}
+
+function auth_authorized($required_level, $role)
+{
+    return $role & $required_level != 0;
 }
