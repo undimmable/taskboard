@@ -26,7 +26,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'csrf_token' => '8',
             'is_customer' => 'on'
         ];
-        $response = $this->api->post('auth/signup', ['form_params' => $credentials, 'headers' => [
+        $response = $this->api->post('auth/signup?XDEBUG_SESSION_START=PHPStorm_Remote', ['json' => $credentials, 'headers' => [
             'X-CSRF-TOKEN' => 8
         ]]);
         $this->assertResponseForbidden($response);
@@ -41,7 +41,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'password' => '123456',
             'csrf_token' => '9',
         ];
-        $response = $this->api->post('auth/login', ['form_params' => $credentials, 'headers' => [
+        $response = $this->api->post('auth/login', ['json' => $credentials, 'headers' => [
             'X-CSRF-TOKEN' => 9
         ]]);
         $this->assertResponseForbidden($response);
@@ -57,7 +57,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'csrf_token' => '8',
             'is_customer' => 'on'
         ];
-        $response = $this->api->post('auth/signup', ['form_params' => $credentials, 'headers' => [
+        $response = $this->api->post('auth/signup', ['json' => $credentials, 'headers' => [
             'X-CSRF-TOKEN' => 8
         ]]);
         $this->assertResponseConflict($response);
@@ -74,7 +74,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'csrf_token' => '0',
             'is_customer' => 'on'
         ];
-        $response = $this->api->post('auth/signup', ['form_params' => $credentials, 'headers' => [
+        $response = $this->api->post('auth/signup', ['json' => $credentials, 'headers' => [
             'X-CSRF-TOKEN' => 0
         ]]);
         $this->assertResponseBadRequest($response);
@@ -90,7 +90,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'csrf_token' => '8',
             'is_customer' => 'on'
         ];
-        $response = $this->api->post('auth/signup', ['form_params' => $credentials, 'headers' => [
+        $response = $this->api->post('auth/signup', ['json' => $credentials, 'headers' => [
             'X-CSRF-TOKEN' => 8
         ]]);
         $this->assertResponseBadRequest($response);
@@ -105,7 +105,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'csrf_token' => '8',
             'is_customer' => 'on'
         ];
-        $response = $this->api->post('auth/signup', ['form_params' => $credentials, 'headers' => [
+        $response = $this->api->post('auth/signup', ['json' => $credentials, 'headers' => [
             'X-CSRF-TOKEN' => 8
         ]]);
         $this->assertResponseBadRequest($response);
@@ -122,7 +122,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'csrf_token' => '8',
             'is_customer' => 'on'
         ];
-        $response = $this->api->post('auth/signup', ['form_params' => $credentials, 'headers' => [
+        $response = $this->api->post('auth/signup', ['json' => $credentials, 'headers' => [
             'X-CSRF-TOKEN' => 8
         ]]);
         $this->assertResponseBadRequest($response);
@@ -138,7 +138,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'csrf_token' => '8',
             'is_customer' => 'on'
         ];
-        $response = $this->api->post('auth/signup', ['form_params' => $credentials, 'headers' => [
+        $response = $this->api->post('auth/signup', ['json' => $credentials, 'headers' => [
             'X-CSRF-TOKEN' => 8
         ]]);
         $this->assertResponseBadRequest($response);
@@ -155,7 +155,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'csrf_token' => '8',
             'is_customer' => 'on'
         ];
-        $response = $this->api->post('auth/signup', ['form_params' => $credentials, 'headers' => [
+        $response = $this->api->post('auth/signup', ['json' => $credentials, 'headers' => [
             'X-CSRF-TOKEN' => 8
         ]]);
         $this->assertResponseBadRequest($response);
@@ -172,7 +172,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'csrf_token' => '8',
             'is_customer' => 'on'
         ];
-        $response = $this->api->post('auth/signup', ['form_params' => $credentials, 'headers' => [
+        $response = $this->api->post('auth/signup', ['json' => $credentials, 'headers' => [
             'X-CSRF-TOKEN' => 8
         ]]);
         $this->assertResponseBadRequest($response);
@@ -188,7 +188,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'password_repeat' => '123456',
             'is_customer' => 'on'
         ];
-        $response = $this->api->post('auth/signup', ['form_params' => $credentials]);
+        $response = $this->api->post('auth/signup', ['json' => $credentials]);
         $this->assertResponseBadRequest($response);
         $this->assertResponseError($response, "signup_csrf_token", "wrong");
         $this->assertNoCookie(AuthIntegrationTest::$authorizationCookieName);
@@ -203,7 +203,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'csrf_token' => '8',
             'is_customer' => 'on'
         ];
-        $response = $this->api->post('auth/signup', ['form_params' => $credentials, 'headers' => [
+        $response = $this->api->post('auth/signup', ['json' => $credentials, 'headers' => [
             'X-CSRF-TOKEN' => 8
         ]]);
         $this->assertResponseOk($response);
@@ -220,7 +220,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'password' => '123456',
             'csrf_token' => '9'
         ];
-        $response = $this->api->post('auth/login', ['form_params' => $credentials, 'headers' => [
+        $response = $this->api->post('auth/login', ['json' => $credentials, 'headers' => [
             'X-CSRF-TOKEN' => 9
         ]]);
         $this->assertResponseOk($response);
@@ -237,7 +237,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'password' => '123456',
             'csrf_token' => '9'
         ];
-        $response = $this->api->post('auth/login', ['form_params' => $credentials, 'headers' => [
+        $response = $this->api->post('auth/login', ['json' => $credentials, 'headers' => [
             'X-CSRF-TOKEN' => 9
         ]]);
         $this->assertResponseUnauthorized($response);
@@ -252,7 +252,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'password' => '123456',
             'csrf_token' => '5'
         ];
-        $response = $this->api->post('auth/login', ['form_params' => $credentials, 'headers' => [
+        $response = $this->api->post('auth/login', ['json' => $credentials, 'headers' => [
             'X-CSRF-TOKEN' => 5
         ]]);
         $this->assertResponseBadRequest($response);
@@ -266,7 +266,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'email' => 'dummy@dummy.com',
             'password' => '123456'
         ];
-        $response = $this->api->post('auth/login', ['form_params' => $credentials]);
+        $response = $this->api->post('auth/login', ['json' => $credentials]);
         $this->assertResponseBadRequest($response);
         $this->assertResponseError($response, "login_csrf_token", "wrong");
         $this->assertNoCookie(AuthIntegrationTest::$authorizationCookieName);
@@ -279,7 +279,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'password' => '123456',
             'csrf_token' => '5'
         ];
-        $response = $this->api->post('auth/login', ['form_params' => $credentials, 'headers' => [
+        $response = $this->api->post('auth/login', ['json' => $credentials, 'headers' => [
             'X-CSRF-TOKEN' => 5
         ]]);
         $this->assertResponseBadRequest($response);
@@ -293,7 +293,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'password' => '123456',
             'csrf_token' => '9'
         ];
-        $response = $this->api->post('auth/login', ['form_params' => $credentials, 'headers' => [
+        $response = $this->api->post('auth/login', ['json' => $credentials, 'headers' => [
             'X-CSRF-TOKEN' => 9
         ]]);
         $this->assertResponseBadRequest($response);
@@ -307,7 +307,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             'email' => 'missing@dummy.com',
             'csrf_token' => '9'
         ];
-        $response = $this->api->post('auth/login', ['form_params' => $credentials, 'headers' => [
+        $response = $this->api->post('auth/login', ['json' => $credentials, 'headers' => [
             'X-CSRF-TOKEN' => 9
         ]]);
         $this->assertResponseBadRequest($response);
@@ -320,7 +320,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
         $credentials = [
             'csrf_token' => '9'
         ];
-        $response = $this->api->post('auth/login', ['form_params' => $credentials, 'headers' => [
+        $response = $this->api->post('auth/login', ['json' => $credentials, 'headers' => [
             'X-CSRF-TOKEN' => 9
         ]]);
         $this->assertResponseBadRequest($response);

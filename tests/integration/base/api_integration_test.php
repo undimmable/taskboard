@@ -33,8 +33,8 @@ abstract class ApiIntegrationTest extends \PHPUnit_Framework_TestCase
         $this->util = new Util($this->mysqli);
         $this->jar = new CookieJar();
         $this->api = new Client([
-            'connect_timeout' => 10,
-            'timeout' => 10,
+            'connect_timeout' => 30,
+            'timeout' => 30,
             'http_errors' => false,
             'base_uri' => getenv('HOST') . '/api/v1/',
             'cookie' => true,
@@ -55,7 +55,7 @@ abstract class ApiIntegrationTest extends \PHPUnit_Framework_TestCase
             'password' => $password,
             'csrf_token' => '9'
         ];
-        $this->api->post('auth/login', ['form_params' => $credentials, 'headers' => [
+        $this->api->post('auth/login?XDEBUG_SESSION_START=PHPStorm_Remote', ['json' => $credentials, 'headers' => [
             'X-CSRF-TOKEN' => 9
         ]]);
     }

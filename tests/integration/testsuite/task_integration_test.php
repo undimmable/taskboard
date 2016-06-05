@@ -45,7 +45,7 @@ class TaskIntegrationTest extends ApiIntegrationTest
             'amount' => 10.00,
             'csrf_token' => '10'
         ];
-        $response = $this->api->post('task', ['form_params' => $task, 'headers' => [
+        $response = $this->api->post('task', ['json' => $task, 'headers' => [
             'X-CSRF-TOKEN' => 10
         ]]);
         $this->assertResponseUnauthorized($response);
@@ -60,7 +60,7 @@ class TaskIntegrationTest extends ApiIntegrationTest
             'amount' => 10.00,
             'csrf_token' => '10'
         ];
-        $response = $this->api->post('task', ['form_params' => $task, 'headers' => [
+        $response = $this->api->post('task', ['json' => $task, 'headers' => [
             'X-CSRF-TOKEN' => 10
         ]]);
         $this->assertResponseForbidden($response);
@@ -75,7 +75,7 @@ class TaskIntegrationTest extends ApiIntegrationTest
             'amount' => 10.00,
             'csrf_token' => '10'
         ];
-        $response = $this->api->post('task', ['form_params' => $task, 'headers' => [
+        $response = $this->api->post('task', ['json' => $task, 'headers' => [
             'X-CSRF-TOKEN' => 10
         ]]);
         $this->assertResponseForbidden($response);
@@ -90,7 +90,7 @@ class TaskIntegrationTest extends ApiIntegrationTest
             'amount' => 1000.00,
             'csrf_token' => '10'
         ];
-        $response = $this->api->post('task', ['form_params' => $task, 'headers' => [
+        $response = $this->api->post('task', ['json' => $task, 'headers' => [
             'X-CSRF-TOKEN' => 10
         ]]);
         $this->assertResponseConflict($response);
