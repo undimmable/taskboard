@@ -15,7 +15,6 @@ function get_login_connection()
 }
 
 
-
 function dal_login_create_or_update($user_id, $ip, $client)
 {
     $db_errors = initialize_db_errors();
@@ -45,8 +44,7 @@ function dal_login_create_or_update($user_id, $ip, $client)
     if (mysqli_errno($connection) !== 0) {
         return false;
     }
-    $id = mysqli_insert_id($connection);
-    return $id;
+    return true;
 }
 
 function dal_login_fetch($user_id, $ip, $client)
@@ -78,7 +76,7 @@ function dal_login_fetch($user_id, $ip, $client)
     if (mysqli_stmt_num_rows($stmt) < 1) {
         return null;
     }
-    if (!mysqli_stmt_bind_result($stmt, $id, $usr_id)) {
+    if (!mysqli_stmt_bind_result($stmt, $id)) {
         add_error($connection, $db_errors);
         return false;
     }
