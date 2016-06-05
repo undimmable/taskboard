@@ -41,12 +41,5 @@ return [
         'user' => 'user_user',
         'password' => 'rplc_user_password',
         'database' => 'db_user'
-    ],
-    'user_info' => [
-        'host' => 'rplc_user_info_host',
-        'port' => 3306,
-        'user' => 'user_user_info',
-        'password' => 'rplc_user_info_password',
-        'database' => 'db_user_info'
     ]
 ];

@@ -1,45 +1,45 @@
 <?php
 return [
-    'task' => [
-        'host' => 'taskboard.dev',
-        'port' => 3306,
-        'user' => 'user_task',
-        'password' => '123',
-        'database' => 'db_task'
-    ],
-    'performer' => [
-        'host' => 'taskboard.dev',
-        'port' => 3306,
-        'user' => 'user_performer',
-        'password' => '123',
-        'database' => 'db_performer'
-    ],
-    'customer' => [
-        'host' => 'taskboard.dev',
-        'port' => 3306,
-        'user' => 'user_customer',
-        'password' => '123',
-        'database' => 'db_customer'
-    ],
     'account' => [
-        'host' => 'taskboard.dev',
+        'host' => 'rplc_account_host',
         'port' => 3306,
         'user' => 'user_account',
-        'password' => '123',
+        'password' => 'rplc_account_password',
         'database' => 'db_account'
     ],
-    'system' => [
-        'host' => 'taskboard.dev',
-        'port' => 3306,
-        'user' => 'user_system',
-        'password' => '123',
-        'database' => 'db_system'
-    ],
     'login' => [
-        'host' => 'taskboard.dev',
+        'host' => 'rplc_login_host',
         'port' => 3306,
         'user' => 'user_login',
-        'password' => '123',
-        'database' => 'db_login',
+        'password' => 'rplc_login_password',
+        'database' => 'db_login'
+    ],
+    'task' => [
+        'host' => 'rplc_task_host',
+        'port' => 3306,
+        'user' => 'user_task',
+        'password' => 'rplc_task_password',
+        'database' => 'db_task'
+    ],
+    'text_idx' => [
+        'host' => 'rplc_text_idx_host',
+        'port' => 3306,
+        'user' => 'user_text_idx',
+        'password' => 'rplc_text_idx_password',
+        'database' => 'db_text_idx'
+    ],
+    'tx' => [
+        'host' => 'rplc_tx_host',
+        'port' => 3306,
+        'user' => 'user_tx',
+        'password' => 'rplc_tx_password',
+        'database' => 'db_tx'
+    ],
+    'user' => [
+        'host' => 'rplc_user_host',
+        'port' => 3306,
+        'user' => 'user_user',
+        'password' => 'rplc_user_password',
+        'database' => 'db_user'
     ]
 ];
