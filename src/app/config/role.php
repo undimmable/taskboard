@@ -46,7 +46,7 @@ function auth_unauthenticated()
 
 function auth_any_authenticated()
 {
-    return 1 + 2 + 4;
+    return get_role_key(SYSTEM) + get_role_key(CUSTOMER) + get_role_key(PERFORMER);
 }
 
 function auth_check_authorization($required_level)
