@@ -17,5 +17,3 @@ require_once "security/force_https.php";
 require_once "security/jwt.php";
 require_once "security/token_auth.php";
 require_once "view/view_helper.php";
-
-try_authorize_from_cookie();
