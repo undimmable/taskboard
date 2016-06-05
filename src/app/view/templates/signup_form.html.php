@@ -34,7 +34,7 @@
                                    class="btn btn-primary btn-lg">
                         </label>
                     </div>
-                    <input type="hidden" id="csrf_token" name="csrf_token"/>
+                    <input type="hidden" id="csrf_token" name="csrf_token" value="<?php echo get_signup_csrf(); ?>"/>
                     <div class="form-group">
                         <button class="btn btn-primary btn-lg btn-block btn-default btn-270">
                             <i class="glyphicon glyphicon-log-in glyphicon-270" aria-hidden="true"

@@ -7,9 +7,8 @@ function Taskboard($) {
     var localization = null;
     var feed = null;
     var role = null;
-    var performerRole = 3;
+    var performerRole = 4;
     var customerRole = 2;
-    var systemRole = 1;
     var unauthorizedRole = 0;
     var timestampRefreshPeriod = 60000;
     this.initialized = false;
@@ -77,10 +76,13 @@ function Taskboard($) {
                 data: feed.buildQuery(limit),
                 contentType: 'text/html; charset=UTF-8',
                 type: "GET",
-                success: function (response, status) {
+                success: function (response) {
                     feed.hideLoading();
                     feed.loading = false;
-                    if (status == "nocontent") {
+                    if (role == customerRole && (feed.lastTaskId == null || feed.lastTaskId == -1)) {
+                        response = taskboardApplication.replaceToken(response);
+                    }
+                    if (response == "") {
                         feed.noMoreContent();
                         feed.lastTaskId = -1;
                     } else {
@@ -191,14 +193,6 @@ function Taskboard($) {
         }
     };
 
-    this.delay = (function () {
-        var timer = 0;
-        return function (callback, ms) {
-            clearTimeout(timer);
-            timer = setTimeout(callback, ms);
-        };
-    })();
-
     this.initializeListeners = function () {
         $('#btn-logout').click(function () {
             window.location = "/api/v1/auth/logout";
@@ -212,6 +206,17 @@ function Taskboard($) {
                 $(this).removeClass('has-error');
             });
         });
+    };
+
+    this.replaceToken = function (html) {
+        var jsonStart = '<!--json-';
+        var jsonEnd = '-json-->';
+        if (html.indexOf(jsonStart) > -1) {
+            var jsonEndIndex = html.indexOf(jsonEnd);
+            var token = html.substr(jsonStart.length, jsonEndIndex - jsonEnd.length - 1);
+            $('#task-form').find('input[name=csrf_token]').val(token);
+            return html.substr(jsonEndIndex + jsonEnd.length);
+        }
     };
 
     this.currentFormId = function () {
@@ -338,6 +343,7 @@ function Taskboard($) {
         taskboardApplication.finalizeForm();
         taskboardApplication.initializePopup(successPopupKey);
         if (taskForm) {
+            taskboardApplication.replaceToken(response);
             taskboardApplication.renderHtmlTask(response, true);
             return;
         }
@@ -346,7 +352,7 @@ function Taskboard($) {
             console.error(response);
             return;
         }
-        if(balanceForm) {
+        if (balanceForm) {
             $('#user-balance').text(response['balance']);
         }
         taskboardApplication.processResponseEvents(response);
@@ -365,6 +371,7 @@ function Taskboard($) {
     this.onFormError = function (response) {
         taskboardApplication.removeFormSpinner();
         taskboardApplication.enableModals();
+        //TODO: parse gateway timeout
         var json = response['responseJSON'] || $.parseJSON(response['responseText']);
         if (json == null) {
             taskboardApplication.closeFormOnUnknownError("Something went extremely wrong here, response is not a JSON.");
@@ -374,10 +381,6 @@ function Taskboard($) {
             taskboardApplication.closeFormOnUnknownError("Something went extremely wrong here, response is JSON of error type, but doesn't have any explanatory fields.");
             return;
         }
-        // if (response.status === 401) {
-        //     taskboardApplication.closeFormOnUnknownError(json.error);
-        //     return;
-        // }
         $(taskboardApplication.currentForm).find('input').on('change keyup', function () {
             if (!taskboardApplication.disableModals) {
                 $(this).off('change keyup');
@@ -388,45 +391,27 @@ function Taskboard($) {
         });
         $.each(json.error, function (error_name, error_description) {
             var $errorSpan = $('#'.concat(taskboardApplication.currentFormId(), '-error-', error_name));
-            $errorSpan.parent('div').addClass('has-error');
-            $errorSpan.text(error_description);
+            if ($errorSpan.length == 0) {
+                taskboardApplication.closeFormOnUnknownError(JSON.stringify($.parseJSON(response['responseText'])['error']));
+                return;
+            } else {
+                $errorSpan.parent('div').addClass('has-error');
+                $errorSpan.text(error_description);
+
+            }
+            taskboardApplication.processResponseEvents(response);
+            taskboardApplication.initializePopup(errorPopupKey);
+            taskboardApplication.finalizeForm();
         });
-        taskboardApplication.processResponseEvents(response);
-        taskboardApplication.initializePopup(errorPopupKey);
-        taskboardApplication.finalizeForm();
     };
 
     this.initializeFormModals = function () {
         var $modal = $('.modal');
         $modal.on('hide.bs.modal', function (e) {
-            $(this).find('form :input[name=csrf_token]').val('');
             if (taskboardApplication.disableModals) {
                 e.preventDefault();
             } else {
                 taskboardApplication.cleanupModal(this);
-            }
-        });
-        $modal.on('show.bs.modal', function (e) {
-            var modal = $(this);
-            var csrfInput = $(this).find('form').find('input[name=csrf_token]');
-            if (csrfInput.val() == null || csrfInput.val() == "") {
-                e.preventDefault();
-                var request = $(this).data('type');
-                if (request !== undefined) {
-                    $.ajax({
-                        url: 'https://taskboard.dev/api/v1/csrf/'.concat(request),
-                        contentType: 'application/json; charset=UTF-8',
-                        type: "GET",
-                        success: function (response) {
-                            csrfInput.val(response);
-                            modal.modal('show');
-                        },
-                        error: function (error) {
-                            taskboardApplication.closeFormOnUnknownError(error);
-                            console.log(error);
-                        }
-                    });
-                }
             }
         });
     };
@@ -520,16 +505,40 @@ function Taskboard($) {
                     },
                     success: function () {
                         task.remove();
+                        taskboardApplication.localStorageAddItem(successPopupKey, "success");
+                        taskboardApplication.initializePopup(successPopupKey);
                     },
-                    error: function (response, statusText) {
-                        console.log(response);
-                        console.log(statusText);
+                    error: function (response) {
+                        taskboardApplication.localStorageAddItem(errorPopupKey, JSON.stringify($.parseJSON(response['responseText'])['error']));
+                        taskboardApplication.initializePopup(errorPopupKey);
+                    }
+                });
+            });
+            $(document).on('click', '.fix-task', function () {
+                var task = $(this).closest('.task-feed-item');
+                var id = task.data('id');
+                var csrf = $(this).data('csrf');
+                $.ajax({
+                    url: 'api/v1/task/' + id,
+                    contentType: 'application/json; charset=UTF-8',
+                    type: "POST",
+                    headers: {
+                        "X-CSRF-TOKEN": csrf
+                    },
+                    success: function (response) {
+                        task.replaceWith(response);
+                        taskboardApplication.localStorageAddItem(successPopupKey, "success");
+                        taskboardApplication.initializePopup(successPopupKey);
+                    },
+                    error: function (response) {
+                        taskboardApplication.localStorageAddItem(errorPopupKey, JSON.stringify($.parseJSON(response['responseText'])['error']));
+                        taskboardApplication.initializePopup(errorPopupKey);
                     }
                 });
             });
         }
         if (role == performerRole) {
-            $(document).on('click', '.complete-task', function () {
+            $(document).on('click', '.perform-task', function () {
                 var task = $(this).closest('.task-feed-item');
                 var id = task.data('id');
                 var csrf = $(this).data('csrf');
@@ -542,10 +551,12 @@ function Taskboard($) {
                     },
                     success: function () {
                         task.remove();
+                        taskboardApplication.localStorageAddItem(successPopupKey, "success");
+                        taskboardApplication.initializePopup(successPopupKey);
                     },
-                    error: function (response, statusText) {
-                        console.log(response);
-                        console.log(statusText);
+                    error: function (response) {
+                        taskboardApplication.localStorageAddItem(errorPopupKey, JSON.stringify($.parseJSON(response['responseText'])['error']));
+                        taskboardApplication.initializePopup(errorPopupKey);
                     }
                 });
             });

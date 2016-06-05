@@ -117,7 +117,7 @@ function dal_task_fetch($task_id)
         add_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "SELECT id, timestampdiff(SECOND, now(), created_at), customer_id, performer_id, amount, description FROM db_task.task WHERE id=?");
+    $stmt = mysqli_prepare($connection, "SELECT id, timestampdiff(SECOND, now(), created_at), customer_id, performer_id, amount, description, lock_tx_id FROM db_task.task WHERE id=?");
     if (!$stmt) {
         add_error($connection, $db_errors);
         return false;
@@ -138,7 +138,7 @@ function dal_task_fetch($task_id)
     if (mysqli_stmt_num_rows($stmt) < 1) {
         return null;
     }
-    if (!mysqli_stmt_bind_result($stmt, $id, $created_at, $customer_id, $performer_id, $amount, $description)) {
+    if (!mysqli_stmt_bind_result($stmt, $id, $created_at, $customer_id, $performer_id, $amount, $description, $lock_tx_id)) {
         add_error($connection, $db_errors);
         return false;
     }
@@ -159,8 +159,44 @@ function dal_task_fetch($task_id)
         CUSTOMER_ID => $customer_id,
         PERFORMER_ID => $performer_id,
         CREATED_AT_OFFSET => $created_at,
+        LOCK_TX_ID => $lock_tx_id,
         AMOUNT => $amount
     ];
+}
+
+function dal_task_get_last_id($user_id)
+{
+    $db_errors = initialize_db_errors();
+    $connection = get_task_connection();
+    if (!$connection) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    $stmt = mysqli_prepare($connection, "SELECT max(id) FROM db_task.task WHERE customer_id=?");
+    if (!$stmt) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+
+    /** @noinspection PhpMethodParametersCountMismatchInspection */
+    if (!mysqli_stmt_bind_param($stmt, 'i', $user_id)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (!mysqli_stmt_execute($stmt)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (!mysqli_stmt_bind_result($stmt, $id)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    mysqli_stmt_fetch($stmt);
+    if (!mysqli_stmt_close($stmt)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    return $id;
 }
 
 function dal_task_fetch_tasks_less_than_last_id_limit($callback, $user_id, $lock_tx_id_clause, $select_user_type, $limit = 100, $last_id = null)

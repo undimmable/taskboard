@@ -15,14 +15,15 @@ if ($user_customer) {
         $task_unpaid = "<span class=\"task-header$task_class\">Unpaid</span>";
     }
     $strong = "<strong class='task-header$task_class'>\$$current_task_price $task_unpaid</strong>";
+    $csrf = get_customer_task_csrf($user[ID], $current_task[ID]);
 } elseif ($user_performer) {
     $strong = "<strong class='task-header'>$customer_name</strong>";
+    $csrf = get_performer_task_csrf($user[ID], $current_task);
 } else {
     $strong = "<strong class='task-header'>$customer_name <h4 class=\"system-price text-\">\$$current_task_price</h4></strong>";
+    $csrf = null;
 }
 ?>
-
-
 <li class="task-feed-item media<?php echo $task_class; ?>" data-id="<?php echo $current_task_id ?>">
     <a href="#" class="pull-left">
         <img class="avatar-img" src="<?php echo $current_task_img ?>">
@@ -38,16 +39,16 @@ if ($user_customer) {
                       data-timestamp-offset="<?php echo $current_task_ts_offset ?>"></span>
             </small>
             <?php if (is_performer($user[ROLE])) {
-                echo '<button type="button" class="perform-task btn btn-primary pull-right no-shadow">$' . $current_task_price . '</button>';
+                echo '<button type="button" class="perform-task btn btn-primary pull-right no-shadow" data-csrf="' . $csrf . '">$' . $current_task_price . '</button>';
             }
             ?>
         </div>
     </div>
     <?php if (is_customer($user[ROLE])) {
         if (!is_task_completed($current_task)) {
-            echo '<button type="button" class="delete-task btn-link pull-right no-shadow" data-csrf="10">Delete</button>';
+            echo '<button type="button" class="delete-task btn-link pull-right no-shadow" data-csrf="' . $csrf . '">Delete</button>';
             if (!is_task_active($current_task)) {
-                echo '<button type="button" class="fix-task btn-link pull-right no-shadow" data-csrf="10">Try again</button>';
+                echo '<button type="button" class="fix-task btn-link pull-right no-shadow" data-csrf="' . $csrf . '">Try again</button>';
             }
         } else {
             echo '<span class="pull-right ">Completed</span>';

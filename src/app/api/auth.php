@@ -44,7 +44,7 @@ $authorization = [
 function __validate_signup_input($email, $role, $password, $password_repeat, $csrf)
 {
     $validation_context = initialize_validation_context();
-    is_csrf_token_valid("signup", $csrf, $validation_context);
+    is_signup_csrf_token_valid($csrf, $validation_context);
     is_email_valid($email, $validation_context);
     is_role_valid($role, $validation_context);
     is_password_valid($password, $validation_context);
@@ -59,7 +59,7 @@ function __validate_signup_input($email, $role, $password, $password_repeat, $cs
 function __validate_login_input($email, $password, $csrf)
 {
     $validation_context = initialize_validation_context();
-    is_csrf_token_valid("login", $csrf, $validation_context);
+    is_login_csrf_token_valid($csrf, $validation_context);
     is_email_valid($email, $validation_context);
     is_password_valid($password, $validation_context);
     if (validation_context_has_errors($validation_context)) {

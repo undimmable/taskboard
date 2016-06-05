@@ -10,6 +10,11 @@ function render_ok_json($response)
     render_status_json(200, $response);
 }
 
+function render_ok()
+{
+    http_response_code(200);
+}
+
 function render_no_content()
 {
     http_response_code(204);
@@ -25,7 +30,7 @@ function render_conflict($error)
     render_status_json(409, $error);
 }
 
-function render_internal_server_error($error)
+function render_internal_server_error($error = ["error" => ["unknown" => "Something went wrong"]])
 {
     render_status_json(500, $error);
 }

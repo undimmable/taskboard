@@ -21,7 +21,7 @@
                         <span id="login-form-error-<?php echo PASSWORD ?>" class="error-description"></span>
                     </div>
                     <label><input name="remember_me" type="checkbox"> Remember me</label>
-                    <input type="hidden" name="csrf_token">
+                    <input type="hidden" name="csrf_token" value="<?php echo get_login_csrf(); ?>">
                     <div class="form-group">
                         <button class="btn btn-primary btn-lg btn-block">
                             <i class="glyphicon glyphicon-log-in" aria-hidden="true"

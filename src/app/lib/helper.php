@@ -87,6 +87,36 @@ function is_task_completed($task)
     return array_key_exists(PERFORMER_ID, $task) && $task[PERFORMER_ID] != null;
 }
 
+function get_customer_task_csrf($user_id, $task_id)
+{
+    return hash("sha256", "$user_id.$task_id." . get_config_task_csrf_secret(), false);
+}
+
+function get_customer_task_create_csrf($user_id, $task_id)
+{
+    return hash("sha256", "$user_id.$task_id." . get_config_task_csrf_secret(), false);
+}
+
+function get_performer_task_csrf($user_id, $task)
+{
+    return hash("sha256", $user_id . $task[CUSTOMER_ID] . "." . $task[ID] . "." . get_config_task_csrf_secret(), false);
+}
+
+function get_login_csrf()
+{
+    return hash("sha256", 0 . " ." . parse_ip() . "." . parse_user_client() . ".gilon" . get_config_login_csrf_secret(), false);
+}
+
+function get_signup_csrf()
+{
+    return hash("sha256", 0 . "." . parse_ip() . "." . parse_user_client() . ".gnsiup" . get_config_login_csrf_secret(), false);
+}
+
+function get_account_csrf($user_id)
+{
+    return hash("sha256", ".$user_id.account" . get_config_account_csrf_secret(), false);
+}
+
 function get_performer_img()
 {
     return "/img/m.png";
