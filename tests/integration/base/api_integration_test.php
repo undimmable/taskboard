@@ -9,6 +9,7 @@ require_once 'util.php';
 
 abstract class ApiIntegrationTest extends \PHPUnit_Framework_TestCase
 {
+    protected static $authorizationCookieName = 'PRIVATE-TOKEN';
     /**
      * @var \GuzzleHttp\Client;
      */
@@ -37,8 +38,7 @@ abstract class ApiIntegrationTest extends \PHPUnit_Framework_TestCase
             'timeout' => 30,
             'http_errors' => false,
             'base_uri' => getenv('HOST') . '/api/v1/',
-            'cookie' => true,
-            'cookies' => $this->jar,
+            'cookies' => true,
             'verify' => false
         ]);
     }
@@ -48,16 +48,18 @@ abstract class ApiIntegrationTest extends \PHPUnit_Framework_TestCase
         return new \mysqli(getenv("MYSQL_CONNECTION_HOST"), getenv("MYSQL_USER"), getenv("MYSQL_PASS"));
     }
 
-    protected function authorize($email, $password)
+    protected function login($email, $password)
     {
         $credentials = [
             'email' => $email,
             'password' => $password,
             'csrf_token' => '9'
         ];
-        $this->api->post('auth/login?XDEBUG_SESSION_START=PHPStorm_Remote', ['json' => $credentials, 'headers' => [
+        $this->api->request('POST', 'auth/login', ['json' => $credentials, 'headers' => [
             'X-CSRF-TOKEN' => 9
-        ]]);
+        ], 'cookies' => $this->jar
+        ]);
+        $this->assertCookiePresent(ApiIntegrationTest::$authorizationCookieName);
     }
 
     /**

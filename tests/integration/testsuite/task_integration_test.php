@@ -45,54 +45,86 @@ class TaskIntegrationTest extends ApiIntegrationTest
             'amount' => 10.00,
             'csrf_token' => '10'
         ];
-        $response = $this->api->post('task', ['json' => $task, 'headers' => [
-            'X-CSRF-TOKEN' => 10
-        ]]);
-        $this->assertResponseUnauthorized($response);
-        $this->assertResponseError($response, "reason", "Not authorized");
+        $response = $this->api->request(
+            'POST',
+            'task',
+            [
+                'json' => $task,
+                'headers' => [
+                    'X-CSRF-TOKEN' => 10
+                ],
+                'cookies' => $this->jar
+            ]
+        );
+        $this->assertResponseForbidden($response);
+        $this->assertResponseError($response, "reason", "Forbidden");
     }
 
     public function testCreateTaskPerformerReturnsForbidden()
     {
-        $this->authorize('performer@dummy.com', '123456');
+        $this->login('performer@dummy.com', '123456');
         $task = [
             'description' => 'Lorem ipsum',
             'amount' => 10.00,
             'csrf_token' => '10'
         ];
-        $response = $this->api->post('task', ['json' => $task, 'headers' => [
-            'X-CSRF-TOKEN' => 10
-        ]]);
+        $response = $this->api->request(
+            'POST',
+            'task',
+            [
+                'json' => $task,
+                'headers' => [
+                    'X-CSRF-TOKEN' => 10
+                ],
+                'cookies' => $this->jar
+            ]
+        );
         $this->assertResponseForbidden($response);
         $this->assertResponseError($response, "reason", "Forbidden");
     }
 
     public function testCreateTaskSystemReturnsForbidden()
     {
-        $this->authorize('system@dummy.com', '123456');
+        $this->login('system@dummy.com', '123456');
         $task = [
             'description' => 'Lorem ipsum',
             'amount' => 10.00,
             'csrf_token' => '10'
         ];
-        $response = $this->api->post('task', ['json' => $task, 'headers' => [
-            'X-CSRF-TOKEN' => 10
-        ]]);
+        $response = $this->api->request(
+            'POST',
+            'task',
+            [
+                'json' => $task,
+                'headers' => [
+                    'X-CSRF-TOKEN' => 10
+                ],
+                'cookies' => $this->jar
+            ]
+        );
         $this->assertResponseForbidden($response);
         $this->assertResponseError($response, "reason", "Forbidden");
     }
 
     public function testCreateTaskNotEnoughMoneyReturnsError()
     {
-        $this->authorize('customer@dummy.com', '123456');
+        $this->login('customer@dummy.com', '123456');
         $task = [
             'description' => 'Lorem ipsum',
             'amount' => 1000.00,
             'csrf_token' => '10'
         ];
-        $response = $this->api->post('task', ['json' => $task, 'headers' => [
-            'X-CSRF-TOKEN' => 10
-        ]]);
+        $response = $this->api->request(
+            'POST',
+            'task',
+            [
+                'json' => $task,
+                'headers' => [
+                    'X-CSRF-TOKEN' => 10
+                ],
+                'cookies' => $this->jar
+            ]
+        );
         $this->assertResponseConflict($response);
         $this->assertResponseError($response, "amount", "Not enough money");
     }
