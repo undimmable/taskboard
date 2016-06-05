@@ -1,5 +1,7 @@
 <?php
 $user = null;
+require_once 'dal/login.php';
+require_once 'lib/helper.php';
 
 function create_jwt_token($email, $role, $id)
 {
@@ -27,15 +29,21 @@ function parse_token_from_cookie()
     return JWT_decode($privateToken, get_config_jwt_secret());
 }
 
-function try_authorize_from_cookie()
+function try_authenticate_from_cookie()
 {
     if (!is_null(get_authorized_user()))
         return;
     $token = parse_token_from_cookie();
-    //TODO: add login check from db
     if (is_null($token))
         return;
-    set_authorized_user(parse_user_from_token($token));
+    $user = parse_user_from_token($token);
+    $user_id = $user[ID];
+    $login = dal_login_fetch($user_id, parse_ip(), parse_user_client());
+    if(is_null($login) || !$login) {
+        delete_token_cookie();
+    } else {
+        set_authorized_user($user);
+    }
 }
 
 function parse_csrf_token_header()
