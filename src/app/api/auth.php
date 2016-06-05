@@ -99,7 +99,7 @@ function api_auth_login_action()
         ]);
         return;
     }
-    dal_login_create_or_update($user, $ip, $client);
+    dal_login_create_or_update($user[ID], $ip, $client);
     $token = create_jwt_token($user[EMAIL], $user[ROLE], $user[ID]);
     set_token_cookie($token, !$remember_me);
     render_ok_json([
