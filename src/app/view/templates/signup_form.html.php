@@ -36,7 +36,7 @@
                     </div>
                     <input type="hidden" id="csrf_token" name="csrf_token"/>
                     <div class="form-group">
-                        <button class="btn btn-primary btn-lg btn-block btn-default">
+                        <button class="btn btn-primary btn-lg btn-block btn-default btn-270">
                             <i class="glyphicon glyphicon-log-in glyphicon-270" aria-hidden="true"
                                id="signup-form-spinner" data-icon="glyphicon glyphicon-log-in glyphicon-rotate"></i>
                             Sign Up
