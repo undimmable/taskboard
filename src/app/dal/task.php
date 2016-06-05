@@ -84,13 +84,13 @@ function dal_task_create($customer_id, $amount, $description)
         add_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "INSERT INTO db_task.task (customer_id, amount, description) VALUES (?, ?, ?)");
+    $stmt = mysqli_prepare($connection, "INSERT INTO db_task.task (customer_id, amount, description, commission) VALUES (?, ?, ?, ?)");
     if (!$stmt) {
         add_error($connection, $db_errors);
         return false;
     }
     /** @noinspection PhpMethodParametersCountMismatchInspection */
-    if (!mysqli_stmt_bind_param($stmt, 'ids', $customer_id, $amount, $description)) {
+    if (!mysqli_stmt_bind_param($stmt, 'idsi', $customer_id, $amount, $description, get_system_commission())) {
         add_error($connection, $db_errors);
         return false;
     }
