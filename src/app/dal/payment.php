@@ -142,7 +142,7 @@ function payment_create_account($user_id, $balance = DEFAULT_BALANCE)
     return true;
 }
 
-function payment_create_transaction($user_from, $user_to, $amount, $type)
+function payment_create_transaction($id_from, $id_to, $amount, $type)
 {
     $db_errors = initialize_db_errors();
     $connection = get_payment_connection();
@@ -150,13 +150,13 @@ function payment_create_transaction($user_from, $user_to, $amount, $type)
         add_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "INSERT INTO db_tx.tx (from_user_id, to_user_id, amount, type) VALUES (?, ?, ?, ?)");
+    $stmt = mysqli_prepare($connection, "INSERT INTO db_tx.tx (id_from, id_to, amount, type) VALUES (?, ?, ?, ?)");
     if (!$stmt) {
         add_error($connection, $db_errors);
         return false;
     }
     /** @noinspection PhpMethodParametersCountMismatchInspection */
-    if (!mysqli_stmt_bind_param($stmt, 'idsi', $user_from, $user_to, $amount, $type)) {
+    if (!mysqli_stmt_bind_param($stmt, 'idsi', $id_from, $id_to, $amount, $type)) {
         add_error($connection, $db_errors);
         return false;
     }
@@ -175,7 +175,55 @@ function payment_create_transaction($user_from, $user_to, $amount, $type)
     return $id;
 }
 
-function payment_process_transaction($from_user_id, $to_user_id, $amount)
+function payment_get_unprocessed_transaction($entity_id_from, $entity_id_to, $type)
+{
+    $db_errors = initialize_db_errors();
+    $connection = get_payment_connection();
+    if (!$connection) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    $stmt = mysqli_prepare($connection, "SELECT id FROM db_tx.tx WHERE id_from=? AND id_to=? AND type=? AND NOT processed");
+    if (!$stmt) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    /** @noinspection PhpMethodParametersCountMismatchInspection */
+    if (!mysqli_stmt_bind_param($stmt, 'iis', $entity_id_from, $entity_id_to, $type)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (!mysqli_stmt_execute($stmt)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (!mysqli_stmt_store_result($stmt)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (mysqli_stmt_num_rows($stmt) < 1) {
+        mysqli_stmt_close($stmt);
+        return null;
+    }
+    if (!mysqli_stmt_bind_result($stmt, $id)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (!mysqli_stmt_fetch($stmt)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (!mysqli_stmt_close($stmt)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (mysqli_errno($connection) !== 0) {
+        return false;
+    }
+    return $id;
+}
+
+function payment_process_transaction($id_from, $id_to, $amount)
 {
     $connection = get_payment_connection();
     $stmt = mysqli_prepare($connection, "UPDATE db_account.account SET locked_balance = locked_balance + $amount WHERE user_id=? AND $amount < account.balance - account.locked_balance");
@@ -189,7 +237,7 @@ function payment_fetch_balance($user_id)
         add_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "SELECT balance FROM db_account.account WHERE user_id=?");
+    $stmt = mysqli_prepare($connection, "SELECT balance-locked_balance FROM db_account.account WHERE user_id=?");
     if (!$stmt) {
         add_error($connection, $db_errors);
         return false;
