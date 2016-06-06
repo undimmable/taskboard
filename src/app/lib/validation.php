@@ -18,9 +18,9 @@ function __validate_task_create_csrf($csrf, $customer_id, $task_id, &$validation
         return true;
 }
 
-function is_performer_task_csrf_token_valid($csrf, $performer_id, $task_id, &$validation_context)
+function __validate_performer_task_csrf($csrf, $performer_id, $task_id, &$validation_context)
 {
-    if ($csrf != get_customer_task_create_csrf($performer_id, $task_id)) {
+    if ($csrf != get_performer_task_csrf($performer_id, $task_id)) {
         add_validation_error($validation_context, 'token', 'wrong');
         return false;
     } else
