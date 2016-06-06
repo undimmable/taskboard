@@ -77,7 +77,7 @@ function __validate_description($description, &$validation_context)
     return true;
 }
 
-function __validate_task_input($last_task_id, $amount, $description, $csrf)
+function __validate_task_create_input($last_task_id, $amount, $description, $csrf)
 {
     $validation_context = initialize_validation_context();
     __validate_task_create_csrf($csrf, get_authorized_user()[ID], $last_task_id, $validation_context);
@@ -90,11 +90,23 @@ function __validate_task_input($last_task_id, $amount, $description, $csrf)
     return true;
 }
 
-function __validate_task_fix_input($id, $csrf)
+function __validate_task_fix_input($task_id, $customer_id, $csrf)
 {
     $validation_context = initialize_validation_context();
-    __validate_id($id, $validation_context);
-    __validate_customer_task_csrf($csrf, get_authorized_user()[ID], $id, $validation_context);
+    __validate_id($task_id, $validation_context);
+    __validate_customer_task_csrf($csrf, $customer_id, $task_id, $validation_context);
+    if (validation_context_has_errors($validation_context)) {
+        render_bad_request_json(['error' => get_all_validation_errors($validation_context)]);
+        return false;
+    }
+    return true;
+}
+
+function __validate_task_perform_input($task_id, $performer_id, $csrf)
+{
+    $validation_context = initialize_validation_context();
+    __validate_id($task_id, $validation_context);
+    __validate_performer_task_csrf($csrf, $performer_id, $task_id, $validation_context);
     if (validation_context_has_errors($validation_context)) {
         render_bad_request_json(['error' => get_all_validation_errors($validation_context)]);
         return false;
@@ -146,9 +158,13 @@ function api_task_get_last_n()
     }
 }
 
-function api_task_perform()
+function api_task_perform($task_id)
 {
-//    $user = get_authorized_user();
+    $user = get_authorized_user();
+    $performer_id = $user[ID];
+    $csrf = parse_csrf_token_header();
+    __validate_task_perform_input($task_id, $performer_id, $csrf);
+
 }
 
 function api_task_create()
@@ -164,7 +180,7 @@ function api_task_create()
     $description = $data[DESCRIPTION];
     $csrf = parse_csrf_token_header();
     $last_task_id = dal_task_get_last_id($customer_id);
-    if (!__validate_task_input($last_task_id, $amount, $description, $csrf)) {
+    if (!__validate_task_create_input($last_task_id, $amount, $description, $csrf)) {
         return;
     }
     if (!payment_check_able_to_process($customer_id, $amount)) {
@@ -174,7 +190,7 @@ function api_task_create()
         return;
     }
     $task_id = dal_task_create($customer_id, $amount, $description);
-    $lock_tx_id = payment_create_transaction($customer_id, $customer_id, $amount, 'l');
+    $lock_tx_id = payment_create_transaction($customer_id, $task_id, $amount, 'l');
     $success = payment_lock_balance($customer_id, $lock_tx_id, $amount);
     if (is_null($success)) {
         render_conflict([
@@ -205,23 +221,27 @@ function api_task_create()
     }
 }
 
-function api_task_fix($id)
+function api_task_fix($task_id)
 {
     $user = get_authorized_user();
-    $data = json_decode(file_get_contents('php://input'), true);
     $customer_id = $user[ID];
-    $amount = $data[AMOUNT];
-    $description = $data[DESCRIPTION];
     $csrf = parse_csrf_token_header();
-    __validate_task_fix_input($id, $csrf);
+    __validate_task_fix_input($task_id, $customer_id, $csrf);
+    $amount = dal_task_fetch_price($task_id, $customer_id);
+    if (is_null($amount) || !$amount) {
+        render_bad_request_json([
+            "error" => ["task" => "Couldn't process"]
+        ]);
+        return;
+    }
     if (!payment_check_able_to_process($customer_id, $amount)) {
         render_conflict([
             "error" => ["amount" => "Not enough money"]
         ]);
         return;
     }
-    $task_id = dal_task_create($customer_id, $amount, $description);
-    $lock_tx_id = payment_create_transaction($customer_id, $customer_id, $amount, 'l');
+
+    $lock_tx_id = payment_get_unprocessed_transaction($customer_id, $task_id, 'l');
     $success = payment_lock_balance($customer_id, $lock_tx_id, $amount);
     if (is_null($success)) {
         render_conflict([
