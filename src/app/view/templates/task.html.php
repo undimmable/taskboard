@@ -7,7 +7,7 @@ $current_task_img = get_task_img($current_task, $user);
 $current_task_description = htmlspecialchars($current_task[DESCRIPTION], ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5 | ENT_DISALLOWED, 'UTF-8', false);
 $current_task_ts_offset = $current_task[CREATED_AT_OFFSET];
 $current_task_price = $current_task[AMOUNT];
-$customer_name = 'John Customer';
+$customer_name = 'Jean Customer';
 $user_customer = is_customer($user[ROLE]);
 $user_performer = is_performer($user[ROLE]);
 if ($user_customer) {
@@ -18,7 +18,7 @@ if ($user_customer) {
     $csrf = get_customer_task_csrf($user[ID], $current_task[ID]);
 } elseif ($user_performer) {
     $strong = "<strong class='task-header'>$customer_name</strong>";
-    $csrf = get_performer_task_csrf($user[ID], $current_task);
+    $csrf = get_performer_task_csrf($user[ID], $current_task[ID]);
 } else {
     $strong = "<strong class='task-header'>$customer_name <h4 class=\"system-price text-\">\$$current_task_price</h4></strong>";
     $csrf = null;
