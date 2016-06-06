@@ -97,9 +97,9 @@ function get_customer_task_create_csrf($user_id, $task_id)
     return hash("sha256", "$user_id.$task_id." . get_config_task_csrf_secret(), false);
 }
 
-function get_performer_task_csrf($user_id, $task)
+function get_performer_task_csrf($user_id, $task_id)
 {
-    return hash("sha256", $user_id . $task[CUSTOMER_ID] . "." . $task[ID] . "." . get_config_task_csrf_secret(), false);
+    return hash("sha256", "$user_id.$task_id." . get_config_task_csrf_secret(), false);
 }
 
 function get_login_csrf()
@@ -115,6 +115,11 @@ function get_signup_csrf()
 function get_account_csrf($user_id)
 {
     return hash("sha256", ".$user_id.account" . get_config_account_csrf_secret(), false);
+}
+
+function get_random_payload($user = null)
+{
+    return 0;
 }
 
 function get_performer_img()

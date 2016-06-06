@@ -54,11 +54,11 @@
     <script type="application/javascript" src="/js/app.js?__nocache=true"></script>
 </head>
 <body>
-<div id="user-data" data-role="<?php if (is_authorized()) {
-    echo get_authorized_user()[ROLE];
-} else {
-    echo 0;
-} ?>"></div>
+<?php
+$role = is_authorized() ? get_authorized_user()[ROLE] : 0;
+$payload = get_random_payload(get_authorized_user());
+echo "<div id=\"user-data\" data-role=\"$role\" data-payloadsid=\"$payload\"></div>";
+?>
 <nav class="navbar navbar-default">
     <div class="container-fluid">
         <div class="navbar-header">
