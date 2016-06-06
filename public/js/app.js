@@ -368,10 +368,13 @@ function Taskboard($) {
         taskboardApplication.finalizeForm();
     };
 
-    this.onFormError = function (response) {
+    this.onFormError = function (response, status, xhr) {
         taskboardApplication.removeFormSpinner();
         taskboardApplication.enableModals();
-        //TODO: parse gateway timeout
+        if(xhr.statusCode == 504) {
+            taskboardApplication.closeFormOnUnknownError("Gateway Timeout.");
+            return;
+        }
         var json = response['responseJSON'] || $.parseJSON(response['responseText']);
         if (json == null) {
             taskboardApplication.closeFormOnUnknownError("Something went extremely wrong here, response is not a JSON.");
@@ -458,7 +461,6 @@ function Taskboard($) {
         return JSON.stringify($(taskboardApplication.currentForm).serializeObject());
     };
 
-    //noinspection JSUnusedGlobalSymbols
     this.initializeFeed = function () {
         feed = new taskboardApplication.Feed(10);
         feed.initialize();
@@ -469,6 +471,10 @@ function Taskboard($) {
                 $('#task-feed').attr('data-hide-completed', false);
             }
         });
+    };
+
+    this.initializeTooltips = function () {
+        $("[rel=tooltip]").tooltip({ placement: 'bottom'});
     };
 
     this.initialize = function () {
@@ -488,6 +494,7 @@ function Taskboard($) {
         taskboardApplication.initializeFormModals();
         taskboardApplication.initializeTimestampRefresher(timestampRefreshPeriod);
         taskboardApplication.initializeEventStream();
+        taskboardApplication.initializeTooltips();
         if (role != unauthorizedRole) {
             taskboardApplication.initializeFeed();
         }

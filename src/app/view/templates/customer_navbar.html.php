@@ -4,8 +4,8 @@ $balance = get_balance(get_authorized_user()[ID]);
 ?>
 <li>
     <a type="button" class="btn btn-lg btn-link" data-toggle="modal" data-type="account"
-       data-target="#account-form-modal">
-        $<span id="user-balance"><?php echo $balance; ?></span> Refill Account
+       data-target="#account-form-modal" rel="tooltip" title="Note that the balance shown here is the difference between account balance and active task prices">
+        $<span id="user-balance"><?php echo $balance; ?> </span> Refill Account
     </a>
 </li>
 <li>
