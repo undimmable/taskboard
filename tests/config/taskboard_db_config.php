@@ -14,6 +14,13 @@ return [
         'password' => 'rplc_login_password',
         'database' => 'db_login'
     ],
+    'message' => [
+        'host' => 'rplc_message_host',
+        'port' => 3306,
+        'user' => 'user_message',
+        'password' => 'rplc_message_password',
+        'database' => 'db_message'
+    ],
     'task' => [
         'host' => 'rplc_task_host',
         'port' => 3306,

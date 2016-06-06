@@ -2,6 +2,7 @@
 
 define('ACCOUNT_DB', 'account');
 define('LOGIN_DB', 'login');
+define('MESSAGE_DB', 'message');
 define('TASK_DB', 'task');
 define('TEXT_IDX_DB', 'text_idx');
 define('TX_DB', 'tx');

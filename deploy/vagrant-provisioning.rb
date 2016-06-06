@@ -31,6 +31,7 @@ Vagrant.configure(2) do |config|
     echo "Provisioning: creating MySQL users" | tee -a $INSTALL_LOG
     mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_account identified by '$MYSQL_ACCOUNT_PASS'" >> $INSTALL_LOG 2>&1
     mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_login identified by '$MYSQL_LOGIN_PASS'" >> $INSTALL_LOG 2>&1
+    mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_message identified by '$MYSQL_MESSAGE_PASS'" >> $INSTALL_LOG 2>&1
     mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_task identified by '$MYSQL_TASK_PASS'" >> $INSTALL_LOG 2>&1
     mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_text_idx identified by '$MYSQL_TEXT_IDX_PASS'" >> $INSTALL_LOG 2>&1
     mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_tx identified by '$MYSQL_TX_PASS'" >> $INSTALL_LOG 2>&1
@@ -40,6 +41,7 @@ Vagrant.configure(2) do |config|
     echo "Provisioning: creating MySQL databases" | tee -a $INSTALL_LOG
     mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/account.sql >> $INSTALL_LOG 2>&1
     mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/login.sql >> $INSTALL_LOG 2>&1
+    mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/message.sql >> $INSTALL_LOG 2>&1
     mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/task.sql >> $INSTALL_LOG 2>&1
     mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/text_idx.sql >> $INSTALL_LOG 2>&1
     mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/tx.sql >> $INSTALL_LOG 2>&1
@@ -88,6 +90,8 @@ Vagrant.configure(2) do |config|
     sed -i -e 's/rplc_account_host/'"$MYSQL_ACCOUNT_HOST"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_login_password/'"$MYSQL_LOGIN_PASS"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_login_host/'"$MYSQL_LOGIN_HOST"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
+    sed -i -e 's/rplc_message_password/'"$MYSQL_MESSAGE_PASS"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
+    sed -i -e 's/rplc_message_host/'"$MYSQL_MESSAGE_HOST"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_task_password/'"$MYSQL_TASK_PASS"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_task_host/'"$MYSQL_TASK_HOST"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_text_idx_password/'"$MYSQL_TEXT_IDX_PASS"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
@@ -107,6 +111,7 @@ Vagrant.configure(2) do |config|
     sed -i -e 's/rplc_login_csrf_secret/'"$LOGIN_CSRF_SECRET"'/g' $SECURITY_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_task_csrf_secret/'"$TASK_CSRF_SECRET"'/g' $SECURITY_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_account_csrf_secret/'"$ACCOUNT_CSRF_SECRET"'/g' $SECURITY_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
+    sed -i -e 's/rplc_payload_secret/'"$PAYLOAD_SECRET"'/g' $SECURITY_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
 
     echo "Provisioning: add certs" | tee -a $INSTALL_LOG
     openssl genrsa -des3 -passout pass:x -out /etc/ssl/taskboards.top.pass.key 2048  >> $INSTALL_LOG 2>&1

@@ -6,5 +6,6 @@ return [
     'vk_secret'             => 'rplc_vk_secret',
     'task_csrf_secret'      => 'rplc_task_csrf_secret',
     'login_csrf_secret'     => 'rplc_login_csrf_secret',
-    'account_csrf_secret'   => 'rplc_account_csrf_secret'
+    'account_csrf_secret'   => 'rplc_account_csrf_secret',
+    'payload_secret'        => 'rplc_payload_secret'
 ];

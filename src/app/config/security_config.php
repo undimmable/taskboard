@@ -36,6 +36,11 @@ function get_config_account_csrf_secret()
     return get_security_config()['account_csrf_secret'];
 }
 
+function get_config_payload_secret()
+{
+    return get_security_config()['payload_secret'];
+}
+
 function get_config_vk_client_id()
 {
     return get_security_config()['vk_client_id'];
