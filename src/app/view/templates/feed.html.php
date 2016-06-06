@@ -3,12 +3,14 @@
         <div class="panel panel-info">
             <div class="panel-heading">
                 Task feed
-                <span class="pull-right">
+                <?php if (is_customer(get_current_user()[ROLE])) {
+                    echo "<span class=\"pull-right\">
                     <label>
                         Hide completed
-                        <input type="checkbox" id="hide-completed">
+                        <input type=\"checkbox\" id=\"hide-completed\">
                     </label>
-                </span>
+                </span>";
+                } ?>
             </div>
             <div class="panel-body">
                 <ul id="task-feed" class="media-list">
