@@ -164,6 +164,53 @@ function dal_task_fetch($task_id)
     ];
 }
 
+function dal_task_fetch_price($task_id, $customer_id)
+{
+    $db_errors = initialize_db_errors();
+    $connection = get_task_connection();
+    if (!$connection) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    $stmt = mysqli_prepare($connection, "SELECT amount FROM db_task.task WHERE id=? AND customer_id=? AND (task.lock_tx_id IS NULL OR lock_tx_id = -1)");
+    if (!$stmt) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    /** @noinspection PhpMethodParametersCountMismatchInspection */
+    if (!mysqli_stmt_bind_param($stmt, 'ii', $task_id, $customer_id)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (!mysqli_stmt_execute($stmt)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (!mysqli_stmt_store_result($stmt)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (mysqli_stmt_num_rows($stmt) < 1) {
+        return null;
+    }
+    if (!mysqli_stmt_bind_result($stmt, $amount)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (!mysqli_stmt_fetch($stmt)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (!mysqli_stmt_close($stmt)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (mysqli_errno($connection) !== 0) {
+        return false;
+    }
+    return $amount;
+}
+
 function dal_task_get_last_id($user_id)
 {
     $db_errors = initialize_db_errors();
