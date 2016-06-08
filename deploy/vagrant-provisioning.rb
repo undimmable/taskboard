@@ -36,7 +36,6 @@ Vagrant.configure(2) do |config|
     mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_text_idx identified by '$MYSQL_TEXT_IDX_PASS'" >> $INSTALL_LOG 2>&1
     mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_tx identified by '$MYSQL_TX_PASS'" >> $INSTALL_LOG 2>&1
     mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_user identified by '$MYSQL_USER_PASS'" >> $INSTALL_LOG 2>&1
-    mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_user_info identified by '$MYSQL_USER_INFO_PASS'" >> $INSTALL_LOG 2>&1
 
     echo "Provisioning: creating MySQL databases" | tee -a $INSTALL_LOG
     mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/account.sql >> $INSTALL_LOG 2>&1
@@ -46,7 +45,6 @@ Vagrant.configure(2) do |config|
     mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/text_idx.sql >> $INSTALL_LOG 2>&1
     mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/tx.sql >> $INSTALL_LOG 2>&1
     mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/user.sql >> $INSTALL_LOG 2>&1
-    mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/user_info.sql >> $INSTALL_LOG 2>&1
 
     echo "Provisioning: stopping services" | tee -a $INSTALL_LOG
     service nginx stop >> $INSTALL_LOG 2>&1
@@ -100,8 +98,6 @@ Vagrant.configure(2) do |config|
     sed -i -e 's/rplc_tx_host/'"$MYSQL_TX_HOST"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_user_password/'"$MYSQL_USER_PASS"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_user_host/'"$MYSQL_USER_HOST"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
-    sed -i -e 's/rplc_user_info_password/'"$MYSQL_USER_INFO_PASS"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
-    sed -i -e 's/rplc_user_info_host/'"$MYSQL_USER_INFO_HOST"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
 
     echo "Provisioning PHP keys configuration inside $SECURITY_CONFIG_FULL_PATH" | tee -a $INSTALL_LOG
     sed -i -e 's/rplc_jwt_secret/'"$JWT_SECRET"'/g' $SECURITY_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
