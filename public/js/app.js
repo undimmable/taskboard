@@ -84,7 +84,11 @@ function Taskboard($) {
                     }
                     if (response == "") {
                         feed.noMoreContent();
+                        var localLastTaskId = feed.lastTaskId;
                         feed.lastTaskId = -1;
+                        if(role == customerRole &&  localLastTaskId == null) {
+                            $('#create-task-button').click();
+                        }
                     } else {
                         taskboardApplication.renderHtmlTask(response, false);
                     }

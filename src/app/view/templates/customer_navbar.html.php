@@ -11,7 +11,7 @@ $balance = get_balance(get_authorized_user()[ID]);
 </li>
 <li>
     <a type="button" class="btn btn-lg btn-link" data-toggle="modal" data-type="task"
-       data-target="#task-form-modal">
+       data-target="#task-form-modal" id="create-task-button">
         <i class="glyphicon glyphicon-plus" aria-hidden="true"></i> Create Task
     </a>
 </li>
