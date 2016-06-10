@@ -443,7 +443,6 @@ function Taskboard($) {
             url: "api/v1/account",
             error: console.log,
             success: function (response) {
-                console.log(response);
                 $('#user-balance').text($.parseJSON(response)['balance']);
             }
         });
