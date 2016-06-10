@@ -102,7 +102,7 @@ function Taskboard($) {
     this.parseJsonResponse = function (response) {
         var error = {};
         if (response.hasOwnProperty('status') && (response.status == 404 || response.status == 502)) {
-            error.unspecified = "Too many attempts";
+            error.unspecified = "Max attempts number exceeded.";
             return {error: error};
         }
         if (response['responseJSON']) {
