@@ -50,7 +50,7 @@ function __validate_signup_input($email, $role, $password, $password_repeat, $cs
     is_password_valid($password, $validation_context);
     is_password_repeat_valid($password, $password_repeat, $validation_context);
     if (validation_context_has_errors($validation_context)) {
-        render_bad_request_json(['error' => get_all_validation_errors($validation_context)]);
+        render_bad_request_json([JSON_ERROR => get_all_validation_errors($validation_context)]);
         return false;
     }
     return true;
@@ -63,7 +63,7 @@ function __validate_login_input($email, $password, $csrf)
     is_email_valid($email, $validation_context);
     is_password_valid($password, $validation_context);
     if (validation_context_has_errors($validation_context)) {
-        render_bad_request_json(['error' => get_all_validation_errors($validation_context)]);
+        render_bad_request_json([JSON_ERROR => get_all_validation_errors($validation_context)]);
         return false;
     }
     return true;
@@ -88,23 +88,19 @@ function api_auth_login_action()
     $interval = get_config_failed_attempt_timeout();
     $failed_attempts = dal_login_being_failed($ip, $client, get_config_failed_attempt_retry(), $interval);
     if ($failed_attempts) {
-        render_not_authorized_json(['error' => [EMAIL => "Max attempts number exceeded. Try again in $interval seconds"]]);
+        render_not_authorized_json([JSON_ERROR => [EMAIL => "Max attempts number exceeded. Try again in $interval seconds"]]);
         return;
     }
     $user = db_fetch_user_by_email($email);
     if ($user === null || !password_verify($password, $user[HASHED_PASSWORD])) {
         dal_login_log_failed($ip, $client);
-        render_not_authorized_json([
-            'error' => [EMAIL => 'Wrong username and/or password']
-        ]);
+        render_not_authorized_json([JSON_ERROR => [EMAIL => 'Wrong username and/or password']]);
         return;
     }
     dal_login_create_or_update($user[ID], $ip, $client);
     $token = create_jwt_token($user[EMAIL], $user[ROLE], $user[ID]);
     set_token_cookie($token, !$remember_me);
-    render_ok_json([
-        'redirect' => '/'
-    ]);
+    render_ok_json(['redirect' => '/']);
 }
 
 function api_auth_signup_action()
@@ -133,7 +129,7 @@ function api_auth_signup_action()
     if (!$user) {
         $errors = get_db_errors();
         if ($errors[LOGIN] === "duplicate entity") {
-            $errors = ['error' => [EMAIL => "User with this email already registered"]];
+            $errors = [JSON_ERROR => [EMAIL => "User with this email already registered"]];
         }
         render_conflict($errors);
         return;

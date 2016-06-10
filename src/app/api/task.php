@@ -84,7 +84,7 @@ function __validate_task_create_input($last_task_id, $amount, $description, $csr
     __validate_amount($amount, $validation_context);
     __validate_description($description, $validation_context);
     if (validation_context_has_errors($validation_context)) {
-        render_bad_request_json(['error' => get_all_validation_errors($validation_context)]);
+        render_bad_request_json([JSON_ERROR => get_all_validation_errors($validation_context)]);
         return false;
     }
     return true;
@@ -96,7 +96,7 @@ function __validate_task_fix_input($task_id, $customer_id, $csrf)
     __validate_id($task_id, $validation_context);
     __validate_customer_task_csrf($csrf, $customer_id, $task_id, $validation_context);
     if (validation_context_has_errors($validation_context)) {
-        render_bad_request_json(['error' => get_all_validation_errors($validation_context)]);
+        render_bad_request_json([JSON_ERROR => get_all_validation_errors($validation_context)]);
         return false;
     }
     return true;
@@ -108,7 +108,7 @@ function __validate_task_perform_input($task_id, $performer_id, $csrf)
     __validate_id($task_id, $validation_context);
     __validate_performer_task_csrf($csrf, $performer_id, $task_id, $validation_context);
     if (validation_context_has_errors($validation_context)) {
-        render_bad_request_json(['error' => get_all_validation_errors($validation_context)]);
+        render_bad_request_json([JSON_ERROR => get_all_validation_errors($validation_context)]);
         return false;
     }
     return true;
@@ -123,7 +123,7 @@ function api_task_get_by_id($task_id)
         render_not_found();
         die;
     } elseif (!$task) {
-        render_bad_request_json(['error' => get_all_validation_errors($validation_context)]);
+        render_bad_request_json([JSON_ERROR => get_all_validation_errors($validation_context)]);
         die;
     } else {
         render_ok_json($task);
@@ -150,7 +150,7 @@ function api_task_get_last_n()
         $create_csrf = get_customer_task_create_csrf($user[ID], dal_task_get_last_id($user[ID]));
         echo "<!--json-$create_csrf-json-->";
     }
-    $tasks = dal_task_fetch_tasks_less_than_last_id_limit("__render_task", $user_id, $lock_tx_id_clause, $select_user_type, $limit, $last_id);
+    $tasks = dal_task_fetch_tasks_less_than_last_id_limit("_render_task", $user_id, $lock_tx_id_clause, $select_user_type, $limit, $last_id);
     if (is_null($tasks)) {
         render_ok();
     } else if ($tasks === false) {
@@ -210,13 +210,13 @@ function api_task_create()
     $task = dal_task_fetch($task_id);
     if (!$task) {
         error_log("Couldn't fetch task");
-        render_bad_request_json(['error' => get_db_errors()]);
+        render_bad_request_json([JSON_ERROR => get_db_errors()]);
         return;
     } else {
         send_index_event($task[ID], TASK_DESCRIPTION_IDX, $task[DESCRIPTION]);
         $create_csrf = get_customer_task_create_csrf($user[ID], $task[ID]);
         echo "<!--json-$create_csrf-json-->";
-        __render_task($task);
+        _render_task($task);
         return;
     }
 }
@@ -229,24 +229,18 @@ function api_task_fix($task_id)
     __validate_task_fix_input($task_id, $customer_id, $csrf);
     $amount = dal_task_fetch_price($task_id, $customer_id);
     if (is_null($amount) || !$amount) {
-        render_bad_request_json([
-            "error" => ["task" => "Couldn't process"]
-        ]);
+        render_bad_request_json([JSON_ERROR => ["task" => "Couldn't process"]]);
         return;
     }
     if (!payment_check_able_to_process($customer_id, $amount)) {
-        render_conflict([
-            "error" => ["amount" => "Not enough money"]
-        ]);
+        render_conflict([JSON_ERROR => [AMOUNT => "Not enough money"]]);
         return;
     }
 
     $lock_tx_id = payment_get_unprocessed_transaction($customer_id, $task_id, 'l');
     $success = payment_lock_balance($customer_id, $lock_tx_id, $amount);
     if (is_null($success)) {
-        render_conflict([
-            "error" => ["amount" => "Not enough money"]
-        ]);
+        render_conflict([JSON_ERROR => [AMOUNT => "Not enough money"]]);
         return;
     } elseif (!$success) {
         render_internal_server_error();
@@ -261,13 +255,13 @@ function api_task_fix($task_id)
     $task = dal_task_fetch($task_id);
     if (!$task) {
         error_log("Couldn't fetch task");
-        render_bad_request_json(['error' => get_db_errors()]);
+        render_bad_request_json([JSON_ERROR => get_db_errors()]);
         return;
     } else {
         send_index_event($task[ID], TASK_DESCRIPTION_IDX, $task[DESCRIPTION]);
         $create_csrf = get_customer_task_create_csrf($customer_id, $task[ID]);
         echo "<!--json-$create_csrf-json-->";
-        __render_task($task);
+        _render_task($task);
         return;
     }
 }
@@ -281,7 +275,7 @@ function api_task_delete_by_id($task_id)
     $validation_context = initialize_validation_context();
     if (!__validate_customer_task_csrf($csrf, $customer_id, $task_id, $validation_context)) {
         if (validation_context_has_errors($validation_context)) {
-            render_bad_request_json(['error' => get_all_validation_errors($validation_context)]);
+            render_bad_request_json([JSON_ERROR => get_all_validation_errors($validation_context)]);
             return;
         }
     }
@@ -297,7 +291,7 @@ function api_task_delete_by_id($task_id)
     return;
 }
 
-function __render_task($task)
+function _render_task($task)
 {
     global $current_task;
     $current_task = $task;

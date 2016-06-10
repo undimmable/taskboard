@@ -45,13 +45,13 @@ function __validate_amount($amount, &$validation_context)
     return true;
 }
 
-function __validate_account_input($amount, $csrf)
+function __validate_account_input($amount, $user_id, $csrf)
 {
     $validation_context = initialize_validation_context();
-    is_csrf_token_valid("account", $csrf, $validation_context);
+    is_account_csrf_token_valid($csrf, $user_id, $validation_context);
     __validate_amount($amount, $validation_context);
     if (validation_context_has_errors($validation_context)) {
-        render_bad_request_json(['error' => get_all_validation_errors($validation_context)]);
+        render_bad_request_json([JSON_ERROR => get_all_validation_errors($validation_context)]);
         return false;
     }
     return true;
@@ -62,7 +62,7 @@ function api_get_balance()
     $user_id = get_authorized_user()[ID];
     $balance = payment_fetch_balance($user_id);
     if (!$balance) {
-        render_internal_server_error(["error" => get_db_errors()]);
+        render_internal_server_error([JSON_ERROR => get_db_errors()]);
         return;
     }
     render_ok_json(["balance" => $balance]);
@@ -83,12 +83,12 @@ function api_refill_balance()
     $customer_id = $user[ID];
     $amount = $data[AMOUNT];
     $csrf = parse_csrf_token_header();
-    if (!__validate_amount($amount, $csrf)) {
+    if (!__validate_account_input($amount, $customer_id, $csrf)) {
         return;
     }
     $updated = payment_refill_balance($customer_id, $amount);
     if (!$updated) {
-        render_internal_server_error(["error" => get_db_errors()]);
+        render_internal_server_error([JSON_ERROR => get_db_errors()]);
         return;
     } else {
         api_get_balance();
