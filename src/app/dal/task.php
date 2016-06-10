@@ -13,10 +13,18 @@
  * @link      https://taskboards.top
  * @since     1.0.0
  */
+/**
+ * Require application bootstrap and dal_helper
+ */
 require_once "../bootstrap.php";
 require_once "dal_helper.php";
 $task_connection = null;
 
+/**
+ * Helper function returning cached task connection
+ *
+ * @return mysqli
+ */
 function get_task_connection()
 {
     global $task_connection;
@@ -26,6 +34,13 @@ function get_task_connection()
     return $task_connection;
 }
 
+/**
+ * Set transaction id to task
+ *
+ * @param $task_id
+ * @param $tx_id
+ * @return bool|null null if the row with specified task_id doesn't exists, true if update was successful and false if there was some errors
+ */
 function dal_task_update_set_lock_tx_id($task_id, $tx_id)
 {
     $db_errors = initialize_db_errors();
@@ -56,6 +71,12 @@ function dal_task_update_set_lock_tx_id($task_id, $tx_id)
     return true;
 }
 
+/**
+ * Delete the task with specified id
+ *
+ * @param $task_id
+ * @return bool|null null if the row with specified task_id doesn't exists, true if update was successful and false if there was some errors
+ */
 function dal_task_delete($task_id)
 {
     $db_errors = initialize_db_errors();
@@ -86,6 +107,14 @@ function dal_task_delete($task_id)
     return true;
 }
 
+/**
+ * Create task for customer_id with given amount and description
+ *
+ * @param $customer_id
+ * @param $amount
+ * @param $description
+ * @return bool|int|string  null if the row with specified task_id doesn't exists, task_id if creation was successful and false if there was some errors
+ */
 function dal_task_create($customer_id, $amount, $description)
 {
     $db_errors = initialize_db_errors();
@@ -119,6 +148,12 @@ function dal_task_create($customer_id, $amount, $description)
     return $id;
 }
 
+/**
+ * Fetch task by id
+ *
+ * @param $task_id
+ * @return array|bool  task object represented as assoc array was successful and false if there was some errors
+ */
 function dal_task_fetch($task_id)
 {
     $db_errors = initialize_db_errors();
@@ -174,6 +209,13 @@ function dal_task_fetch($task_id)
     ];
 }
 
+/**
+ * Fetch price of specified task_id owned by customer_id
+ *
+ * @param $task_id
+ * @param $customer_id
+ * @return null|bool|int  null if the row with specified task_id/customer_id doesn't exists, price if there's such row and false if there was some errors
+ */
 function dal_task_fetch_price($task_id, $customer_id)
 {
     $db_errors = initialize_db_errors();
@@ -221,7 +263,13 @@ function dal_task_fetch_price($task_id, $customer_id)
     return $amount;
 }
 
-function dal_task_get_last_id($user_id)
+/**
+ * Fetch the id of last task owned by customer_id
+ *
+ * @param $customer_id
+ * @return null|bool|int  null if there's no such row, id of last owned task if there's such row and false if there was some errors
+ */
+function dal_task_fetch_last_id($customer_id)
 {
     $db_errors = initialize_db_errors();
     $connection = get_task_connection();
@@ -236,7 +284,7 @@ function dal_task_get_last_id($user_id)
     }
 
     /** @noinspection PhpMethodParametersCountMismatchInspection */
-    if (!mysqli_stmt_bind_param($stmt, 'i', $user_id)) {
+    if (!mysqli_stmt_bind_param($stmt, 'i', $customer_id)) {
         add_error($connection, $db_errors);
         return false;
     }
@@ -256,6 +304,18 @@ function dal_task_get_last_id($user_id)
     return $id;
 }
 
+/**
+ * Fetches tasks limited by limit for specified user_id and user_type with an ids less that specified id
+ * with specified clause and apply callback function to each fetched entity
+ *
+ * @param $callback callable
+ * @param $user_id integer
+ * @param $lock_tx_id_clause string
+ * @param $select_user_type string
+ * @param $limit integer
+ * @param $last_id integer
+ * @return bool|null true if the fetch and callback were successful, false if there was some errors and null if there's no such row
+ */
 function dal_task_fetch_tasks_less_than_last_id_limit($callback, $user_id, $lock_tx_id_clause, $select_user_type, $limit = 100, $last_id = null)
 {
     $db_errors = initialize_db_errors();

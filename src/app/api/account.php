@@ -13,6 +13,9 @@
  * @link      https://taskboards.top
  * @since     1.0.0
  */
+/**
+ * Require bootstrap
+ */
 require_once "../bootstrap.php";
 require_once "dal/payment.php";
 
@@ -32,6 +35,13 @@ $authorization = [
     'api_refill_balance' => get_role_key(CUSTOMER)
 ];
 
+/**
+ * Validate amount
+ *
+ * @param $amount integer
+ * @param $validation_context array
+ * @return bool true if validation succeeds and false otherwise
+ */
 function __validate_amount($amount, &$validation_context)
 {
     if (is_null($amount)) {
@@ -54,6 +64,15 @@ function __validate_amount($amount, &$validation_context)
     return true;
 }
 
+/**
+ * Validate account request provided correct values
+ *
+ * @param $amount integer
+ * @param $user_id integer
+ * @param $validation_context array
+ * @return bool true if validation succeeds and false otherwise
+ */
+
 function __validate_account_input($amount, $user_id, $csrf)
 {
     $validation_context = initialize_validation_context();
@@ -66,6 +85,9 @@ function __validate_account_input($amount, $user_id, $csrf)
     return true;
 }
 
+/**
+ * Api get user balance
+ */
 function api_get_balance()
 {
     $user_id = get_authorized_user()[ID];
@@ -77,6 +99,9 @@ function api_get_balance()
     render_ok_json(["balance" => $balance]);
 }
 
+/**
+ * Api refill user balance
+ */
 function api_refill_balance()
 {
     $user = get_authorized_user();

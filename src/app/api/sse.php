@@ -13,10 +13,18 @@
  * @link      https://taskboards.top
  * @since     1.0.0
  */
+/**
+ * Require application bootstrap
+ */
 require_once "../bootstrap.php";
 $event = null;
 
-function getEvent()
+/**
+ * Get event from pool
+ * 
+ * @return int|null
+ */
+function get_event()
 {
     global $event;
     $i = 0;
@@ -30,6 +38,6 @@ function getEvent()
 
 header('Content-Type: text/event-stream');
 header('Cache-Control: no-cache');
-echo "data: " . getEvent() . PHP_EOL;
+echo "data: " . get_event() . PHP_EOL;
 echo PHP_EOL;
 flush();

@@ -13,6 +13,9 @@
  * @link      https://taskboards.top
  * @since     1.0.0
  */
+/**
+ * Require bootstrap, dal and lib functions
+ */
 require_once "../bootstrap.php";
 require_once "lib/mail.php";
 require_once "dal/user.php";

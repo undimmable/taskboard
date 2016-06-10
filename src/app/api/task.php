@@ -13,6 +13,9 @@
  * @link      https://taskboards.top
  * @since     1.0.0
  */
+/**
+ * Require bootstrap, task and payment
+ */
 require_once "../bootstrap.php";
 require_once "dal/task.php";
 require_once "dal/payment.php";
@@ -43,7 +46,13 @@ $authorization = [
     'api_task_delete_by_id' => get_role_key(CUSTOMER)
 ];
 
-
+/**
+ * Validate task amount
+ *
+ * @param $amount integer
+ * @param $validation_context array
+ * @return bool true if validation succeeds and false otherwise
+ */
 function __validate_amount($amount, &$validation_context)
 {
     if (is_null($amount)) {
@@ -66,7 +75,13 @@ function __validate_amount($amount, &$validation_context)
     return true;
 }
 
-
+/**
+ * Validate task id
+ *
+ * @param $id integer
+ * @param $validation_context array
+ * @return bool true if validation succeeds and false otherwise
+ */
 function __validate_id(&$id, &$validation_context)
 {
     if (is_null($id)) {
@@ -81,6 +96,13 @@ function __validate_id(&$id, &$validation_context)
     return true;
 }
 
+/**
+ * Validate task description
+ *
+ * @param $description string
+ * @param $validation_context array
+ * @return bool true if validation succeeds and false otherwise
+ */
 function __validate_description($description, &$validation_context)
 {
     if (is_null($description) || strlen($description) < 1) {
@@ -90,6 +112,15 @@ function __validate_description($description, &$validation_context)
     return true;
 }
 
+/**
+ * Validate task creation request provided correct values
+ *
+ * @param $last_task_id integer
+ * @param $amount integer
+ * @param $description string
+ * @param $csrf string
+ * @return bool true if validation succeeds and false otherwise
+ */
 function __validate_task_create_input($last_task_id, $amount, $description, $csrf)
 {
     $validation_context = initialize_validation_context();
@@ -103,6 +134,14 @@ function __validate_task_create_input($last_task_id, $amount, $description, $csr
     return true;
 }
 
+/**
+ * Validate task fix request provided correct values
+ *
+ * @param $task_id integer
+ * @param $customer_id int
+ * @param $csrf string
+ * @return bool true if validation succeeds and false otherwise
+ */
 function __validate_task_fix_input($task_id, $customer_id, $csrf)
 {
     $validation_context = initialize_validation_context();
@@ -115,6 +154,14 @@ function __validate_task_fix_input($task_id, $customer_id, $csrf)
     return true;
 }
 
+/**
+ * Validate perform task provided correct values
+ *
+ * @param $task_id integer
+ * @param $performer_id integer
+ * @param $csrf string
+ * @return bool true if validation succeeds and false otherwise
+ */
 function __validate_task_perform_input($task_id, $performer_id, $csrf)
 {
     $validation_context = initialize_validation_context();
@@ -127,6 +174,11 @@ function __validate_task_perform_input($task_id, $performer_id, $csrf)
     return true;
 }
 
+/**
+ * Api get task as json by id
+ *
+ * @param $task_id integer
+ */
 function api_task_get_by_id($task_id)
 {
     $validation_context = initialize_validation_context();
@@ -143,6 +195,9 @@ function api_task_get_by_id($task_id)
     }
 }
 
+/**
+ * Api get last n tasks for user
+ */
 function api_task_get_last_n()
 {
     $user = get_authorized_user();
@@ -160,7 +215,7 @@ function api_task_get_last_n()
         $lock_tx_id_clause = "lock_tx_id != -1";
     }
     if (is_customer($user[ROLE]) && is_null($last_id)) {
-        $create_csrf = get_customer_task_create_csrf($user[ID], dal_task_get_last_id($user[ID]));
+        $create_csrf = get_customer_task_create_csrf($user[ID], dal_task_fetch_last_id($user[ID]));
         echo "<!--json-$create_csrf-json-->";
     }
     $tasks = dal_task_fetch_tasks_less_than_last_id_limit("_render_task", $user_id, $lock_tx_id_clause, $select_user_type, $limit, $last_id);
@@ -171,6 +226,11 @@ function api_task_get_last_n()
     }
 }
 
+/**
+ * Api perform task
+ *
+ * @param $task_id integer
+ */
 function api_task_perform($task_id)
 {
     $user = get_authorized_user();
@@ -180,6 +240,9 @@ function api_task_perform($task_id)
 
 }
 
+/**
+ * Api create task
+ */
 function api_task_create()
 {
     if (!is_request_json()) {
@@ -192,7 +255,7 @@ function api_task_create()
     $amount = $data[AMOUNT];
     $description = $data[DESCRIPTION];
     $csrf = parse_csrf_token_header();
-    $last_task_id = dal_task_get_last_id($customer_id);
+    $last_task_id = dal_task_fetch_last_id($customer_id);
     if (!__validate_task_create_input($last_task_id, $amount, $description, $csrf)) {
         return;
     }
@@ -234,6 +297,11 @@ function api_task_create()
     }
 }
 
+/**
+ * Api fix task
+ *
+ * @param $task_id integer
+ */
 function api_task_fix($task_id)
 {
     $user = get_authorized_user();
@@ -279,7 +347,11 @@ function api_task_fix($task_id)
     }
 }
 
-
+/**
+ * Api delete task
+ *
+ * @param $task_id integer
+ */
 function api_task_delete_by_id($task_id)
 {
     $user = get_authorized_user();
@@ -304,6 +376,11 @@ function api_task_delete_by_id($task_id)
     return;
 }
 
+/**
+ * Render task from template
+ * 
+ * @param $task array
+ */
 function _render_task($task)
 {
     global $current_task;
