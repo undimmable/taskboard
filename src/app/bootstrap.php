@@ -1,4 +1,19 @@
 <?php
+/**
+ * Application Bootstrap
+ *
+ * PHP version 5
+ *
+ * @category  ApplicationBootstrap
+ * @package   Root
+ * @author    Dmitry Bogdanov <dimyriy.bogdanov@gmail.com>
+ * @copyright 2016 Dmitry Bogdanov
+ * @license   https://opensource.org/licenses/MIT MIT License
+ * @version   GIT: $Id$ In development.
+ * @link      https://taskboards.top
+ * @since     1.0.0
+ */
+
 if (!isset($php_config_path)) {
     $php_config_path = "/var/www/taskboard_config";
 };

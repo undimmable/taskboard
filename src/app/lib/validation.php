@@ -1,5 +1,18 @@
 <?php
-
+/**
+ * Lib functions
+ *
+ * PHP version 5
+ *
+ * @category  LibFunctions
+ * @package   Lib
+ * @author    Dmitry Bogdanov <dimyriy.bogdanov@gmail.com>
+ * @copyright 2016 Dmitry Bogdanov
+ * @license   https://opensource.org/licenses/MIT MIT License
+ * @version   GIT: $Id$ In development.
+ * @link      https://taskboards.top
+ * @since     1.0.0
+ */
 function __validate_customer_task_csrf($csrf, $customer_id, $task_id, &$validation_context)
 {
     if ($csrf != get_customer_task_csrf($customer_id, $task_id)) {

@@ -1,4 +1,19 @@
 <?php
+/**
+ * Common constants definitions
+ *
+ * PHP version 5
+ *
+ * @category  ConfigFunctions
+ * @package   Config
+ * @author    Dmitry Bogdanov <dimyriy.bogdanov@gmail.com>
+ * @copyright 2016 Dmitry Bogdanov
+ * @license   https://opensource.org/licenses/MIT MIT License
+ * @version   GIT: $Id$ In development.
+ * @link      https://taskboards.top
+ * @since     1.0.0
+ */
+
 define('ID', 'id');
 define('USER_ID', 'user_id');
 define('CUSTOMER_ID', 'customer_id');

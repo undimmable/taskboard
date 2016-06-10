@@ -41,6 +41,16 @@ $authorization = [
     'api_auth_signup_vk_action' => auth_unauthenticated()
 ];
 
+/**
+ * Validate signup request provided correct values
+ *
+ * @param $email string
+ * @param $role integer
+ * @param $password string
+ * @param $password_repeat string
+ * @param $csrf string
+ * @return bool true if validation succeeds and false otherwise
+ */
 function __validate_signup_input($email, $role, $password, $password_repeat, $csrf)
 {
     $validation_context = initialize_validation_context();
@@ -56,6 +66,14 @@ function __validate_signup_input($email, $role, $password, $password_repeat, $cs
     return true;
 }
 
+/**
+ * Validate login request provided correct values
+ *
+ * @param $email string
+ * @param $password string
+ * @param $csrf string
+ * @return bool true if validation succeeds and false otherwise
+ */
 function __validate_login_input($email, $password, $csrf)
 {
     $validation_context = initialize_validation_context();
@@ -69,6 +87,27 @@ function __validate_login_input($email, $password, $csrf)
     return true;
 }
 
+/**
+ * Set authentication cookie and write login information to database
+ *
+ * @param $user_id integer
+ * @param $user_role integer
+ * @param $email string
+ * @param $ip string
+ * @param $client string
+ * @param $remember_me boolean
+ */
+function __login($user_id, $user_role, $email, $ip, $client, $remember_me)
+{
+    dal_login_create_or_update($user_id, $ip, $client);
+    $token = create_jwt_token($email, $user_role, $user_id);
+    set_token_cookie($token, !$remember_me);
+    render_ok_json(['redirect' => '/']);
+}
+
+/**
+ * Api submit login form
+ */
 function api_auth_login_action()
 {
     if (!is_request_json()) {
@@ -97,12 +136,13 @@ function api_auth_login_action()
         render_not_authorized_json([JSON_ERROR => [EMAIL => 'Wrong username and/or password']]);
         return;
     }
-    dal_login_create_or_update($user[ID], $ip, $client);
-    $token = create_jwt_token($user[EMAIL], $user[ROLE], $user[ID]);
-    set_token_cookie($token, !$remember_me);
-    render_ok_json(['redirect' => '/']);
+    __login($user[ID], $user[ROLE], $user[EMAIL], $ip, $client, $remember_me);
 }
 
+
+/**
+ * Api submit signup form
+ */
 function api_auth_signup_action()
 {
     if (!is_request_json()) {
@@ -141,14 +181,21 @@ function api_auth_signup_action()
         $account = payment_create_account($user[ID], DEFAULT_BALANCE);
     }
     send_verification_request_email($email, $_SERVER['HTTP_HOST'], $confirmation_token);
+    __login($user[ID], $role, $email, parse_ip(), parse_user_client(), true);
 }
 
+/**
+ * Remove authentication cookie and redirect to index page
+ */
 function api_auth_logout_action()
 {
     delete_token_cookie();
     https_redirect("/");
 }
 
+/**
+ * Verify that user has followed link received in email
+ */
 function api_auth_verify_action()
 {
     if (array_key_exists(CONFIRMATION_TOKEN, $_GET)) {

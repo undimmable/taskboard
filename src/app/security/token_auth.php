@@ -1,4 +1,19 @@
 <?php
+/**
+ * Security functions
+ *
+ * PHP version 5
+ *
+ * @category  SecurityFunctions
+ * @package   Security
+ * @author    Dmitry Bogdanov <dimyriy.bogdanov@gmail.com>
+ * @copyright 2016 Dmitry Bogdanov
+ * @license   https://opensource.org/licenses/MIT MIT License
+ * @version   GIT: $Id$ In development.
+ * @link      https://taskboards.top
+ * @since     1.0.0
+ */
+
 $user = null;
 require_once 'dal/login.php';
 require_once 'lib/helper.php';
@@ -39,7 +54,7 @@ function try_authenticate_from_cookie()
     $user = parse_user_from_token($token);
     $user_id = $user[ID];
     $login = dal_login_fetch($user_id, parse_ip(), parse_user_client());
-    if(is_null($login) || !$login) {
+    if (is_null($login) || !$login) {
         delete_token_cookie();
     } else {
         set_authorized_user($user);

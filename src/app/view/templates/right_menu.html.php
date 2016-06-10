@@ -9,7 +9,7 @@
         if (is_customer($user[ROLE])) {
             require 'view/templates/customer_navbar.html.php';
         } else {
-            require 'view/templates/user_navbar.html.php'; 
+            require 'view/templates/user_navbar.html.php';
         }
         require 'view/templates/logout_button.html.php';
     }

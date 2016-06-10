@@ -1,4 +1,18 @@
 <?php
+/**
+ * Role definitions
+ *
+ * PHP version 5
+ *
+ * @category  ConfigFunctions
+ * @package   Config
+ * @author    Dmitry Bogdanov <dimyriy.bogdanov@gmail.com>
+ * @copyright 2016 Dmitry Bogdanov
+ * @license   https://opensource.org/licenses/MIT MIT License
+ * @version   GIT: $Id$ In development.
+ * @link      https://taskboards.top
+ * @since     1.0.0
+ */
 
 $roles = array(1 => SYSTEM, 2 => CUSTOMER, 4 => PERFORMER);
 $roles_reversed = array_flip($roles);

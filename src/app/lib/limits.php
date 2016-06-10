@@ -1,9 +1,18 @@
 <?php
 /**
- * @author dimyriy
- * @version 1.0
+ * Lib functions
+ *
+ * PHP version 5
+ *
+ * @category  LibFunctions
+ * @package   Lib
+ * @author    Dmitry Bogdanov <dimyriy.bogdanov@gmail.com>
+ * @copyright 2016 Dmitry Bogdanov
+ * @license   https://opensource.org/licenses/MIT MIT License
+ * @version   GIT: $Id$ In development.
+ * @link      https://taskboards.top
+ * @since     1.0.0
  */
-
 $_max_connections_per_ip = 10;
 $_max_requests = 10;
 $_request_limit_timeout_sec = 60;

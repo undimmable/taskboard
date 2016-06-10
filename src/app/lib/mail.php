@@ -1,5 +1,18 @@
 <?php
-
+/**
+ * Lib functions
+ *
+ * PHP version 5
+ *
+ * @category  LibFunctions
+ * @package   Lib
+ * @author    Dmitry Bogdanov <dimyriy.bogdanov@gmail.com>
+ * @copyright 2016 Dmitry Bogdanov
+ * @license   https://opensource.org/licenses/MIT MIT License
+ * @version   GIT: $Id$ In development.
+ * @link      https://taskboards.top
+ * @since     1.0.0
+ */
 function send_verification_confirmed_email($email, $host)
 {
     if (INTEGRATION_TESTS)

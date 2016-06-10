@@ -1,9 +1,18 @@
 <?php
 /**
- * @author dimyriy
- * @version 1.0
+ * Dal functions
+ *
+ * PHP version 5
+ *
+ * @category  DalFunctions
+ * @package   Dal
+ * @author    Dmitry Bogdanov <dimyriy.bogdanov@gmail.com>
+ * @copyright 2016 Dmitry Bogdanov
+ * @license   https://opensource.org/licenses/MIT MIT License
+ * @version   GIT: $Id$ In development.
+ * @link      https://taskboards.top
+ * @since     1.0.0
  */
-
 require_once "dal/dal_helper.php";
 $payment_connection = null;
 $account_connection = null;
