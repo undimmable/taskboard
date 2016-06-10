@@ -39,13 +39,14 @@ $authorization = [
  * Validate amount
  *
  * @param $amount integer
+ * @param bool $is_task boolean
  * @param $validation_context array
  * @return bool true if validation succeeds and false otherwise
  */
 function __validate_amount($amount, &$validation_context)
 {
     if (is_null($amount)) {
-        add_validation_error($validation_context, AMOUNT, 'Price not provided');
+        add_validation_error($validation_context, AMOUNT, 'Amount not provided');
         return false;
     }
     $amount = filter_var($amount, FILTER_VALIDATE_INT);
@@ -54,11 +55,11 @@ function __validate_amount($amount, &$validation_context)
         return false;
     }
     if ($amount < get_config_min_amount()) {
-        add_validation_error($validation_context, AMOUNT, 'Price cannot be less than ' . get_config_min_amount());
+        add_validation_error($validation_context, AMOUNT, 'Amount cannot be less than ' . get_config_min_amount());
         return false;
     }
     if ($amount > get_config_max_amount()) {
-        add_validation_error($validation_context, AMOUNT, 'Price cannot be larger than ' . get_config_max_amount());
+        add_validation_error($validation_context, AMOUNT, 'Amount cannot be larger than ' . get_config_max_amount());
         return false;
     }
     return true;
