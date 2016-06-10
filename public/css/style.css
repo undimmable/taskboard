@@ -18,6 +18,10 @@
     padding-bottom: 15px;
 }
 
+textarea {
+    resize: none;
+}
+
 .feed-wrapper .panel-body {
     overflow: auto;
 }
