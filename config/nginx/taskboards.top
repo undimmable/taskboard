@@ -36,11 +36,13 @@ server {
     add_header Strict-Transport-Security "max-age=31536000; includeSubdomains;";
 
     location = /events {
+        limit_req zone=events burst=5;
         access_log off;
         log_not_found off;
-        proxy_pass https://events;
-        proxy_set_header Host      $host;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_pass https://events;
     }
 
     location = /robots.txt  {
@@ -63,7 +65,8 @@ server {
     rewrite ^/api/v1/([^/]+)/?$ /app/api/$1.php?path_param=root& last;
     rewrite ^/api/v1/([^/]+)/([^/]+)/?$ /app/api/$1.php?path_param=$2& last;
 
-    location ~* "\.php$" {
+    location ~* /app/api/auth.php {
+        limit_req zone=login burst=1 nodelay;
         access_log off;
         try_files $fastcgi_script_name =404;
         proxy_buffer_size          64k;
@@ -74,9 +77,16 @@ server {
         internal;
     }
 
-    location = (/|^/feed/?$) {
+    location ~* "\.php$" {
+        limit_req zone=zone burst=5 nodelay;
         access_log off;
-        rewrite ^ /index.php?path_param=root& last;
+        try_files $fastcgi_script_name =404;
+        proxy_buffer_size          64k;
+        proxy_buffers              4 128k;
+        proxy_busy_buffers_size    128k;
+        include fastcgi_params;
+        fastcgi_pass php;
+        internal;
     }
 
     location = /favicon.ico {
