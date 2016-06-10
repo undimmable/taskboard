@@ -86,7 +86,7 @@ function Taskboard($) {
                         feed.noMoreContent();
                         var localLastTaskId = feed.lastTaskId;
                         feed.lastTaskId = -1;
-                        if(role == customerRole &&  localLastTaskId == null) {
+                        if (role == customerRole && localLastTaskId == null) {
                             $('#create-task-button').click();
                         }
                     } else {
@@ -367,6 +367,7 @@ function Taskboard($) {
         taskboardApplication.finalizeForm();
         taskboardApplication.initializePopup(successPopupKey);
         if (taskForm) {
+            taskboardApplication.updateBalance();
             taskboardApplication.replaceToken(response);
             taskboardApplication.renderHtmlTask(response, true);
             return;
@@ -432,6 +433,18 @@ function Taskboard($) {
                 e.preventDefault();
             } else {
                 taskboardApplication.cleanupModal(this);
+            }
+        });
+    };
+
+    this.updateBalance = function () {
+        $.ajax({
+            type: 'GET',
+            url: "api/v1/account",
+            error: console.log,
+            success: function (response) {
+                console.log(response);
+                $('#user-balance').text($.parseJSON(response)['balance']);
             }
         });
     };
@@ -540,6 +553,7 @@ function Taskboard($) {
                         task.remove();
                         taskboardApplication.localStorageAddItem(successPopupKey, "success");
                         taskboardApplication.initializePopup(successPopupKey);
+                        taskboardApplication.updateBalance();
                     },
                     error: function (response) {
                         taskboardApplication.localStorageAddItem(errorPopupKey, taskboardApplication.parseJsonResponseError(response));
@@ -562,6 +576,7 @@ function Taskboard($) {
                         task.replaceWith(response);
                         taskboardApplication.localStorageAddItem(successPopupKey, "success");
                         taskboardApplication.initializePopup(successPopupKey);
+                        taskboardApplication.updateBalance();
                     },
                     error: function (response) {
                         taskboardApplication.localStorageAddItem(errorPopupKey, taskboardApplication.parseJsonResponseError(response));
@@ -586,6 +601,7 @@ function Taskboard($) {
                         task.remove();
                         taskboardApplication.localStorageAddItem(successPopupKey, "success");
                         taskboardApplication.initializePopup(successPopupKey);
+                        taskboardApplication.updateBalance();
                     },
                     error: function (response) {
                         taskboardApplication.localStorageAddItem(errorPopupKey, taskboardApplication.parseJsonResponseError(response));
