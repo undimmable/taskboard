@@ -11,7 +11,6 @@ require_once "config/role.php";
 require_once "events/event.php";
 require_once "lib/helper.php";
 require_once "lib/validation.php";
-require_once "lib/mobile.php";
 require_once "lib/router.php";
 require_once "security/force_https.php";
 require_once "security/jwt.php";
