@@ -72,7 +72,7 @@ function Taskboard($) {
                 return;
             }
             $.ajax({
-                url: 'https://taskboard.dev/api/v1/task',
+                url: '/api/v1/task',
                 data: feed.buildQuery(limit),
                 contentType: 'text/html; charset=UTF-8',
                 type: "GET",
