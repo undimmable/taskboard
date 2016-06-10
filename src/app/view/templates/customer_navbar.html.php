@@ -1,6 +1,7 @@
 <?php
 $commission = get_system_commission();
 $balance = get_balance(get_authorized_user()[ID]);
+$csrf = get_account_csrf(get_authorized_user()[ID]);
 ?>
 <li>
     <a type="button" class="btn btn-lg btn-link" data-toggle="modal" data-type="account"
@@ -74,8 +75,9 @@ $balance = get_balance(get_authorized_user()[ID]);
                                placeholder="Amount" name="<?php echo AMOUNT ?>" min="1"
                                max="<?php echo get_config_max_amount() ?>">
                         <span id="account-form-error-<?php echo AMOUNT ?>" class="error-description"></span>
+                        <span id="account-form-error-token" class="error-description"></span>
                     </div>
-                    <input type="hidden" name="csrf_token">
+                    <input type="hidden" name="csrf_token" value="<?php echo $csrf; ?>">
                     <div class="form-group">
                         <button class="btn btn-primary btn-lg btn-block">
                             <i class="glyphicon glyphicon-usd" aria-hidden="true"
