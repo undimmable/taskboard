@@ -454,10 +454,23 @@ function Taskboard($) {
             if (taskboardApplication.currentForm != null) {
                 return;
             }
+            taskboardApplication.cleanupModal($(this).closest('.modal'));
+            var empty;
+            var form = $(this);
+            $(this).find('input,textarea').each(function (e, v) {
+                if(!v.value.trim().length) {
+                    empty = true;
+                    var $errorSpan = $('#'.concat(form.attr('id'), '-error-', v.name));
+                    $errorSpan.parent('div').addClass('has-error');
+                    $errorSpan.text("Not provided");
+                }
+            });
+            if(empty) {
+                return;
+            }
             var isTaskForm = $(this).attr('id') == 'task-form';
             taskboardApplication.disableModals = true;
             taskboardApplication.currentForm = this;
-            taskboardApplication.cleanupModal($(this).closest('.modal'));
             $(this).find('button').each(function () {
                 $(this).attr('disabled', 'true');
             });
