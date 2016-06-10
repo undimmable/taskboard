@@ -13,6 +13,7 @@
                         <input id="login-<?php echo EMAIL ?>" type="email" class="form-control input-lg"
                                placeholder="Email" name="<?php echo EMAIL ?>">
                         <span id="login-form-error-<?php echo EMAIL ?>" class="error-description"></span>
+                        <span id="login-form-error-unspecified" class="error-description"></span>
                     </div>
                     <div class="form-group">
                         <label for="login-<?php echo PASSWORD ?>">Password</label>

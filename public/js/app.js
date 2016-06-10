@@ -99,6 +99,26 @@ function Taskboard($) {
         }
     };
 
+    this.parseJsonResponse = function (response) {
+        var error = {};
+        if (response.hasOwnProperty('status') && (response.status == 404 || response.status == 502)) {
+            error.unspecified = "Too many attempts";
+            return {error: error};
+        }
+        if (response['responseJSON']) {
+            if (response['responseJSON'].hasOwnProperty('error')) {
+                return response['responseJSON'];
+            } else {
+                error.unspecified = "Unknown error occured";
+                return {error: error};
+            }
+        }
+        if (response.hasOwnProperty('responseText')) {
+            return $.parseJSON(response['responseText']);
+        }
+        return false;
+    };
+
     this.initializeExtensions = function () {
         $.fn.setTimestamp = function () {
             if ($(this).data('timestamp') == null) {
@@ -371,16 +391,12 @@ function Taskboard($) {
     this.onFormError = function (response, status, xhr) {
         taskboardApplication.removeFormSpinner();
         taskboardApplication.enableModals();
-        if(xhr.statusCode == 504) {
-            taskboardApplication.closeFormOnUnknownError("Gateway Timeout.");
-            return;
-        }
-        var json = response['responseJSON'] || $.parseJSON(response['responseText']);
-        if (json == null) {
+        var json = taskboardApplication.parseJsonResponse(response);
+        if (!json) {
             taskboardApplication.closeFormOnUnknownError("Something went extremely wrong here, response is not a JSON.");
             return;
         }
-        if (json.error == null) {
+        if (!json.hasOwnProperty('error') || json.error == null) {
             taskboardApplication.closeFormOnUnknownError("Something went extremely wrong here, response is JSON of error type, but doesn't have any explanatory fields.");
             return;
         }
@@ -395,17 +411,14 @@ function Taskboard($) {
         $.each(json.error, function (error_name, error_description) {
             var $errorSpan = $('#'.concat(taskboardApplication.currentFormId(), '-error-', error_name));
             if ($errorSpan.length == 0) {
-                taskboardApplication.closeFormOnUnknownError(JSON.stringify($.parseJSON(response['responseText'])['error']));
-                return;
+                taskboardApplication.closeFormOnUnknownError(json);
             } else {
                 $errorSpan.parent('div').addClass('has-error');
                 $errorSpan.text(error_description);
-
             }
-            taskboardApplication.processResponseEvents(response);
-            taskboardApplication.initializePopup(errorPopupKey);
-            taskboardApplication.finalizeForm();
         });
+        taskboardApplication.processResponseEvents(response);
+        taskboardApplication.finalizeForm();
     };
 
     this.initializeFormModals = function () {
@@ -474,7 +487,16 @@ function Taskboard($) {
     };
 
     this.initializeTooltips = function () {
-        $("[rel=tooltip]").tooltip({ placement: 'bottom'});
+        $("[rel=tooltip]").tooltip({placement: 'bottom'});
+    };
+
+    this.parseJsonResponseError = function (response) {
+        var json = taskboardApplication.parseJsonResponse(response);
+        if (json && json.hasOwnProperty('error') && json['error'] != null) {
+            return JSON.stringify($.parseJSON(json.error));
+        } else {
+            return "Unknown error";
+        }
     };
 
     this.initialize = function () {
@@ -516,7 +538,7 @@ function Taskboard($) {
                         taskboardApplication.initializePopup(successPopupKey);
                     },
                     error: function (response) {
-                        taskboardApplication.localStorageAddItem(errorPopupKey, JSON.stringify($.parseJSON(response['responseText'])['error']));
+                        taskboardApplication.localStorageAddItem(errorPopupKey, taskboardApplication.parseJsonResponseError(response));
                         taskboardApplication.initializePopup(errorPopupKey);
                     }
                 });
@@ -538,7 +560,7 @@ function Taskboard($) {
                         taskboardApplication.initializePopup(successPopupKey);
                     },
                     error: function (response) {
-                        taskboardApplication.localStorageAddItem(errorPopupKey, JSON.stringify($.parseJSON(response['responseText'])['error']));
+                        taskboardApplication.localStorageAddItem(errorPopupKey, taskboardApplication.parseJsonResponseError(response));
                         taskboardApplication.initializePopup(errorPopupKey);
                     }
                 });
@@ -562,7 +584,7 @@ function Taskboard($) {
                         taskboardApplication.initializePopup(successPopupKey);
                     },
                     error: function (response) {
-                        taskboardApplication.localStorageAddItem(errorPopupKey, JSON.stringify($.parseJSON(response['responseText'])['error']));
+                        taskboardApplication.localStorageAddItem(errorPopupKey, taskboardApplication.parseJsonResponseError(response));
                         taskboardApplication.initializePopup(errorPopupKey);
                     }
                 });
