@@ -105,7 +105,7 @@ function __validate_id(&$id, &$validation_context)
  */
 function __validate_description($description, &$validation_context)
 {
-    if (is_null($description) || strlen($description) < 1) {
+    if (is_null($description) || strlen($description) < 1 || ctype_space($description)) {
         add_validation_error($validation_context, DESCRIPTION, 'Description not provided');
         return false;
     }
