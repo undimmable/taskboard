@@ -15,7 +15,7 @@
     }
     ?>
     <li class="dropdown">
-        <a href="#" id="locale" class="dropdown-toggle btn btn-link" data-toggle="dropdown">EN</a>
+        <a href="#" id="locale" class="dropdown-toggle btn btn-link btn-default" data-toggle="dropdown">EN</a>
         <ul class="dropdown-menu">
             <li><a href="#" id="russian">Русский</a></li>
             <li><a href="#" id="english">English</a></li>
