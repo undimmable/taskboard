@@ -267,9 +267,9 @@ function dal_task_fetch_price($task_id, $customer_id)
  * Fetch the id of last task owned by customer_id
  *
  * @param $customer_id
- * @return null|bool|int  null if there's no such row, id of last owned task if there's such row and false if there was some errors
+ * @return null|bool|array null if there's no such row, assoc array containing last owned task if there's such row and false if there was some errors
  */
-function dal_task_fetch_last_id($customer_id)
+function dal_task_fetch_last($customer_id)
 {
     $db_errors = initialize_db_errors();
     $connection = get_task_connection();
@@ -277,7 +277,7 @@ function dal_task_fetch_last_id($customer_id)
         add_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "SELECT max(id) FROM db_task.task WHERE customer_id=?");
+    $stmt = mysqli_prepare($connection, "SELECT id,amount,paid FROM db_task.task WHERE customer_id=? ORDER BY id DESC LIMIT 1");
     if (!$stmt) {
         add_error($connection, $db_errors);
         return false;
@@ -292,7 +292,7 @@ function dal_task_fetch_last_id($customer_id)
         add_error($connection, $db_errors);
         return false;
     }
-    if (!mysqli_stmt_bind_result($stmt, $id)) {
+    if (!mysqli_stmt_bind_result($stmt, $id, $amount, $paid)) {
         add_error($connection, $db_errors);
         return false;
     }
@@ -301,7 +301,11 @@ function dal_task_fetch_last_id($customer_id)
         add_error($connection, $db_errors);
         return false;
     }
-    return $id;
+    return [
+        ID => $id,
+        AMOUNT => $amount,
+        PAID => $paid
+    ];
 }
 
 /**
@@ -310,13 +314,13 @@ function dal_task_fetch_last_id($customer_id)
  *
  * @param $callback callable
  * @param $user_id integer
- * @param $lock_tx_id_clause string
+ * @param $paid string
  * @param $select_user_type string
  * @param $limit integer
  * @param $last_id integer
  * @return bool|null true if the fetch and callback were successful, false if there was some errors and null if there's no such row
  */
-function dal_task_fetch_tasks_less_than_last_id_limit($callback, $user_id, $lock_tx_id_clause, $select_user_type, $limit = 100, $last_id = null)
+function dal_task_fetch_tasks_less_than_last_id_limit($callback, $user_id, $paid, $select_user_type, $limit = 100, $last_id = null)
 {
     $db_errors = initialize_db_errors();
     $connection = get_task_connection();
@@ -326,7 +330,7 @@ function dal_task_fetch_tasks_less_than_last_id_limit($callback, $user_id, $lock
     }
     $last_id_clause = $last_id === null ? '' : "AND id < $last_id";
 
-    $query = "SELECT id, timestampdiff(SECOND, now(), created_at), customer_id, performer_id, amount, description, lock_tx_id FROM db_task.task WHERE $lock_tx_id_clause AND not deleted AND $select_user_type <=> ? $last_id_clause ORDER BY id DESC LIMIT ?";
+    $query = "SELECT id, timestampdiff(SECOND, now(), created_at), customer_id, performer_id, amount, description, paid FROM db_task.task WHERE $paid AND not deleted AND $select_user_type <=> ? $last_id_clause ORDER BY id DESC LIMIT ?";
     $stmt = mysqli_prepare($connection, $query);
     if (!$stmt) {
         add_error($connection, $db_errors);

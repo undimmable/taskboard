@@ -174,6 +174,23 @@ function __validate_task_perform_input($task_id, $performer_id, $csrf)
     return true;
 }
 
+function __try_fix_unprocessed_transaction($user_id)
+{
+    $id = payment_get_last_user_tx_id($user_id);
+    if (is_null($id)) {
+        return null;
+    } elseif (!$id) {
+        return false;
+    } else {
+        $transactions = payment_fetch_transactions_after($id);
+        if (!$transactions) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+}
+
 /**
  * Api get task as json by id
  *
@@ -212,10 +229,12 @@ function api_task_get_last_n()
         $select_user_type = 'customer_id';
     } else {
         $select_user_type = 'performer_id';
-        $lock_tx_id_clause = "lock_tx_id != -1";
+        $lock_tx_id_clause = "paid";
     }
     if (is_customer($user[ROLE]) && is_null($last_id)) {
-        $create_csrf = get_customer_task_create_csrf($user[ID], dal_task_fetch_last_id($user[ID]));
+        $task = dal_task_fetch_last($user[ID]);
+        $last_task_id = $task ? $task[ID] : -1;
+        $create_csrf = get_customer_task_create_csrf($user[ID], $last_task_id);
         echo "<!--json-$create_csrf-json-->";
     }
     $tasks = dal_task_fetch_tasks_less_than_last_id_limit("_render_task", $user_id, $lock_tx_id_clause, $select_user_type, $limit, $last_id);
@@ -255,13 +274,21 @@ function api_task_create()
     $amount = $data[AMOUNT];
     $description = $data[DESCRIPTION];
     $csrf = parse_csrf_token_header();
-    $last_task_id = dal_task_fetch_last_id($customer_id);
+    $last_task = dal_task_fetch_last($customer_id);
+    $last_task_id = $last_task ? $last_task[ID] : -1;
     if (!__validate_task_create_input($last_task_id, $amount, $description, $csrf)) {
         return;
     }
+    if (!$last_task[PAID]) {
+        if (!__try_fix_unprocessed_transaction($customer_id)) {
+            render_conflict([
+                JSON_ERROR => ["task-unpaid" => true]
+            ]);
+        }
+    }
     if (!payment_check_able_to_process($customer_id, $amount)) {
         render_conflict([
-            "error" => ["amount" => "not_enough"]
+            JSON_ERROR => ["amount" => "not_enough"]
         ]);
         return;
     }

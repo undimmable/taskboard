@@ -41,7 +41,54 @@ function payment_check_able_to_process($user_id, $amount)
     if (!$balance)
         return false;
     return $balance - $amount > 0;
+}
 
+function payment_get_last_user_tx_id($user_id)
+{
+    $connection = get_account_connection();
+    $stmt = mysqli_prepare($connection, "SELECT last_tx_id FROM db_account.account WHERE user_id=?");
+    if (!$stmt) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (!mysqli_stmt_bind_param($stmt, 'i', $user_id)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (!mysqli_stmt_execute($stmt)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (!mysqli_stmt_store_result($stmt)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (mysqli_stmt_num_rows($stmt) < 1) {
+        mysqli_stmt_close($stmt);
+        return null;
+    }
+    if (!mysqli_stmt_bind_result($stmt, $id)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (!mysqli_stmt_fetch($stmt)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (!mysqli_stmt_close($stmt)) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    if (mysqli_errno($connection) !== 0) {
+        return false;
+    }
+    return $id;
+}
+
+function payment_fetch_transactions_after($tx_id)
+{
+    $connection = get_payment_connection();
+    return mysqli_query($connection, "SELECT id,amount,processed,type FROM db_tx.tx WHERE id=$tx_id", MYSQLI_ASSOC);
 }
 
 function payment_lock_balance($user_id, $tx_id, $amount)
