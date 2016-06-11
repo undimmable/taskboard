@@ -46,20 +46,20 @@ $authorization = [
 function __validate_amount($amount, &$validation_context)
 {
     if (is_null($amount)) {
-        add_validation_error($validation_context, AMOUNT, 'Amount not provided');
+        add_validation_error($validation_context, AMOUNT, 'not_provided');
         return false;
     }
     $amount = filter_var($amount, FILTER_VALIDATE_INT);
     if (!$amount) {
-        add_validation_error($validation_context, AMOUNT, 'Is not a valid number');
+        add_validation_error($validation_context, AMOUNT, 'is_invalid');
         return false;
     }
     if ($amount < get_config_min_amount()) {
-        add_validation_error($validation_context, AMOUNT, 'Amount cannot be less than ' . get_config_min_amount());
+        add_validation_error($validation_context, AMOUNT, 'too_small');
         return false;
     }
-    if ($amount > get_config_max_amount()) {
-        add_validation_error($validation_context, AMOUNT, 'Amount cannot be larger than ' . get_config_max_amount());
+    if ($amount > 1) {
+        add_validation_error($validation_context, AMOUNT, 'too_large');
         return false;
     }
     return true;

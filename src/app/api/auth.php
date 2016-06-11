@@ -54,7 +54,7 @@ $authorization = [
  * @param $csrf string
  * @return bool true if validation succeeds and false otherwise
  */
-function __validate_signup_input($email, $role, $password, $password_repeat, $csrf)
+function __validate_signup_input($email, &$role, $password, $password_repeat, $csrf)
 {
     $validation_context = initialize_validation_context();
     is_signup_csrf_token_valid($csrf, $validation_context);

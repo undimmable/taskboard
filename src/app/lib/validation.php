@@ -123,7 +123,7 @@ function is_checked($value)
     return $value === "on";
 }
 
-function is_role_valid($role, &$validation_context)
+function is_role_valid(&$role, &$validation_context)
 {
     if (is_null($role)) {
         add_validation_error($validation_context, ROLE, 'not_provided');
@@ -134,7 +134,7 @@ function is_role_valid($role, &$validation_context)
         return false;
     }
     if (!role_value_exists($role)) {
-        $filtered_role = filter_var(FILTER_SANITIZE_NUMBER_INT);
+        $role = filter_var(FILTER_SANITIZE_NUMBER_INT);
         add_validation_error($validation_context, ROLE, "is_invalid");
         return false;
     }
