@@ -14,9 +14,6 @@
  * @since     1.0.0
  */
 
-define("UNSPECIFIED", "unspecified");
-define("JSON_ERROR", "error");
-
 function render_not_found($error = [JSON_ERROR => [UNSPECIFIED => "Not found"]])
 {
     render_status_json(404, $error);

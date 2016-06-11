@@ -57,4 +57,6 @@ define('TASK_DESCRIPTION_IDX', 'TD');
 define('DEFAULT_BALANCE', 100.00);
 define('CREATE_ACCOUNT_RETRIES', 2);
 define('INTEGRATION_TESTS', true);
+define("UNSPECIFIED", "unspecified");
+define("JSON_ERROR", "error");
 ini_set('sendmail_from', 'signup@taskboards.top');
