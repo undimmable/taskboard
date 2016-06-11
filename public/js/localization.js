@@ -118,6 +118,8 @@ function Localization() {
     this.hide_completed_ru = "Спрятать завершённые";
     this.unspecified_too_many_attempts_en = this.too_many_attempts_en;
     this.unspecified_too_many_attempts_ru = this.too_many_attempts_ru;
+    this.error_unknown_en = "Unknown error occurred";
+    this.error_unknown_ru = "Произошла неизвестная ошибка";
     this.commission_en = function () {
         return "Note that the system commission ".concat($('#user-data').data('commission'), "% will be applied");
     };
