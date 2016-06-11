@@ -29,7 +29,7 @@
                     </div>
                     <div class="form-group center-block pull-right">
                         <label>
-                            <input type="checkbox" data-toggle="toggle" data-size="large" data-width="250px"
+                            <input type="checkbox" id="toggler" data-size="large" data-width="250px"
                                    name="<?php echo IS_CUSTOMER ?>" data-onstyle="success" data-offstyle="success"
                                    class="btn btn-primary btn-lg l10n l10n-toggler" data-l10n="performer_customer">
                         </label>

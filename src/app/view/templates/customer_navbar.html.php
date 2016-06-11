@@ -25,7 +25,7 @@ $csrf = get_account_csrf(get_authorized_user()[ID]);
                 <!--suppress HtmlUnknownTarget -->
                 <form id="task-form" class="form col-md-12 center-block" action="/api/v1/task">
                     <div class="form-group">
-                        <label for="task-<?php echo DESCRIPTION ?>">Description</label>
+                        <label for="task-<?php echo DESCRIPTION ?>" class="l10n l10n-text" data-l10n="description"></label>
                         <textarea id="task-<?php echo DESCRIPTION ?>" class="form-control input-lg l10n l10n-placeholder" data-l10n="description"
                                   placeholder="Description" name="<?php echo DESCRIPTION ?>" rows="3"
                                   maxlength="<?php echo get_config_max_task_description_length() ?>"></textarea>

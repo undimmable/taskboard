@@ -56,20 +56,20 @@ $authorization = [
 function __validate_amount($amount, &$validation_context)
 {
     if (is_null($amount)) {
-        add_validation_error($validation_context, AMOUNT, 'Price not provided');
+        add_validation_error($validation_context, AMOUNT, 'not_provided');
         return false;
     }
     $amount = filter_var($amount, FILTER_VALIDATE_INT);
     if (!$amount) {
-        add_validation_error($validation_context, AMOUNT, 'Is not a valid number');
+        add_validation_error($validation_context, AMOUNT, 'is_invalid');
         return false;
     }
     if ($amount < get_config_min_amount()) {
-        add_validation_error($validation_context, AMOUNT, 'Price cannot be less than ' . get_config_min_amount());
+        add_validation_error($validation_context, AMOUNT, 'too_small');
         return false;
     }
     if ($amount > get_config_max_amount()) {
-        add_validation_error($validation_context, AMOUNT, 'Price cannot be larger than ' . get_config_max_amount());
+        add_validation_error($validation_context, AMOUNT, 'too_large');
         return false;
     }
     return true;
@@ -261,7 +261,7 @@ function api_task_create()
     }
     if (!payment_check_able_to_process($customer_id, $amount)) {
         render_conflict([
-            "error" => ["amount" => "Not enough money"]
+            "error" => ["amount" => "not_enough"]
         ]);
         return;
     }
@@ -270,7 +270,7 @@ function api_task_create()
     $success = payment_lock_balance($customer_id, $lock_tx_id, $amount);
     if (is_null($success)) {
         render_conflict([
-            "error" => ["amount" => "Not enough money"]
+            "error" => ["amount" => "not_enough"]
         ]);
         return;
     } elseif (!$success) {
@@ -314,14 +314,14 @@ function api_task_fix($task_id)
         return;
     }
     if (!payment_check_able_to_process($customer_id, $amount)) {
-        render_conflict([JSON_ERROR => [AMOUNT => "Not enough money"]]);
+        render_conflict([JSON_ERROR => [AMOUNT => "not_enough"]]);
         return;
     }
 
     $lock_tx_id = payment_get_unprocessed_transaction($customer_id, $task_id, 'l');
     $success = payment_lock_balance($customer_id, $lock_tx_id, $amount);
     if (is_null($success)) {
-        render_conflict([JSON_ERROR => [AMOUNT => "Not enough money"]]);
+        render_conflict([JSON_ERROR => [AMOUNT => "not_enough"]]);
         return;
     } elseif (!$success) {
         render_internal_server_error();

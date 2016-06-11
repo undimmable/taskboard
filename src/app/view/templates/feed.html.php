@@ -6,7 +6,7 @@
                 <?php if (is_customer(get_current_user()[ROLE])) {
                     echo "<span class=\"pull-right\">
                     <label>
-                        Hide completed
+                        <span class=\"l10n l10n-text\" data-l10n=\"hide_completed\"></span>
                         <input type=\"checkbox\" id=\"hide-completed\">
                     </label>
                 </span>";

@@ -2,7 +2,7 @@
     <div class="feed-wrapper">
         <div class="panel panel-info">
             <div class="panel-heading">
-                Task feed
+                <span class="l10n l10n-text" data-l10n="task_feed"></span>
             </div>
             <div class="panel-body">
                 <ul id="task-feed" class="media-list">
@@ -22,8 +22,7 @@
                             </div>
                             <div class="col-md-3">
                                 <small class="text-muted pull-right">
-                                    <span class="timestamp created_at"
-                                          data-timestamp-offset="-3432">about an hour ago</span>
+                                    <span class="created_at  l10n  l10n-text" data-l10n="hour_ago">about an hour ago</span>
                                 </small>
                                 <button type="button" class="perform-task btn btn-primary pull-right no-shadow"
                                         data-toggle="modal" data-target="#signup-form-modal">
@@ -45,8 +44,7 @@
                             </div>
                             <div class="col-md-3">
                                 <small class="text-muted pull-right">
-                                    <span class="timestamp created_at"
-                                          data-timestamp-offset="-3438">about an hour ago</span>
+                                    <span class="created_at  l10n  l10n-text" data-l10n="hour_ago">about an hour ago</span>
                                 </small>
                                 <button type="button" class="perform-task btn btn-primary pull-right no-shadow"
                                         data-toggle="modal" data-target="#signup-form-modal">$50.00
@@ -69,8 +67,7 @@
                             </div>
                             <div class="col-md-3">
                                 <small class="text-muted pull-right">
-                                    <span class="timestamp created_at"
-                                          data-timestamp-offset="-3456">about an hour ago</span>
+                                    <span class="created_at l10n  l10n-text" data-l10n="hour_ago">about an hour ago</span>
                                 </small>
                                 <button type="button" class="perform-task btn btn-primary pull-right no-shadow"
                                         data-toggle="modal" data-target="#signup-form-modal">
@@ -91,8 +88,7 @@
                             </div>
                             <div class="col-md-3">
                                 <small class="text-muted pull-right">
-                                    <span class="timestamp created_at"
-                                          data-timestamp-offset="-3521">about an hour ago</span>
+                                    <span class="created_at  l10n l10n-text" data-l10n="hour_ago">about an hour ago</span>
                                 </small>
                                 <button type="button" class="perform-task btn btn-primary pull-right no-shadow"
                                         data-toggle="modal" data-target="#signup-form-modal">
@@ -116,8 +112,7 @@
                             </div>
                             <div class="col-md-3">
                                 <small class="text-muted pull-right">
-                                    <span class="timestamp created_at"
-                                          data-timestamp-offset="-3678">about an hour ago</span>
+                                    <span class="created_at  l10n  l10n-text" data-l10n="hour_ago">about an hour ago</span>
                                 </small>
                                 <button type="button" class="perform-task btn btn-primary pull-right no-shadow"
                                         data-toggle="modal" data-target="#signup-form-modal">
@@ -140,8 +135,7 @@
                             </div>
                             <div class="col-md-3">
                                 <small class="text-muted pull-right">
-                                    <span class="timestamp created_at"
-                                          data-timestamp-offset="-3964">about an hour ago</span>
+                                    <span class="created_at  l10n  l10n-text" data-l10n="hour_ago">about an hour ago</span>
                                 </small>
                                 <button type="button" class="perform-task btn btn-primary pull-right no-shadow"
                                         data-toggle="modal" data-target="#signup-form-modal">$2.00
@@ -151,11 +145,11 @@
                     </li>
                 </ul>
             </div>
-            <div id="loading" class="panel-footer" hidden="" style="display: none;">
-                Loading...
+            <div id="loading" class="panel-footer" hidden>
+                <span class="l10n l10n-text" data-l10n="loading"></span>
             </div>
             <div id="no-more-content" class="panel-footer">
-                No more content
+                <span class="l10n l10n-text" data-l10n="no_more_content"></span>
             </div>
         </div>
     </div>

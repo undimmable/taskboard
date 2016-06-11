@@ -131,17 +131,24 @@ function Taskboard($) {
         }
     };
 
+    this.replaceTooltip = function () {
+        var tooltip = $("[rel=tooltip]");
+        tooltip.attr('data-original-title', taskboardApplication.localizedMessage('balance_tooltip'));
+    };
+
     this.setLocale = function (locale) {
-        if(locale != 'ru' && locale != 'en')
+        if (locale != 'ru' && locale != 'en')
             return;
         var item = localStorage.getItem('locale');
         if (!item)
             item = 'en';
-        if(locale == item)
+        if (locale == item)
             return;
         localStorage.setItem('locale', locale);
         $("#locale").text(locale.toUpperCase());
         taskboardApplication.updateLocales();
+        taskboardApplication.initializeToggler();
+        taskboardApplication.replaceTooltip();
     };
 
     this.localizedMessage = function (message) {
@@ -581,12 +588,26 @@ function Taskboard($) {
         });
     };
 
+    this.initializeToggler = function () {
+        var $toggler = $('#toggler');
+        $toggler.bootstrapToggle('destroy');
+        $toggler.bootstrapToggle({
+            on: function () {
+                return taskboardApplication.localizedMessage('i_am_customer');
+            },
+            off: function () {
+                return taskboardApplication.localizedMessage('i_am_performer');
+            }
+        });
+    };
+
     this.initialize = function () {
         "use strict";
         taskboardApplication.initializeExtensions();
         taskboardApplication.locale = localStorage.getItem('locale') || 'en';
         $("#locale").text(taskboardApplication.locale.toUpperCase());
         taskboardApplication.updateLocales();
+        taskboardApplication.initializeToggler();
         $('#english').click(function (e) {
             e.preventDefault();
             taskboardApplication.setLocale('en');
