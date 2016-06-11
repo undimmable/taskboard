@@ -4,7 +4,6 @@
   "license": "proprietary",
   "require": {
     "php": ">=5.6.0",
-    "ext-libevent": "*",
     "ext-mysqli": "*"
   },
   "require-dev": {
