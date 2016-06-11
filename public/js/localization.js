@@ -74,6 +74,8 @@ function Localization() {
     this.password_is_invalid_ru = "Указано неверное значение пароля";
     this.email_is_too_short_en = "Email is too short";
     this.email_is_too_short_ru = "Слишком короткий email";
+    this.email_already_registered_en = "User with this email alreadt registered";
+    this.email_already_registered_ru = "Пользователь с таким именем уже существует";
     this.password_is_too_short_en = "Password is too short";
     this.password_is_too_short_ru = "Слишком короткий пароль";
     this.email_is_too_long_en = "Email is way too long";
@@ -104,6 +106,8 @@ function Localization() {
     this.price_not_provided_ru = "Стоимость не указана";
     this.amount_not_enough_en = "Not enough money";
     this.amount_not_enough_ru = "Недостаточно денег";
+    this.task_unable_to_process_en = "Couldn't process";
+    this.task_unable_to_process_ru = "Не удалось повторить транзакцию";
     this.price_not_enough_en = this.amount_not_enough_en;
     this.price_not_enough_ru = this.amount_not_enough_ru;
     this.too_many_attempts_en = "Too many attempts, try again later";

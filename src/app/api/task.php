@@ -310,7 +310,7 @@ function api_task_fix($task_id)
     __validate_task_fix_input($task_id, $customer_id, $csrf);
     $amount = dal_task_fetch_price($task_id, $customer_id);
     if (is_null($amount) || !$amount) {
-        render_bad_request_json([JSON_ERROR => ["task" => "Couldn't process"]]);
+        render_bad_request_json([JSON_ERROR => ["task" => "unable_to_process"]]);
         return;
     }
     if (!payment_check_able_to_process($customer_id, $amount)) {
@@ -378,7 +378,7 @@ function api_task_delete_by_id($task_id)
 
 /**
  * Render task from template
- * 
+ *
  * @param $task array
  */
 function _render_task($task)

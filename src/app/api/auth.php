@@ -172,7 +172,7 @@ function api_auth_signup_action()
     if (!$user) {
         $errors = get_db_errors();
         if ($errors[LOGIN] === "duplicate entity") {
-            $errors = [JSON_ERROR => [EMAIL => "User with this email already registered"]];
+            $errors = [JSON_ERROR => [EMAIL => "already_registered"]];
         }
         render_conflict($errors);
         return;

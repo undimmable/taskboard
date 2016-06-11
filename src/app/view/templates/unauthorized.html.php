@@ -1,7 +1,7 @@
 <div class="col-lg-8 col-md-10 col-sm-12 col-xs-12 col-lg-offset-2 col-md-offset-1 col-sm-offset-0 col-xs-offset-0">
     <div class="feed-wrapper">
         <div class="panel panel-info">
-            <div class="panel-heading">
+            <div class="panel-heading text-center">
                 <span class="l10n l10n-text" data-l10n="task_feed"></span>
             </div>
             <div class="panel-body">
