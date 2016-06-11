@@ -93,7 +93,7 @@ function parse_user_client()
 
 function is_task_active($task)
 {
-    return array_key_exists(LOCK_TX_ID, $task) && ($task[LOCK_TX_ID] != -1);
+    return array_key_exists(PAID, $task) && ($task[PAID]);
 }
 
 function is_task_completed($task)
