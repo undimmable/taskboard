@@ -70,11 +70,11 @@ function is_account_csrf_token_valid($csrf, $user_id, &$validation_context)
 function is_password_valid($password, &$validation_context)
 {
     if (is_null($password)) {
-        add_validation_error($validation_context, PASSWORD, 'Password not provided');
+        add_validation_error($validation_context, PASSWORD, 'not_provided');
         return false;
     }
     if (strlen($password) < get_config_min_password_length()) {
-        add_validation_error($validation_context, PASSWORD, 'Password is too short');
+        add_validation_error($validation_context, PASSWORD, 'is_too_short');
         return false;
     }
     return true;
@@ -85,12 +85,12 @@ function is_password_repeat_valid($password, $password_repeat, &$validation_cont
     if (!$password)
         return false;
     if (is_null($password_repeat)) {
-        add_validation_error($validation_context, PASSWORD_REPEAT, 'Password repeat not provided');
+        add_validation_error($validation_context, PASSWORD_REPEAT, 'not_provided');
         return false;
     }
     if ($password !== $password_repeat) {
-        add_validation_error($validation_context, PASSWORD, "Passwords don't match");
-        add_validation_error($validation_context, PASSWORD_REPEAT, "Passwords don't match");
+        add_validation_error($validation_context, PASSWORD, "mismatch");
+        add_validation_error($validation_context, PASSWORD_REPEAT, "mismatch");
         return false;
     }
     return true;
@@ -99,15 +99,15 @@ function is_password_repeat_valid($password, $password_repeat, &$validation_cont
 function is_email_valid($email, &$validation_context)
 {
     if (is_null($email)) {
-        add_validation_error($validation_context, EMAIL, 'Email not provided');
+        add_validation_error($validation_context, EMAIL, 'not_provided');
         return false;
     }
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        add_validation_error($validation_context, EMAIL, 'Email is invalid');
+        add_validation_error($validation_context, EMAIL, 'is_invalid');
         return false;
     }
     if (strlen($email) > get_config_max_email_length()) {
-        add_validation_error($validation_context, EMAIL, 'Email is way too long');
+        add_validation_error($validation_context, EMAIL, 'is_too_long');
         return false;
     }
     return true;
@@ -126,16 +126,16 @@ function is_checked($value)
 function is_role_valid($role, &$validation_context)
 {
     if (is_null($role)) {
-        add_validation_error($validation_context, ROLE, 'User role not provided');
+        add_validation_error($validation_context, ROLE, 'not_provided');
         return false;
     }
     if (!filter_var($role, FILTER_VALIDATE_INT)) {
-        add_validation_error($validation_context, ROLE, 'Invalid user role');
+        add_validation_error($validation_context, ROLE, 'is_invalid');
         return false;
     }
     if (!role_value_exists($role)) {
         $filtered_role = filter_var(FILTER_SANITIZE_NUMBER_INT);
-        add_validation_error($validation_context, ROLE, "No such role $filtered_role");
+        add_validation_error($validation_context, ROLE, "is_invalid");
         return false;
     }
     return true;

@@ -3,13 +3,13 @@ $balance = get_balance(get_authorized_user()[ID]);
 $csrf = get_account_csrf(get_authorized_user()[ID]);
 ?>
 <li>
-    <a type="button" class="btn btn-lg btn-link l10n l10n-tooltip" data-l10n="balance_tooltip" data-toggle="modal" data-type="account"
+    <a type="button" class="btn btn-link l10n l10n-tooltip" data-l10n="balance_tooltip" data-toggle="modal" data-type="account"
        data-target="#account-form-modal" rel="tooltip">
         $<span id="user-balance"><?php echo $balance; ?> </span> <span class="l10n l10n-text" data-l10n="refill_account"></span>
     </a>
 </li>
 <li>
-    <a type="button" class="btn btn-lg btn-link" data-toggle="modal" data-type="task"
+    <a type="button" class="btn btn-link" data-toggle="modal" data-type="task"
        data-target="#task-form-modal" id="create-task-button">
         <i class="glyphicon glyphicon-plus" aria-hidden="true"></i> <span class="l10n l10n-text" data-l10n="create_task"></span>
     </a>
@@ -33,7 +33,7 @@ $csrf = get_account_csrf(get_authorized_user()[ID]);
                         <span id="login-form-error-unspecified" class="error-description"></span>
                     </div>
                     <div class="form-group">
-                        <label for="task-<?php echo AMOUNT ?>">Price</label>
+                        <label for="task-<?php echo AMOUNT ?>" class="l10n l10n-text" data-l10n="price"></label>
                         <input id="task-<?php echo AMOUNT ?>" type="number" class="form-control input-lg l10n l10n-placeholder" data-l10n="price"
                                placeholder="Price" name="<?php echo AMOUNT ?>" min="1"
                                max="<?php echo get_config_max_amount() ?>">
@@ -84,7 +84,7 @@ $csrf = get_account_csrf(get_authorized_user()[ID]);
                 <!--suppress HtmlUnknownTarget -->
                 <form id="account-form" class="form col-md-12 center-block" action="/api/v1/account">
                     <div class="form-group">
-                        <label for="account-<?php echo AMOUNT ?>">Amount</label>
+                        <label for="account-<?php echo AMOUNT ?>" class="l10n l10n-text" data-l10n="amount"></label>
                         <input id="account-<?php echo AMOUNT ?>" type="number" class="form-control input-lg l10n l10n-placeholder" data-l10n="amount"
                                placeholder="Amount" name="<?php echo AMOUNT ?>" min="1"
                                max="<?php echo get_config_max_amount() ?>">

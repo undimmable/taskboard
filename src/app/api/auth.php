@@ -130,13 +130,13 @@ function api_auth_login_action()
     $interval = get_config_failed_attempt_timeout();
     $failed_attempts = dal_login_being_failed($ip, $client, get_config_failed_attempt_retry(), $interval);
     if ($failed_attempts) {
-        render_not_authorized_json([JSON_ERROR => [EMAIL => "Max attempts number exceeded. Try again in $interval seconds"]]);
+        render_not_authorized_json([JSON_ERROR => [UNSPECIFIED => "too_many_attempts"]]);
         return;
     }
     $user = db_fetch_user_by_email($email);
     if ($user === null || !password_verify($password, $user[HASHED_PASSWORD])) {
         dal_login_log_failed($ip, $client);
-        render_not_authorized_json([JSON_ERROR => [EMAIL => 'Wrong username and/or password']]);
+        render_not_authorized_json([JSON_ERROR => [EMAIL => 'no_such_user']]);
         return;
     }
     __login($user[ID], $user[ROLE], $user[EMAIL], $ip, $client, $remember_me);

@@ -1,6 +1,5 @@
 function Taskboard($) {
     "use strict";
-    var successPopupKey = 'success-popup';
     var errorPopupKey = 'error-popup';
     var taskboardApplication = this;
     var feed = null;
@@ -106,14 +105,14 @@ function Taskboard($) {
     this.parseJsonResponse = function (response) {
         var error = {};
         if (response.hasOwnProperty('status') && (response.status == 404 || response.status == 502)) {
-            error.unspecified = "Max attempts number exceeded.";
+            error.unspecified = taskboardApplication.localizedMessage('too_many_attempts');
             return {error: error};
         }
         if (response['responseJSON']) {
             if (response['responseJSON'].hasOwnProperty('error')) {
                 return response['responseJSON'];
             } else {
-                error.unspecified = "Unknown error occurred";
+                error.unspecified = taskboardApplication.localizedMessage('unknown_error');
                 return {error: error};
             }
         }
@@ -130,6 +129,19 @@ function Taskboard($) {
         } else {
             return 'en';
         }
+    };
+
+    this.setLocale = function (locale) {
+        if(locale != 'ru' && locale != 'en')
+            return;
+        var item = localStorage.getItem('locale');
+        if (!item)
+            item = 'en';
+        if(locale == item)
+            return;
+        localStorage.setItem('locale', locale);
+        $("#locale").text(locale.toUpperCase());
+        taskboardApplication.updateLocales();
     };
 
     this.localizedMessage = function (message) {
@@ -392,7 +404,6 @@ function Taskboard($) {
         taskboardApplication.enableModals();
         taskboardApplication.closeFormModal();
         taskboardApplication.finalizeForm();
-        taskboardApplication.initializePopup(successPopupKey);
         if (taskForm) {
             taskboardApplication.updateBalance();
             taskboardApplication.replaceToken(response);
@@ -455,7 +466,8 @@ function Taskboard($) {
                 taskboardApplication.closeFormOnUnknownError(json);
             } else {
                 $errorSpan.parent('div').addClass('has-error');
-                $errorSpan.text(error_description);
+                var localizedDescription = taskboardApplication.localizedMessage(error_name.concat('_', error_description)) || error_description;
+                $errorSpan.text(localizedDescription);
             }
         });
         taskboardApplication.finalizeForm();
@@ -497,7 +509,7 @@ function Taskboard($) {
                     empty = true;
                     var $errorSpan = $('#'.concat(form.attr('id'), '-error-', v.name));
                     $errorSpan.parent('div').addClass('has-error');
-                    $errorSpan.text("Not provided");
+                    $errorSpan.text(taskboardApplication.localizedMessage('not_provided'));
                 }
             });
             if (empty) {
@@ -572,15 +584,23 @@ function Taskboard($) {
     this.initialize = function () {
         "use strict";
         taskboardApplication.initializeExtensions();
+        taskboardApplication.locale = localStorage.getItem('locale') || 'en';
+        $("#locale").text(taskboardApplication.locale.toUpperCase());
         taskboardApplication.updateLocales();
+        $('#english').click(function (e) {
+            e.preventDefault();
+            taskboardApplication.setLocale('en');
+        });
+        $('#russian').click(function (e) {
+            e.preventDefault();
+            taskboardApplication.setLocale('ru');
+        });
         role = $('#user-data').data('role');
         taskboardApplication.logger.enableLogger();
         if (taskboardApplication.initialized)
             return this;
         taskboardApplication.initialized = true;
-        [successPopupKey, errorPopupKey].forEach(function (entry) {
-            taskboardApplication.initializePopup(entry);
-        });
+        taskboardApplication.initializePopup(errorPopupKey);
         taskboardApplication.initializeListeners();
         taskboardApplication.initializeFormListeners();
         taskboardApplication.initializeFormModals();
@@ -604,8 +624,6 @@ function Taskboard($) {
                     },
                     success: function () {
                         task.remove();
-                        taskboardApplication.localStorageAddItem(successPopupKey, "success");
-                        taskboardApplication.initializePopup(successPopupKey);
                         taskboardApplication.updateBalance();
                     },
                     error: function (response) {
@@ -627,8 +645,6 @@ function Taskboard($) {
                     },
                     success: function (response) {
                         task.replaceWith(response);
-                        taskboardApplication.localStorageAddItem(successPopupKey, "success");
-                        taskboardApplication.initializePopup(successPopupKey);
                         taskboardApplication.updateBalance();
                     },
                     error: function (response) {
@@ -652,8 +668,6 @@ function Taskboard($) {
                     },
                     success: function () {
                         task.remove();
-                        taskboardApplication.localStorageAddItem(successPopupKey, "success");
-                        taskboardApplication.initializePopup(successPopupKey);
                         taskboardApplication.updateBalance();
                     },
                     error: function (response) {
