@@ -473,7 +473,7 @@ function Taskboard($) {
                 taskboardApplication.closeFormOnUnknownError(json);
             } else {
                 $errorSpan.parent('div').addClass('has-error');
-                var localizedDescription = taskboardApplication.localizedMessage(error_name.concat('_', error_description)) || error_description;
+                var localizedDescription = taskboardApplication.localizedMessage(error_name.concat('_', error_description)) || taskboardApplication.localizedMessage(error_description) || error_description;
                 $errorSpan.text(localizedDescription);
             }
         });

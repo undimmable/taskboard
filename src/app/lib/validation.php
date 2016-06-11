@@ -16,7 +16,7 @@
 function __validate_customer_task_csrf($csrf, $customer_id, $task_id, &$validation_context)
 {
     if ($csrf != get_customer_task_csrf($customer_id, $task_id)) {
-        add_validation_error($validation_context, 'token', 'wrong');
+        add_validation_error($validation_context, 'unspecified', 'token_wrong');
         return false;
     } else
         return true;
@@ -25,7 +25,7 @@ function __validate_customer_task_csrf($csrf, $customer_id, $task_id, &$validati
 function __validate_task_create_csrf($csrf, $customer_id, $task_id, &$validation_context)
 {
     if ($csrf != get_customer_task_create_csrf($customer_id, $task_id)) {
-        add_validation_error($validation_context, 'token', 'wrong');
+        add_validation_error($validation_context, 'unspecified', 'token_wrong');
         return false;
     } else
         return true;
@@ -34,7 +34,7 @@ function __validate_task_create_csrf($csrf, $customer_id, $task_id, &$validation
 function __validate_performer_task_csrf($csrf, $performer_id, $task_id, &$validation_context)
 {
     if ($csrf != get_performer_task_csrf($performer_id, $task_id)) {
-        add_validation_error($validation_context, 'token', 'wrong');
+        add_validation_error($validation_context, 'unspecified', 'token_wrong');
         return false;
     } else
         return true;
@@ -43,7 +43,7 @@ function __validate_performer_task_csrf($csrf, $performer_id, $task_id, &$valida
 function is_login_csrf_token_valid($csrf, &$validation_context)
 {
     if ($csrf != get_login_csrf()) {
-        add_validation_error($validation_context, 'token', 'wrong');
+        add_validation_error($validation_context, 'unspecified', 'token_wrong');
         return false;
     } else
         return true;
@@ -52,7 +52,7 @@ function is_login_csrf_token_valid($csrf, &$validation_context)
 function is_signup_csrf_token_valid($csrf, &$validation_context)
 {
     if ($csrf != get_signup_csrf()) {
-        add_validation_error($validation_context, 'token', 'wrong');
+        add_validation_error($validation_context, 'unspecified', 'token_wrong');
         return false;
     } else
         return true;
@@ -61,7 +61,7 @@ function is_signup_csrf_token_valid($csrf, &$validation_context)
 function is_account_csrf_token_valid($csrf, $user_id, &$validation_context)
 {
     if ($csrf != get_account_csrf($user_id)) {
-        add_validation_error($validation_context, 'token', 'wrong');
+        add_validation_error($validation_context, 'unspecified', 'token_wrong');
         return false;
     } else
         return true;
