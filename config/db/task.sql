@@ -9,7 +9,7 @@ CREATE TABLE task (
   performer_id BIGINT                           DEFAULT NULL,
   amount       NUMERIC(10, 2)          NOT NULL,
   description  MEDIUMTEXT              NOT NULL,
-  lock_tx_id   BIGINT                  NOT NULL DEFAULT -1,
+  paid         BOOL DEFAULT FALSE      NOT NULL,
   commission   NUMERIC(10, 2)          NOT NULL,
   deleted      BOOL DEFAULT FALSE      NOT NULL
 )
