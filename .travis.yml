@@ -5,9 +5,8 @@ env:
   - DB=mysql
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install -y libevent-1.4-2 libevent-core-1.4-2 libevent-dev
+  - sudo apt-get install -y libevent-1.4-2 libevent-core-1.4-2 libevent-dev php-pear php5-dev
   - yes '' | sudo pecl install -f channel://pecl.php.net/libevent-0.1.0
-  - sudo echo "extension=libevent.so" > /etc/php5/mods-available/libevent.ini
 install:
   - composer install
 script:
