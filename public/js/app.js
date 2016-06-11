@@ -2,15 +2,15 @@ function Taskboard($) {
     "use strict";
     var successPopupKey = 'success-popup';
     var errorPopupKey = 'error-popup';
-    var responseLocalStorage = 'local_storage';
     var taskboardApplication = this;
-    var localization = null;
     var feed = null;
     var role = null;
     var performerRole = 4;
     var customerRole = 2;
     var unauthorizedRole = 0;
     var timestampRefreshPeriod = 60000;
+    this.locale = 'ru';
+    this.localization = new Localization();
     this.initialized = false;
     this.disableModals = false;
     this.currentForm = null;
@@ -113,7 +113,7 @@ function Taskboard($) {
             if (response['responseJSON'].hasOwnProperty('error')) {
                 return response['responseJSON'];
             } else {
-                error.unspecified = "Unknown error occured";
+                error.unspecified = "Unknown error occurred";
                 return {error: error};
             }
         }
@@ -121,6 +121,40 @@ function Taskboard($) {
             return $.parseJSON(response['responseText']);
         }
         return false;
+    };
+
+    this.getLocale = function () {
+        var item = localStorage.getItem('locale');
+        if (item && (item == 'en' || item == 'ru')) {
+            return item;
+        } else {
+            return 'en';
+        }
+    };
+
+    this.localizedMessage = function (message) {
+        return taskboardApplication.localization[message.concat('_', taskboardApplication.getLocale())];
+    };
+
+    this.updateLocale = function (el) {
+        var msg = taskboardApplication.localizedMessage(el.data('l10n'));
+        if (el.hasClass('l10n-tooltip')) {
+            el.attr('title', msg);
+            el.data('original-title', msg);
+        }
+        if (el.hasClass('l10n-placeholder')) {
+            el.attr('placeholder', msg)
+        }
+        if (el.hasClass('l10n-text')) {
+            el.text(msg);
+        }
+        if (el.hasClass('l10n-toggler')) {
+            var ind = msg.indexOf('|');
+            var on = msg.substring(0, ind);
+            var off = msg.substring(ind + 1);
+            el.attr('data-on', on);
+            el.attr('data-off', off);
+        }
     };
 
     this.initializeExtensions = function () {
@@ -133,8 +167,8 @@ function Taskboard($) {
         $.fn.substituteTime = function () {
             var timestamp = $(this).data('timestamp') || 0;
             var milliseconds = new Date().getTime() - timestamp;
-            var prefix = localization.prefixAgo;
-            var suffix = localization.suffixAgo;
+            var prefix = taskboardApplication.localizedMessage('prefixAgo');
+            var suffix = taskboardApplication.localizedMessage('suffixAgo');
             var seconds = Math.abs(milliseconds) / 1000;
             var minutes = seconds / 60;
             var hours = minutes / 60;
@@ -142,21 +176,21 @@ function Taskboard($) {
             var years = days / 365;
 
             function substituteNumber(number) {
-                return (localization.numbers && localization.numbers[number]) || number;
+                return number;
             }
 
-            var words = seconds < 45 && localization.seconds.format(substituteNumber(Math.round(seconds))) ||
-                seconds < 90 && localization.minute.format(substituteNumber(1)) ||
-                minutes < 45 && localization.minutes.format(substituteNumber(Math.round(minutes))) ||
-                minutes < 90 && localization.hour.format(substituteNumber(1)) ||
-                hours < 24 && localization.hours.format(substituteNumber(Math.round(hours))) ||
-                hours < 42 && localization.day.format(substituteNumber(1)) ||
-                days < 30 && localization.days.format(substituteNumber(Math.round(days))) ||
-                days < 45 && localization.month.format(substituteNumber(1)) ||
-                days < 365 && localization.months.format(substituteNumber(Math.round(days / 30))) ||
-                years < 1.5 && localization.year.format(substituteNumber(1)) ||
-                localization.years.format(substituteNumber(Math.round(years)));
-            var value = $.trim([prefix, words, suffix].join(localization.wordSeparator));
+            var words = seconds < 45 && taskboardApplication.localizedMessage('seconds').format(substituteNumber(Math.round(seconds))) ||
+                seconds < 90 && taskboardApplication.localizedMessage('minute').format(substituteNumber(1)) ||
+                minutes < 45 && taskboardApplication.localizedMessage('minutes').format(substituteNumber(Math.round(minutes))) ||
+                minutes < 90 && taskboardApplication.localizedMessage('hour').format(substituteNumber(1)) ||
+                hours < 24 && taskboardApplication.localizedMessage('hours').format(substituteNumber(Math.round(hours))) ||
+                hours < 42 && taskboardApplication.localizedMessage('day').format(substituteNumber(1)) ||
+                days < 30 && taskboardApplication.localizedMessage('days').format(substituteNumber(Math.round(days))) ||
+                days < 45 && taskboardApplication.localizedMessage('month').format(substituteNumber(1)) ||
+                days < 365 && taskboardApplication.localizedMessage('months').format(substituteNumber(Math.round(days / 30))) ||
+                years < 1.5 && taskboardApplication.localizedMessage('year').format(substituteNumber(1)) ||
+                taskboardApplication.localizedMessage('years').format(substituteNumber(Math.round(years)));
+            var value = $.trim([prefix, words, suffix].join(taskboardApplication.localizedMessage('wordSeparator')));
             $(this).text(value);
         };
 
@@ -222,13 +256,16 @@ function Taskboard($) {
             window.location = "/api/v1/auth/logout";
         });
         $('.modal').on('hidden.bs.modal', function () {
-            $(this).find('form')[0].reset();
-            $(this).find('.error-description').each(function () {
-                $(this).empty();
-            });
-            $(this).find('.has-error').each(function () {
-                $(this).removeClass('has-error');
-            });
+            var form = $(this).find('form');
+            if (form.length) {
+                form[0].reset();
+                $(this).find('.error-description').each(function () {
+                    $(this).empty();
+                });
+                $(this).find('.has-error').each(function () {
+                    $(this).removeClass('has-error');
+                });
+            }
         });
     };
 
@@ -303,7 +340,11 @@ function Taskboard($) {
             lastElementIndex = 0;
         if (prepend) {
             feedHtml.prepend(html);
-            var timestamp = feedHtml.find('li:first').find('.timestamp');
+            var taskDiv = feedHtml.find('li:first');
+            taskDiv.find('.l10n').each(function () {
+                taskboardApplication.updateLocale($(this));
+            });
+            var timestamp = taskDiv.find('.timestamp');
             timestamp.setTimestamp();
             timestamp.substituteTime();
         } else {
@@ -311,6 +352,9 @@ function Taskboard($) {
             var gtSelector = lastElementIndex == 0 ? '' : ':gt('.concat(lastElementIndex.toString(), ')');
             feedHtml.find('li'.concat(gtSelector)).each(function () {
                 var currentElement = $(this);
+                currentElement.find('.l10n').each(function () {
+                    taskboardApplication.updateLocale($(this));
+                });
                 var id = parseInt(currentElement.data('id'));
                 if (feed.lastTaskId == null || feed.lastTaskId > id) {
                     feed.lastTaskId = id;
@@ -322,28 +366,11 @@ function Taskboard($) {
         }
     };
 
-    this.processResponseEvent = function (event) {
-        var localStorageItems = event[responseLocalStorage];
-        if (localStorageItems != null) {
-            localStorageItems.forEach(function (localStorageItem) {
-                taskboardApplication.localStorageAddItem(localStorageItem['key'], localStorageItem['value']);
-            });
-        }
-    };
-
     this.finalizeForm = function () {
         $(taskboardApplication.currentForm).find('button').each(function () {
             $(this).prop('disabled', false);
         });
         taskboardApplication.currentForm = null;
-    };
-
-    this.processResponseEvents = function (response) {
-        if (response['event'] != null) {
-            response['event'].forEach(function (event) {
-                taskboardApplication.processResponseEvent(event);
-            });
-        }
     };
 
     this.closeFormModal = function () {
@@ -380,7 +407,6 @@ function Taskboard($) {
         if (balanceForm) {
             $('#user-balance').text(response['balance']);
         }
-        taskboardApplication.processResponseEvents(response);
         if (response['redirect'] != null) {
             location.href = response['redirect'];
         }
@@ -393,7 +419,13 @@ function Taskboard($) {
         taskboardApplication.finalizeForm();
     };
 
-    this.onFormError = function (response, status, xhr) {
+    this.closeTaskFormWithAlert = function () {
+        taskboardApplication.closeFormModal();
+        taskboardApplication.finalizeForm();
+        $('#task-unpaid-modal').modal('show');
+    };
+
+    this.onFormError = function (response) {
         taskboardApplication.removeFormSpinner();
         taskboardApplication.enableModals();
         var json = taskboardApplication.parseJsonResponse(response);
@@ -413,6 +445,10 @@ function Taskboard($) {
                 });
             }
         });
+        if (json.error.hasOwnProperty("task-unpaid")) {
+            taskboardApplication.closeTaskFormWithAlert();
+            return;
+        }
         $.each(json.error, function (error_name, error_description) {
             var $errorSpan = $('#'.concat(taskboardApplication.currentFormId(), '-error-', error_name));
             if ($errorSpan.length == 0) {
@@ -422,7 +458,6 @@ function Taskboard($) {
                 $errorSpan.text(error_description);
             }
         });
-        taskboardApplication.processResponseEvents(response);
         taskboardApplication.finalizeForm();
     };
 
@@ -458,14 +493,14 @@ function Taskboard($) {
             var empty;
             var form = $(this);
             $(this).find('input,textarea').each(function (e, v) {
-                if(!v.value.trim().length) {
+                if (!v.value.trim().length) {
                     empty = true;
                     var $errorSpan = $('#'.concat(form.attr('id'), '-error-', v.name));
                     $errorSpan.parent('div').addClass('has-error');
                     $errorSpan.text("Not provided");
                 }
             });
-            if(empty) {
+            if (empty) {
                 return;
             }
             var isTaskForm = $(this).attr('id') == 'task-form';
@@ -528,10 +563,16 @@ function Taskboard($) {
         }
     };
 
+    this.updateLocales = function () {
+        $('.l10n').each(function () {
+            taskboardApplication.updateLocale($(this));
+        });
+    };
+
     this.initialize = function () {
         "use strict";
         taskboardApplication.initializeExtensions();
-        localization = new Localization();
+        taskboardApplication.updateLocales();
         role = $('#user-data').data('role');
         taskboardApplication.logger.enableLogger();
         if (taskboardApplication.initialized)

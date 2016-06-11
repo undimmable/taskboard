@@ -12,7 +12,7 @@ $user_customer = is_customer($user[ROLE]);
 $user_performer = is_performer($user[ROLE]);
 if ($user_customer) {
     if (!is_task_active($current_task)) {
-        $task_unpaid = "<span class=\"task-header$task_class\">Unpaid</span>";
+        $task_unpaid = "<span data-l10n=\"unpaid\" class=\"l10n l10n-text task-header$task_class\">Unpaid</span>";
     }
     $strong = "<strong class='task-header$task_class'>\$$current_task_price $task_unpaid</strong>";
     $csrf = get_customer_task_csrf($user[ID], $current_task[ID]);
@@ -46,9 +46,9 @@ if ($user_customer) {
     </div>
     <?php if (is_customer($user[ROLE])) {
         if (!is_task_completed($current_task)) {
-            echo '<button type="button" class="delete-task btn-link pull-right no-shadow" data-csrf="' . $csrf . '">Delete</button>';
+            echo '<button type="button" data-l10n="delete_task" class="l10n l10n-text delete-task btn-link pull-right no-shadow" data-csrf="' . $csrf . '">Delete</button>';
             if (!is_task_active($current_task)) {
-                echo '<button type="button" class="fix-task btn-link pull-right no-shadow" data-csrf="' . $csrf . '">Try again</button>';
+                echo '<button type="button" data-l10n="fix_task" class="l10n l10n-text fix-task btn-link pull-right no-shadow" data-csrf="' . $csrf . '">Try again</button>';
             }
         } else {
             echo '<span class="pull-right ">Completed</span>';

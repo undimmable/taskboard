@@ -3,36 +3,35 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                <h1 class="text-center">Sign Up</h1>
+                <h1 class="text-center"><span class="l10n l10n-text" data-l10n="signup"></span></h1>
             </div>
             <div class="modal-body col-md-12">
                 <!--suppress HtmlUnknownTarget -->
                 <form id="signup-form" class="form col-md-12 center-block" action="/api/v1/auth/signup">
                     <div id="signup-<?php echo EMAIL ?>" class="form-group">
-                        <label for="signup-<?php echo EMAIL ?>">Email</label>
-                        <input type="email" class="form-control input-lg" placeholder="Email" name="<?php echo EMAIL ?>"
+                        <label for="signup-<?php echo EMAIL ?>" class="l10n l10n-text" data-l10n="email">Email</label>
+                        <input type="email" class="form-control input-lg l10n l10n-placeholder" placeholder="Email" name="<?php echo EMAIL ?>" data-l10n="email"
                                id="signup-<?php echo EMAIL ?>">
                         <span id="signup-form-error-<?php echo EMAIL ?>" class="error-description"></span>
                         <span id="login-form-error-unspecified" class="error-description"></span>
                     </div>
                     <div class="form-group">
-                        <label for="signup-<?php echo PASSWORD ?>">Password</label>
-                        <input type="password" class="form-control input-lg" placeholder="Password"
+                        <label for="signup-<?php echo PASSWORD ?>" class="l10n l10n-text" data-l10n="password">Password</label>
+                        <input type="password" class="form-control input-lg l10n l10n-placeholder" placeholder="Password" data-l10n="password"
                                name="<?php echo PASSWORD ?>" id="signup-<?php echo PASSWORD ?>">
                         <span id="signup-form-error-<?php echo PASSWORD ?>" class="error-description"></span>
                     </div>
                     <div class="form-group">
-                        <label for="signup-<?php echo PASSWORD_REPEAT ?>">Repeat Password</label>
-                        <input type="password" class="form-control input-lg" placeholder="Password"
+                        <label for="signup-<?php echo PASSWORD_REPEAT ?>" class="l10n l10n-text" data-l10n="password_repeat">Repeat Password</label>
+                        <input type="password" class="form-control input-lg l10n l10n-placeholder" placeholder="Password" data-l10n="password_repeat"
                                name="<?php echo PASSWORD_REPEAT ?>" id="signup-<?php echo PASSWORD_REPEAT ?>">
                         <span id="signup-form-error-<?php echo PASSWORD_REPEAT ?>" class="error-description"></span>
                     </div>
                     <div class="form-group center-block pull-right">
                         <label>
-                            <input type="checkbox" data-toggle="toggle" data-on="I'm a customer"
-                                   data-off="I'm a performer" data-size="large" data-width="250px"
+                            <input type="checkbox" data-toggle="toggle" data-size="large" data-width="250px"
                                    name="<?php echo IS_CUSTOMER ?>" data-onstyle="success" data-offstyle="success"
-                                   class="btn btn-primary btn-lg">
+                                   class="btn btn-primary btn-lg l10n l10n-toggler" data-l10n="performer_customer">
                         </label>
                     </div>
                     <input type="hidden" id="csrf_token" name="csrf_token" value="<?php echo get_signup_csrf(); ?>"/>
@@ -40,7 +39,7 @@
                         <button class="btn btn-primary btn-lg btn-block btn-default btn-270">
                             <i class="glyphicon glyphicon-log-in glyphicon-270" aria-hidden="true"
                                id="signup-form-spinner" data-icon="glyphicon glyphicon-log-in glyphicon-rotate"></i>
-                            Sign Up
+                            <span class="l10n l10n-text" data-l10n="signup"></span>
                         </button>
                     </div>
                 </form>

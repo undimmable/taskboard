@@ -2,7 +2,7 @@
     <div class="feed-wrapper">
         <div class="panel panel-info">
             <div class="panel-heading">
-                Task feed
+                <span class="l10n l10n-text" data-l10n="task_feed"></span>
                 <?php if (is_customer(get_current_user()[ROLE])) {
                     echo "<span class=\"pull-right\">
                     <label>
@@ -17,10 +17,10 @@
                 </ul>
             </div>
             <div id="loading" class="panel-footer" hidden>
-                Loading...
+                <span class="l10n l10n-text" data-l10n="loading"></span>
             </div>
             <div id="no-more-content" class="panel-footer" hidden>
-                No more content
+                <span class="l10n l10n-text" data-l10n="no_more_content"></span>
             </div>
         </div>
     </div>
