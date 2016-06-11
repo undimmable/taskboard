@@ -13,7 +13,7 @@
                         <input type="email" class="form-control input-lg l10n l10n-placeholder" placeholder="Email" name="<?php echo EMAIL ?>" data-l10n="email"
                                id="signup-<?php echo EMAIL ?>">
                         <span id="signup-form-error-<?php echo EMAIL ?>" class="error-description"></span>
-                        <span id="login-form-error-unspecified" class="error-description"></span>
+                        <span id="signup-form-error-unspecified" class="error-description"></span>
                     </div>
                     <div class="form-group">
                         <label for="signup-<?php echo PASSWORD ?>" class="l10n l10n-text" data-l10n="password">Password</label>
