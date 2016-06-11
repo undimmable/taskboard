@@ -30,7 +30,7 @@ $csrf = get_account_csrf(get_authorized_user()[ID]);
                                   placeholder="Description" name="<?php echo DESCRIPTION ?>" rows="3"
                                   maxlength="<?php echo get_config_max_task_description_length() ?>"></textarea>
                         <span id="task-form-error-<?php echo DESCRIPTION ?>" class="error-description"></span>
-                        <span id="login-form-error-unspecified" class="error-description"></span>
+                        <span id="task-form-error-unspecified" class="error-description"></span>
                     </div>
                     <div class="form-group">
                         <label for="task-<?php echo AMOUNT ?>" class="l10n l10n-text" data-l10n="price"></label>
