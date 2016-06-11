@@ -15,6 +15,10 @@ textarea {
     overflow: auto;
 }
 
+.error-description {
+    display: inline-block;
+}
+
 .panel-info {
     border-color: #bce8f1;
 }
