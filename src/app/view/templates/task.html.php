@@ -14,7 +14,7 @@ if ($user_customer) {
     if (!is_task_active($current_task)) {
         $task_unpaid = "<span data-l10n=\"unpaid\" class=\"l10n l10n-text task-header$task_class\">Unpaid</span>";
     }
-    $strong = "<strong class='task-header$task_class'>\$$current_task_price $task_unpaid</strong>";
+    $strong = "<strong class='task-header$task_class'><i class=\"fa fa-usd\"></i>$current_task_price $task_unpaid</strong>";
     $csrf = get_customer_task_csrf($user[ID], $current_task[ID]);
 } elseif ($user_performer) {
     $strong = "<strong class='task-header'>$customer_name</strong>";

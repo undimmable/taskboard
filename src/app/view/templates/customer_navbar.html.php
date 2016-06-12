@@ -5,13 +5,13 @@ $csrf = get_account_csrf(get_authorized_user()[ID]);
 <li>
     <a type="button" class="btn btn-link l10n l10n-tooltip" data-l10n="balance_tooltip" data-toggle="modal" data-type="account"
        data-target="#account-form-modal" rel="tooltip">
-        $<span id="user-balance"><?php echo $balance; ?> </span> <span class="l10n l10n-text" data-l10n="refill_account"></span>
+        <i class="fa fa-usd"></i><span id="user-balance"><?php echo $balance; ?> </span> <span class="l10n l10n-text" data-l10n="refill_account"></span>
     </a>
 </li>
 <li>
     <a type="button" class="btn btn-link" data-toggle="modal" data-type="task"
        data-target="#task-form-modal" id="create-task-button">
-        <i class="glyphicon glyphicon-plus" aria-hidden="true"></i> <span class="l10n l10n-text" data-l10n="create_task"></span>
+        <i class="fa fa-plus" aria-hidden="true"></i> <span class="l10n l10n-text" data-l10n="create_task"></span>
     </a>
 </li>
 <div id="task-form-modal" class="modal fade" data-type="task" tabindex="-1" role="dialog" aria-hidden="true">
@@ -26,7 +26,7 @@ $csrf = get_account_csrf(get_authorized_user()[ID]);
                 <form id="task-form" class="form col-md-12 center-block" action="/api/v1/task">
                     <div class="form-group">
                         <label for="task-<?php echo DESCRIPTION ?>" class="l10n l10n-text" data-l10n="description"></label>
-                        <textarea id="task-<?php echo DESCRIPTION ?>" class="form-control input-lg l10n l10n-placeholder" data-l10n="description"
+                        <textarea id="task-<?php echo DESCRIPTION ?>" class="form-control input-lg l10n l10n-placeholder" data-l10n="description_placeholder"
                                   placeholder="Description" name="<?php echo DESCRIPTION ?>" rows="3"
                                   maxlength="<?php echo get_config_max_task_description_length() ?>"></textarea>
                         <span id="task-form-error-<?php echo DESCRIPTION ?>" class="error-description"></span>
@@ -34,7 +34,7 @@ $csrf = get_account_csrf(get_authorized_user()[ID]);
                     </div>
                     <div class="form-group">
                         <label for="task-<?php echo AMOUNT ?>" class="l10n l10n-text" data-l10n="price"></label>
-                        <input id="task-<?php echo AMOUNT ?>" type="number" class="form-control input-lg l10n l10n-placeholder" data-l10n="price"
+                        <input id="task-<?php echo AMOUNT ?>" type="number" class="form-control input-lg l10n l10n-placeholder" data-l10n="price_placeholder"
                                placeholder="Price" name="<?php echo AMOUNT ?>" min="1"
                                max="<?php echo get_config_max_amount() ?>">
                         <span id="task-form-error-<?php echo AMOUNT ?>" class="error-description"></span>
@@ -42,8 +42,8 @@ $csrf = get_account_csrf(get_authorized_user()[ID]);
                     <input type="hidden" name="csrf_token">
                     <div class="form-group">
                         <button class="btn btn-primary btn-lg btn-block">
-                            <i class="glyphicon glyphicon-plus" aria-hidden="true"
-                               id="task-form-spinner" data-icon="glyphicon glyphicon-plus"></i> <span class="l10n l10n-text" data-l10n="create_task"></span>
+                            <i class="fa fa-plus" aria-hidden="true"
+                               id="task-form-spinner" data-icon="fa fa-plus"></i> <span class="l10n l10n-text" data-l10n="create_task"></span>
                         </button>
                     </div>
                 </form>
@@ -94,8 +94,8 @@ $csrf = get_account_csrf(get_authorized_user()[ID]);
                     <input type="hidden" name="csrf_token" value="<?php echo $csrf; ?>">
                     <div class="form-group">
                         <button class="btn btn-primary btn-lg btn-block">
-                            <i class="glyphicon glyphicon-usd" aria-hidden="true"
-                               id="account-form-spinner" data-icon="glyphicon glyphicon-usd"></i> <span class="l10n l10n-text" data-l10n="refill"></span>
+                            <i class="fa fa-usd" aria-hidden="true"
+                               id="account-form-spinner" data-icon="fa fa-usd"></i> <span class="l10n l10n-text" data-l10n="refill"></span>
                         </button>
                     </div>
                 </form>

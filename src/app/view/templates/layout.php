@@ -64,7 +64,7 @@ echo "<div id=\"user-data\" data-role=\"$role\" data-payloadsid=\"$payload\" dat
 <nav class="navbar navbar-default">
     <div class="container-fluid">
         <div class="navbar-header">
-            <a href="#" class="pull-left navbar-brand logo glyphicon glyphicon-ok"></a>
+            <a href="#" class="pull-left navbar-brand logo fa fa-check-circle-o fa-2x"></a>
             <a class="navbar-brand" href="#">TaskBoards</a>
         </div>
         <div>

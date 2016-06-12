@@ -26,7 +26,7 @@
                                 </small>
                                 <button type="button" class="perform-task btn btn-primary pull-right no-shadow"
                                         data-toggle="modal" data-target="#signup-form-modal">
-                                    $100.00
+                                    <i class="fa fa-usd"></i>100.00
                                 </button>
                             </div>
                         </div>
@@ -47,7 +47,7 @@
                                     <span class="created_at  l10n  l10n-text" data-l10n="hour_ago">about an hour ago</span>
                                 </small>
                                 <button type="button" class="perform-task btn btn-primary pull-right no-shadow"
-                                        data-toggle="modal" data-target="#signup-form-modal">$50.00
+                                        data-toggle="modal" data-target="#signup-form-modal"><i class="fa fa-usd"></i>50.00
                                 </button>
                             </div>
                         </div>
@@ -71,7 +71,7 @@
                                 </small>
                                 <button type="button" class="perform-task btn btn-primary pull-right no-shadow"
                                         data-toggle="modal" data-target="#signup-form-modal">
-                                    $12.00
+                                    <i class="fa fa-usd"></i>12.00
                                 </button>
                             </div>
                         </div>
@@ -92,7 +92,7 @@
                                 </small>
                                 <button type="button" class="perform-task btn btn-primary pull-right no-shadow"
                                         data-toggle="modal" data-target="#signup-form-modal">
-                                    $10.00
+                                    <i class="fa fa-usd"></i>10.00
                                 </button>
                             </div>
                         </div>
@@ -116,7 +116,7 @@
                                 </small>
                                 <button type="button" class="perform-task btn btn-primary pull-right no-shadow"
                                         data-toggle="modal" data-target="#signup-form-modal">
-                                    $12.00
+                                    <i class="fa fa-usd"></i>12.00
                                 </button>
                             </div>
                         </div>
@@ -138,7 +138,7 @@
                                     <span class="created_at  l10n  l10n-text" data-l10n="hour_ago">about an hour ago</span>
                                 </small>
                                 <button type="button" class="perform-task btn btn-primary pull-right no-shadow"
-                                        data-toggle="modal" data-target="#signup-form-modal">$2.00
+                                        data-toggle="modal" data-target="#signup-form-modal"><i class="fa fa-usd"></i>2.00
                                 </button>
                             </div>
                         </div>

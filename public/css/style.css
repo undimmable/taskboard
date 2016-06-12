@@ -1,10 +1,7 @@
-.navbar-nav > li > a {
-    padding-top: 13px;
-    padding-bottom: 13px;
-}
-
 .navbar-brand.logo {
-    padding: 12px 15px 18px;
+    padding-top: 11px;
+    padding-bottom: 11px;
+    padding-right: 0;
 }
 
 textarea {

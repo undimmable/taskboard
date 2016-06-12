@@ -25,8 +25,8 @@
                     <input type="hidden" name="csrf_token" value="<?php echo get_login_csrf(); ?>">
                     <div class="form-group">
                         <button class="btn btn-primary btn-lg btn-block">
-                            <i class="glyphicon glyphicon-log-in" aria-hidden="true"
-                               id="login-form-spinner" data-icon="glyphicon glyphicon-log-in"></i> <span class="l10n l10n-text" data-l10n="login"></span>
+                            <i class="fa fa-sign-in" aria-hidden="true"
+                               id="login-form-spinner" data-icon="fa fa-sign-in"></i> <span class="l10n l10n-text" data-l10n="login"></span>
                         </button>
                     </div>
                 </form>

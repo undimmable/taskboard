@@ -1,6 +1,6 @@
 <li>
     <a type="button" class="btn btn-link" data-toggle="modal" data-target="#login-form-modal">
-        <i class="glyphicon glyphicon-log-in"></i> <span class="l10n l10n-text" data-l10n="login"></span>
+        <i class="fa fa-sign-in"></i> <span class="l10n l10n-text" data-l10n="login"></span>
     </a>
 </li>
 <li>
