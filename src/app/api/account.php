@@ -58,7 +58,7 @@ function __validate_amount($amount, &$validation_context)
         add_validation_error($validation_context, AMOUNT, 'too_small');
         return false;
     }
-    if ($amount > 1) {
+    if ($amount > get_config_max_amount()) {
         add_validation_error($validation_context, AMOUNT, 'too_large');
         return false;
     }

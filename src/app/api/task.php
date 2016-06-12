@@ -177,19 +177,19 @@ function __validate_task_perform_input($task_id, $performer_id, $csrf)
     return true;
 }
 
-function __try_fix_unprocessed_transaction($user_id)
+function __try_fix_unprocessed_transaction($user_id, $is_customer = true)
 {
     $id = payment_get_last_user_tx_id($user_id);
     if (is_null($id)) {
         return null;
-    } elseif (!$id) {
+    } elseif ($id == false) {
         return false;
     } else {
-        $transactions = payment_fetch_transactions_after($id);
-        if (!$transactions) {
+        $transactions = payment_fetch_transactions_after($id, $user_id, $is_customer);
+        if (is_null($transactions) || $transactions == false) {
             return false;
         } else {
-            return true;
+            return __payment_transaction_set_processed($id);
         }
     }
 }
@@ -226,13 +226,13 @@ function api_task_get_last_n()
     $last_id = parse_integer_param('last_id');
     $limit = parse_integer_param('limit');
     $limit = $limit < get_config_max_task_selection_limit() ? $limit : get_config_max_task_selection_limit();
-    $paid_clause = "TRUE";
+    $balance_locked_clause = "TRUE";
     if (is_customer($user[ROLE])) {
         $user_id = $user[ID];
         $select_user_type = CUSTOMER_ID;
     } else {
         $select_user_type = PERFORMER_ID;
-        $paid_clause = PAID;
+        $balance_locked_clause = BALANCE_LOCKED;
     }
     if (is_customer($user[ROLE]) && is_null($last_id)) {
         $task = dal_task_fetch_last($user[ID]);
@@ -240,7 +240,7 @@ function api_task_get_last_n()
         $create_csrf = get_customer_task_create_csrf($user[ID], $last_task_id);
         echo "<!--json-$create_csrf-json-->";
     }
-    $tasks = dal_task_fetch_tasks_less_than_last_id_limit("_render_task", $user_id, $paid_clause, $select_user_type, $limit, $last_id);
+    $tasks = dal_task_fetch_tasks_less_than_last_id_limit("_render_task", $user_id, $balance_locked_clause, $select_user_type, $limit, $last_id);
     if (is_null($tasks)) {
         render_ok();
     } else if ($tasks === false) {
@@ -262,14 +262,14 @@ function api_task_perform($task_id)
         return;
     }
     $task = dal_task_fetch($task_id);
-    if ($task[PAID]) {
+    if ($task[BALANCE_LOCKED]) {
         if (is_null($task[PERFORMER_ID])) {
             $updated = dal_task_update_set_performer_id($task_id, $performer_id);
             if (!$updated) {
                 render_conflict([JSON_ERROR => [POPUP => "task_already_performed"]]);
                 return;
             } else {
-
+                payment_init_pay_transaction($task[ID], $performer_id, $task[AMOUNT], $task[COMMISSION]);
             }
         } else {
             render_conflict([JSON_ERROR => [POPUP => "task_already_performed"]]);
@@ -301,11 +301,20 @@ function api_task_create()
     if (!__validate_task_create_input($last_task_id, $amount, $description, $csrf)) {
         return;
     }
-    if (!$last_task[PAID]) {
-        if (!__try_fix_unprocessed_transaction($customer_id)) {
+    if (!is_null($last_task) && !$last_task[BALANCE_LOCKED]) {
+        $transaction_fix_result = __try_fix_unprocessed_transaction($customer_id, true);
+        if (is_null($transaction_fix_result) || $transaction_fix_result == false) {
             render_conflict([
                 JSON_ERROR => ["task-unpaid" => true]
             ]);
+            return;
+        } else {
+            if (!dal_task_update_set_balance_locked($last_task_id)) {
+                render_conflict([
+                    JSON_ERROR => ["task-unpaid" => true]
+                ]);
+                return;
+            }
         }
     }
     if (!payment_check_able_to_process($customer_id, $amount)) {
@@ -316,7 +325,7 @@ function api_task_create()
     }
     $task_id = dal_task_create($customer_id, $amount, $description);
     $lock_tx_id = payment_init_lock_transaction($customer_id, $task_id, $amount);
-    $success = payment_process_transaction($lock_tx_id, $customer_id);
+    $success = payment_process_lock_transaction($lock_tx_id, $customer_id);
     if (is_null($success)) {
         render_conflict([
             "error" => ["amount" => "not_enough"]
@@ -326,7 +335,7 @@ function api_task_create()
         render_internal_server_error();
         return;
     }
-    $updated = dal_task_update_set_paid($task_id);
+    $updated = dal_task_update_set_balance_locked($task_id);
     if (is_null($updated)) {
         error_log("Trying set lock_tx_id when it's already set");
     } elseif (!$updated) {
@@ -338,7 +347,6 @@ function api_task_create()
         render_bad_request_json([JSON_ERROR => get_db_errors()]);
         return;
     } else {
-        send_index_event($task[ID], TASK_DESCRIPTION_IDX, $task[DESCRIPTION]);
         $create_csrf = get_customer_task_create_csrf($user[ID], $task[ID]);
         echo "<!--json-$create_csrf-json-->";
         _render_task($task);
@@ -359,7 +367,7 @@ function api_task_fix($task_id)
     if (!__validate_task_fix_input($task_id, $customer_id, $csrf)) {
         return;
     }
-    $amount = dal_task_fetch_unpaid_price($task_id, $customer_id);
+    $amount = dal_task_fetch_non_locked_price($task_id, $customer_id);
     if (is_null($amount) || !$amount) {
         render_bad_request_json([JSON_ERROR => [UNSPECIFIED => "task_unable_to_process"]]);
         return;
@@ -370,14 +378,14 @@ function api_task_fix($task_id)
     }
     $tx_lock_processed = payment_retry_lock_transaction($task_id, $customer_id, $amount);
     if ($tx_lock_processed === true) {
-        $updated = dal_task_update_set_paid($task_id);
+        $updated = dal_task_update_set_balance_locked($task_id);
         if (!$updated) {
-            $updated = dal_task_update_set_paid($task_id);
+            $updated = dal_task_update_set_balance_locked($task_id);
         }
         if (!$updated) {
             render_internal_server_error();
         } else {
-            render_ok_json("");
+            _render_task(dal_task_fetch($task_id));
         }
     } elseif (is_null($tx_lock_processed)) {
         render_conflict([JSON_ERROR => [POPUP => "task_not_enough_money"]]);
@@ -408,7 +416,7 @@ function api_task_delete_by_id($task_id)
         render_forbidden();
         return;
     }
-    if ($task[PAID]) {
+    if ($task[BALANCE_LOCKED]) {
         render_conflict([JSON_ERROR => [POPUP => 'task_already_paid']]);
         return;
     }
