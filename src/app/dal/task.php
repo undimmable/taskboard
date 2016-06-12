@@ -35,9 +35,9 @@ function get_task_connection()
 }
 
 /**
- * Set transaction id to task
+ * Set paod status to task
  *
- * @param $task_id
+ * @param $task_id  integer
  * @return bool|null null if the row with specified task_id doesn't exists, true if update was successful and false if there was some errors
  */
 function dal_task_update_set_paid($task_id)
@@ -49,6 +49,28 @@ function dal_task_update_set_paid($task_id)
         return false;
     }
     $result = mysqli_query($connection, "UPDATE db_task.task SET paid=TRUE WHERE id = $task_id");
+    if (!$result) {
+        add_error($connection, $db_errors);
+    }
+    return $result;
+}
+
+/**
+ * Set performer_id to task
+ *
+ * @param $task_id integer
+ * @param $performer_id integer
+ * @return bool|null null if the row with specified task_id doesn't exists, true if update was successful and false if there was some errors
+ */
+function dal_task_update_set_performer_id($task_id, $performer_id)
+{
+    $db_errors = initialize_db_errors();
+    $connection = get_task_connection();
+    if (!$connection) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    $result = mysqli_query($connection, "UPDATE db_task.task SET performer_id=$performer_id WHERE id = $task_id AND (performer_id=$performer_id OR performer_id IS NULL)");
     if (!$result) {
         add_error($connection, $db_errors);
     }
@@ -107,13 +129,20 @@ function dal_task_create($customer_id, $amount, $description)
         add_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "INSERT INTO db_task.task (customer_id, amount, description, commission) VALUES (?, ?, ?, ?)");
+    $system_commission_percent = get_system_commission();
+
+    if (!filter_var($system_commission_percent, FILTER_VALIDATE_INT) || $system_commission_percent < 0 || $system_commission_percent > 100) {
+        die();
+    }
+    $amount_query = "(SELECT ($amount - $amount * ($system_commission_percent / 100)))";
+    $commission_query = "(SELECT ($amount * ($system_commission_percent / 100)))";
+    $stmt = mysqli_prepare($connection, "INSERT INTO db_task.task (customer_id, amount, commission, description) VALUES (?,$amount_query,$commission_query,?)");
     if (!$stmt) {
         add_error($connection, $db_errors);
         return false;
     }
     /** @noinspection PhpMethodParametersCountMismatchInspection */
-    if (!mysqli_stmt_bind_param($stmt, 'idsi', $customer_id, $amount, $description, get_system_commission())) {
+    if (!mysqli_stmt_bind_param($stmt, 'is', $customer_id, $description)) {
         add_error($connection, $db_errors);
         return false;
     }
@@ -146,7 +175,7 @@ function dal_task_fetch($task_id)
         add_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "SELECT id, timestampdiff(SECOND, now(), created_at), customer_id, performer_id, amount, description, paid FROM db_task.task WHERE id=?");
+    $stmt = mysqli_prepare($connection, "SELECT id, timestampdiff(SECOND, now(), created_at), customer_id, performer_id, amount + commission, description, paid FROM db_task.task WHERE id=?");
     if (!$stmt) {
         add_error($connection, $db_errors);
         return false;
@@ -261,35 +290,9 @@ function dal_task_fetch_last($customer_id)
         add_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "SELECT id,amount,paid FROM db_task.task WHERE customer_id=? ORDER BY id DESC LIMIT 1");
-    if (!$stmt) {
-        add_error($connection, $db_errors);
-        return false;
-    }
+    $result = mysqli_query($connection, "SELECT id, amount + commission, paid FROM db_task.task WHERE customer_id=$customer_id ORDER BY ID DESC LIMIT 1");
+    return mysqli_fetch_array($result, MYSQLI_ASSOC);
 
-    /** @noinspection PhpMethodParametersCountMismatchInspection */
-    if (!mysqli_stmt_bind_param($stmt, 'i', $customer_id)) {
-        add_error($connection, $db_errors);
-        return false;
-    }
-    if (!mysqli_stmt_execute($stmt)) {
-        add_error($connection, $db_errors);
-        return false;
-    }
-    if (!mysqli_stmt_bind_result($stmt, $id, $amount, $paid)) {
-        add_error($connection, $db_errors);
-        return false;
-    }
-    mysqli_stmt_fetch($stmt);
-    if (!mysqli_stmt_close($stmt)) {
-        add_error($connection, $db_errors);
-        return false;
-    }
-    return [
-        ID => $id,
-        AMOUNT => $amount,
-        PAID => $paid
-    ];
 }
 
 /**
@@ -314,7 +317,7 @@ function dal_task_fetch_tasks_less_than_last_id_limit($callback, $user_id, $paid
     }
     $last_id_clause = $last_id === null ? '' : "AND id < $last_id";
 
-    $query = "SELECT id, timestampdiff(SECOND, now(), created_at), customer_id, performer_id, amount, description, paid FROM db_task.task WHERE $paid AND not deleted AND $select_user_type <=> ? $last_id_clause ORDER BY id DESC LIMIT ?";
+    $query = "SELECT id, timestampdiff(SECOND, now(), created_at), amount as price, customer_id, performer_id, amount + commission as amount, description, paid FROM db_task.task WHERE $paid AND not deleted AND $select_user_type <=> ? $last_id_clause ORDER BY id DESC LIMIT ?";
     $stmt = mysqli_prepare($connection, $query);
     if (!$stmt) {
         add_error($connection, $db_errors);
@@ -330,7 +333,7 @@ function dal_task_fetch_tasks_less_than_last_id_limit($callback, $user_id, $paid
         add_error($connection, $db_errors);
         return false;
     }
-    if (!mysqli_stmt_bind_result($stmt, $id, $created_at, $customer_id, $performer_id, $amount, $description, $paid)) {
+    if (!mysqli_stmt_bind_result($stmt, $id, $created_at, $price, $customer_id, $performer_id, $amount, $description, $paid)) {
         add_error($connection, $db_errors);
         return false;
     }
@@ -343,6 +346,7 @@ function dal_task_fetch_tasks_less_than_last_id_limit($callback, $user_id, $paid
             CUSTOMER_ID => $customer_id,
             PERFORMER_ID => $performer_id,
             AMOUNT => $amount,
+            PRICE => $price,
             DESCRIPTION => $description,
             PAID => $paid
         ];

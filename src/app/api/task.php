@@ -79,18 +79,19 @@ function __validate_amount($amount, &$validation_context)
  * Validate task id
  *
  * @param $id integer
+ * @param $error_key string
  * @param $validation_context array
  * @return bool true if validation succeeds and false otherwise
  */
-function __validate_id(&$id, &$validation_context)
+function __validate_id(&$id, $error_key = 'id', &$validation_context)
 {
     if (is_null($id)) {
-        add_validation_error($validation_context, ID, 'ID not provided');
+        add_validation_error($validation_context, $error_key, 'not_provided');
         return false;
     }
     $id = filter_var($id, FILTER_VALIDATE_INT);
     if (!$id) {
-        add_validation_error($validation_context, ID, 'Is not a valid number');
+        add_validation_error($validation_context, $error_key, 'is_invalid');
         return false;
     }
     return true;
@@ -106,7 +107,7 @@ function __validate_id(&$id, &$validation_context)
 function __validate_description($description, &$validation_context)
 {
     if (is_null($description) || strlen($description) < 1 || ctype_space($description)) {
-        add_validation_error($validation_context, DESCRIPTION, 'Description not provided');
+        add_validation_error($validation_context, DESCRIPTION, 'not_provided');
         return false;
     }
     return true;
@@ -145,7 +146,8 @@ function __validate_task_create_input($last_task_id, $amount, $description, $csr
 function __validate_task_fix_input($task_id, $customer_id, $csrf)
 {
     $validation_context = initialize_validation_context();
-    __validate_id($task_id, $validation_context);
+    __validate_id($task_id, ID, $validation_context);
+    __validate_id($customer_id, CUSTOMER_ID, $validation_context);
     __validate_customer_task_csrf($csrf, $customer_id, $task_id, $validation_context);
     if (validation_context_has_errors($validation_context)) {
         render_bad_request_json([JSON_ERROR => get_all_validation_errors($validation_context)]);
@@ -166,22 +168,13 @@ function __validate_task_perform_input($task_id, $performer_id, $csrf)
 {
     $validation_context = initialize_validation_context();
     __validate_id($task_id, $validation_context);
+    __validate_id($task_id, PERFORMER_ID, $validation_context);
     __validate_performer_task_csrf($csrf, $performer_id, $task_id, $validation_context);
     if (validation_context_has_errors($validation_context)) {
         render_bad_request_json([JSON_ERROR => get_all_validation_errors($validation_context)]);
         return false;
     }
     return true;
-}
-
-function __pay($user_id, $task_id, $amount, $tx_id)
-{
-    if (is_null($tx_id)) {
-        $tx_id = payment_init_lock_transaction($user_id, $task_id, $amount);
-    }
-    if (is_null($tx_id) || !$tx_id)
-        return false;
-    return payment_process_transaction($tx_id, $user_id);
 }
 
 function __try_fix_unprocessed_transaction($user_id)
@@ -236,10 +229,10 @@ function api_task_get_last_n()
     $paid_clause = "TRUE";
     if (is_customer($user[ROLE])) {
         $user_id = $user[ID];
-        $select_user_type = 'customer_id';
+        $select_user_type = CUSTOMER_ID;
     } else {
-        $select_user_type = 'performer_id';
-        $paid_clause = "paid";
+        $select_user_type = PERFORMER_ID;
+        $paid_clause = PAID;
     }
     if (is_customer($user[ROLE]) && is_null($last_id)) {
         $task = dal_task_fetch_last($user[ID]);
@@ -271,11 +264,20 @@ function api_task_perform($task_id)
     $task = dal_task_fetch($task_id);
     if ($task[PAID]) {
         if (is_null($task[PERFORMER_ID])) {
+            $updated = dal_task_update_set_performer_id($task_id, $performer_id);
+            if (!$updated) {
+                render_conflict([JSON_ERROR => [POPUP => "task_already_performed"]]);
+                return;
+            } else {
+
+            }
         } else {
             render_conflict([JSON_ERROR => [POPUP => "task_already_performed"]]);
+            return;
         }
     } else {
         render_forbidden();
+        return;
     }
 }
 
@@ -366,14 +368,7 @@ function api_task_fix($task_id)
         render_conflict([JSON_ERROR => [POPUP => "task_not_enough_money"]]);
         return;
     }
-
-    $lock_tx_id_processed = payment_get_transaction_by_participants($customer_id, $task_id, 'l');
-    if (is_null($lock_tx_id_processed) || $lock_tx_id_processed[PROCESSED] === false) {
-        $tx_id = is_null($lock_tx_id_processed) ? $lock_tx_id_processed[ID] : null;
-        $tx_lock_processed = __pay($customer_id, $task_id, $amount, $tx_id);
-    } else {
-        $tx_lock_processed = true;
-    }
+    $tx_lock_processed = payment_retry_lock_transaction($task_id, $customer_id, $amount);
     if ($tx_lock_processed === true) {
         $updated = dal_task_update_set_paid($task_id);
         if (!$updated) {

@@ -6,7 +6,8 @@ $current_task_id = $current_task[ID];
 $current_task_img = get_task_img($current_task, $user);
 $current_task_description = htmlspecialchars($current_task[DESCRIPTION], ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5 | ENT_DISALLOWED, 'UTF-8', false);
 $current_task_ts_offset = $current_task[CREATED_AT_OFFSET];
-$current_task_price = $current_task[AMOUNT];
+$current_task_amount = $current_task[AMOUNT];
+$current_task_price = $current_task[PRICE];
 $customer_name = 'Jean Customer';
 $user_customer = is_customer($user[ROLE]);
 $user_performer = is_performer($user[ROLE]);
@@ -14,13 +15,13 @@ if ($user_customer) {
     if (!is_task_active($current_task)) {
         $task_unpaid = "<span data-l10n=\"unpaid\" class=\"l10n l10n-text task-header$task_class\">Unpaid</span>";
     }
-    $strong = "<strong class='task-header$task_class'><i class=\"fa fa-usd\"></i>$current_task_price $task_unpaid</strong>";
+    $strong = "<strong class='task-header$task_class'><i class=\"fa fa-usd\"></i>$current_task_amount $task_unpaid</strong>";
     $csrf = get_customer_task_csrf($user[ID], $current_task[ID]);
 } elseif ($user_performer) {
     $strong = "<strong class='task-header'>$customer_name</strong>";
     $csrf = get_performer_task_csrf($user[ID], $current_task[ID]);
 } else {
-    $strong = "<strong class='task-header'>$customer_name <h4 class=\"system-price text-\">\$$current_task_price</h4></strong>";
+    $strong = "<strong class='task-header'>$customer_name <h4 class=\"system-price text-\">\$$current_task_amount</h4></strong>";
     $csrf = null;
 }
 ?>

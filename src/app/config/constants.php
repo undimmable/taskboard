@@ -35,6 +35,7 @@ define('ACCESS_TOKEN', 'access_token');
 define('HASHED_PASSWORD', 'hashed_password');
 define('DESCRIPTION', 'description');
 define('AMOUNT', 'amount');
+define('PRICE', 'price');
 define('PAID', 'paid');
 define('PROCESSED', 'processed');
 define('GET', 'GET');

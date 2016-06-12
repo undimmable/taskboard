@@ -198,6 +198,45 @@ function payment_create_account($user_id, $balance = DEFAULT_BALANCE)
     return true;
 }
 
+/**
+ * @param $task_id
+ * @param $customer_id
+ * @param $amount
+ * @return bool|mysqli_result
+ */
+function payment_retry_lock_transaction($task_id, $customer_id, $amount)
+{
+    $lock_tx_id_processed = payment_get_transaction_by_participants($customer_id, $task_id, 'l');
+    if (is_null($lock_tx_id_processed) || $lock_tx_id_processed[PROCESSED] === false) {
+        $tx_id = is_null($lock_tx_id_processed) ? $lock_tx_id_processed[ID] : null;
+        $tx_lock_processed = __lock($customer_id, $task_id, $amount, $tx_id);
+        return $tx_lock_processed;
+    } else {
+        $tx_lock_processed = true;
+        return $tx_lock_processed;
+    }
+}
+
+function __lock($user_id, $task_id, $amount, $tx_id)
+{
+    if (is_null($tx_id)) {
+        $tx_id = payment_init_lock_transaction($user_id, $task_id, $amount);
+    }
+    if (is_null($tx_id) || !$tx_id)
+        return false;
+    return payment_process_transaction($tx_id, $user_id);
+}
+
+function __pay($user_id, $task_id, $amount, $tx_id)
+{
+    if (is_null($tx_id)) {
+        $tx_id = payment_init_lock_transaction($user_id, $task_id, $amount);
+    }
+    if (is_null($tx_id) || !$tx_id)
+        return false;
+    return payment_process_transaction($tx_id, $user_id);
+}
+
 function __payment_init_transaction($id_from, $id_to, $amount, $type)
 {
     $db_errors = initialize_db_errors();
