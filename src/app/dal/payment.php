@@ -259,7 +259,7 @@ function __payment_init_transaction($id_from, $id_to, $amount, $type)
         return false;
     }
     /** @noinspection PhpMethodParametersCountMismatchInspection */
-    if (!mysqli_stmt_bind_param($stmt, 'idsi', $id_from, $id_to, $amount, $type)) {
+    if (!mysqli_stmt_bind_param($stmt, 'idss', $id_from, $id_to, $amount, $type)) {
         add_error($connection, $db_errors);
         return false;
     }

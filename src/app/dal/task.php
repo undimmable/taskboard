@@ -82,7 +82,7 @@ function dal_task_update_set_paid($task_id)
     }
     $mysqli_result = mysqli_query($connection, "UPDATE db_task.task SET paid=TRUE WHERE id = $task_id");
     $success = false;
-    if($mysqli_result)
+    if ($mysqli_result)
         $success = true;
     mysqli_free_result($mysqli_result);
     //TODO: send event
@@ -106,7 +106,7 @@ function dal_task_update_set_performer_id($task_id, $performer_id)
     }
     $mysqli_result = mysqli_query($connection, "UPDATE db_task.task SET performer_id=$performer_id WHERE id = $task_id AND (performer_id=$performer_id OR performer_id IS NULL)");
     $success = false;
-    if($mysqli_result)
+    if ($mysqli_result)
         $success = true;
     mysqli_free_result($mysqli_result);
     return $success;
@@ -275,7 +275,7 @@ function dal_task_fetch_non_locked_price($task_id, $customer_id)
         add_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "SELECT amount FROM db_task.task WHERE id=? AND customer_id=? AND NOT balance_locked");
+    $stmt = mysqli_prepare($connection, "SELECT amount+commission FROM db_task.task WHERE id=? AND customer_id=? AND NOT balance_locked");
     if (!$stmt) {
         add_error($connection, $db_errors);
         return false;
