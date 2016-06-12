@@ -322,11 +322,11 @@ function Taskboard($) {
     };
 
     this.replaceIconWithSpinner = function (icon) {
-        icon.removeClass(icon.data('icon')).addClass('glyphicon glyphicon-refresh spinning');
+        icon.removeClass(icon.data('icon')).addClass('fa fa-cog fa-spin');
     };
 
     this.replaceSpinnerWithIcon = function (icon) {
-        icon.removeClass('glyphicon glyphicon-refresh spinning').addClass(icon.data('icon'));
+        icon.removeClass('fa fa-cog fa-spin').addClass(icon.data('icon'));
     };
 
     this.removeFormSpinner = function () {

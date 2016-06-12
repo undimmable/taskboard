@@ -37,9 +37,9 @@
                     <input type="hidden" id="csrf_token" name="csrf_token" value="<?php echo get_signup_csrf(); ?>"/>
                     <div class="form-group">
                         <button class="btn btn-primary btn-lg btn-block btn-default">
-                            <i class="glyphicon glyphicon-menu-up" aria-hidden="true"
-                               id="signup-form-spinner" data-icon="glyphicon glyphicon-log-in glyphicon-rotate"></i>
-                            <span class="l10n l10n-text" data-l10n="signup"></span>
+                            <i class="fa fa-user-plus" aria-hidden="true"
+                               id="signup-form-spinner" data-icon="fa fa-user-plus"></i>
+                            <span class="l10n l10n-text" data-l10n="to_signup"></span>
                         </button>
                     </div>
                 </form>
