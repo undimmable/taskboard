@@ -401,12 +401,13 @@ function api_task_delete_by_id($task_id)
     }
     if ($task[PAID]) {
         render_conflict([JSON_ERROR => ['task' => 'already_paid']]);
+        return;
     }
     $task_deleted = dal_task_delete($task_id);
     if ($task_deleted) {
-        payment_unlock_balance($customer_id, $task[AMOUNT]);
+        render_ok_json("");
     } else {
-        render_conflict([JSON_ERROR => ['task' => 'already_paid']]);
+        render_conflict([JSON_ERROR => [UNSPECIFIED => 'task_already_paid']]);
     }
     return;
 }

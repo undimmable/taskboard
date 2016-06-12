@@ -576,7 +576,11 @@ function Taskboard($) {
     this.parseJsonResponseError = function (response) {
         var json = taskboardApplication.parseJsonResponse(response);
         if (json && json.hasOwnProperty('error') && json['error'] != null) {
-            return JSON.stringify($.parseJSON(json.error));
+            if(json.error['unspecified']) {
+                return taskboardApplication.localizedMessage(json.error.unspecified) || json.error.unspecified;
+            } else {
+                return JSON.stringify($.parseJSON(json.error));
+            }
         } else {
             return "Unknown error";
         }

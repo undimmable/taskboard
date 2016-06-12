@@ -29,11 +29,6 @@ function render_ok()
     http_response_code(200);
 }
 
-function render_no_content()
-{
-    http_response_code(204);
-}
-
 function render_unsupported_media_type($error = [JSON_ERROR => [UNSPECIFIED => "Unsupported media type"]])
 {
     render_status_json(415, $error);
