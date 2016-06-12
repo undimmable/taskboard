@@ -321,10 +321,30 @@ function payment_process_pay_transaction($tx_id, $customer_id = null, $performer
         $amount = $task[PRICE];
         $commission = $task[COMMISSION];
     }
-    if (payment_pay($tx_id, $customer_id, $performer_id, $amount, $commission)) {
-        return _payment_transaction_set_processed($tx_id);
-    } else {
+    $result = mysqli_query(get_payment_connection(), "SELECT processed FROM db_tx.tx WHERE id=$tx_id");
+    if (mysqli_num_rows($result) < 1) {
+        if (payment_pay($tx_id, $customer_id, $performer_id, $amount, $commission)) {
+            return _payment_transaction_set_processed($tx_id);
+        } else {
+            return false;
+        }
+    }
+    if (!$result) {
+        mysqli_free_result($result);
         return false;
+    }
+    $processed = mysqli_fetch_array($result, MYSQLI_ASSOC);
+    mysqli_free_result($result);
+    if (is_null($processed)) {
+        return false;
+    } else if (!$processed[PROCESSED]) {
+        if (payment_pay($tx_id, $customer_id, $performer_id, $amount, $commission)) {
+            return _payment_transaction_set_processed($tx_id);
+        } else {
+            return false;
+        }
+    } else {
+        return _payment_transaction_set_processed($tx_id);
     }
 }
 

@@ -281,6 +281,38 @@ function api_task_perform($task_id)
                     render_internal_server_error();
                 }
             }
+        } elseif($task[PERFORMER_ID] == $performer_id) {
+            $tx = payment_get_transaction_by_participants($task_id, $performer_id, 'p');
+            if(!$tx) {
+                $tx_id = payment_init_pay_transaction($task[ID], $performer_id, $task[PRICE]);
+                $processed = payment_process_pay_transaction($tx_id, $task[CUSTOMER_ID], $performer_id, $task[AMOUNT], $task[COMMISSION]);
+                if ($processed) {
+                    $paid_success = dal_task_update_set_paid($task[ID]);
+                    if ($paid_success)
+                        render_ok_json(dal_task_fetch($task_id));
+                    else
+                        render_internal_server_error();
+                } else {
+                    render_internal_server_error();
+                }
+            } else if(!$tx[PROCESSED]) {
+                $processed = payment_process_pay_transaction($tx[ID], $task[CUSTOMER_ID], $performer_id, $task[PRICE], $task[COMMISSION]);
+                if ($processed) {
+                    $paid_success = dal_task_update_set_paid($task[ID]);
+                    if ($paid_success)
+                        render_ok_json(dal_task_fetch($task_id));
+                    else
+                        render_internal_server_error();
+                } else {
+                    render_internal_server_error();
+                }
+            } else {
+                $paid_success = dal_task_update_set_paid($task[ID]);
+                if ($paid_success)
+                    render_ok_json(dal_task_fetch($task_id));
+                else
+                    render_internal_server_error();
+            }
         } else {
             render_conflict([JSON_ERROR => [POPUP => "task_already_performed"]]);
             return;
