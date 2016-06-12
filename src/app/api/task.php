@@ -174,6 +174,16 @@ function __validate_task_perform_input($task_id, $performer_id, $csrf)
     return true;
 }
 
+function __pay($user_id, $task_id, $amount, $tx_id)
+{
+    if (is_null($tx_id)) {
+        $tx_id = payment_init_lock_transaction($user_id, $task_id, $amount);
+    }
+    if (is_null($tx_id) || !$tx_id)
+        return false;
+    return payment_process_transaction($tx_id, $user_id);
+}
+
 function __try_fix_unprocessed_transaction($user_id)
 {
     $id = payment_get_last_user_tx_id($user_id);
@@ -345,35 +355,27 @@ function api_task_fix($task_id)
         return;
     }
 
-    $lock_tx_id = payment_get_unprocessed_transaction($customer_id, $task_id, 'l');
-    if (is_null($lock_tx_id)) {
-
+    $lock_tx_id_processed = payment_get_transaction_by_participants($customer_id, $task_id, 'l');
+    if (is_null($lock_tx_id_processed) || $lock_tx_id_processed[PROCESSED] === false) {
+        $tx_id = is_null($lock_tx_id_processed) ? $lock_tx_id_processed[ID] : null;
+        $tx_lock_processed = __pay($customer_id, $task_id, $amount, $tx_id);
+    } else {
+        $tx_lock_processed = true;
     }
-    $success = payment_lock_balance($customer_id, $lock_tx_id, $amount);
-    if (is_null($success)) {
+    if ($tx_lock_processed === true) {
+        $updated = dal_task_update_set_paid($task_id);
+        if (!$updated) {
+            $updated = dal_task_update_set_paid($task_id);
+        }
+        if (!$updated) {
+            render_internal_server_error();
+        } else {
+            render_ok_json("");
+        }
+    } elseif (is_null($tx_lock_processed)) {
         render_conflict([JSON_ERROR => [POPUP => "task_not_enough_money"]]);
-        return;
-    } elseif (!$success) {
+    } else {
         render_internal_server_error();
-        return;
-    }
-    $updated = dal_task_update_set_paid($task_id);
-    if (is_null($updated)) {
-        error_log("Trying set lock_tx_id when it's already set");
-    } else {
-        error_log("Setting lock_tx_id failed");
-    }
-    $task = dal_task_fetch($task_id);
-    if (!$task) {
-        error_log("Couldn't fetch task");
-        render_bad_request_json([JSON_ERROR => get_db_errors()]);
-        return;
-    } else {
-        send_index_event($task[ID], TASK_DESCRIPTION_IDX, $task[DESCRIPTION]);
-        $create_csrf = get_customer_task_create_csrf($customer_id, $task[ID]);
-        echo "<!--json-$create_csrf-json-->";
-        _render_task($task);
-        return;
     }
 }
 

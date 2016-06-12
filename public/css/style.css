@@ -108,3 +108,9 @@ small > span, button {
 #no-more-content {
     text-align: center;
 }
+
+.center-modal {
+    transform: translate(0, 50%) !important;
+    -ms-transform: translate(0, 50%) !important;
+    -webkit-transform: translate(0, 50%) !important;
+}

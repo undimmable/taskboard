@@ -7,7 +7,7 @@ $balance = get_balance(get_authorized_user()[ID]);
     </a>
 </li>
 
-<div id="task-already-performed-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+<div id="task-already-performed-modal" class="modal fade center-modal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header col-md-12">

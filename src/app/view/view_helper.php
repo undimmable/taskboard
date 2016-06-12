@@ -14,7 +14,7 @@
  * @since     1.0.0
  */
 
-function render_not_found($error = [JSON_ERROR => [UNSPECIFIED => "Not found"]])
+function render_not_found($error = [JSON_ERROR => [UNSPECIFIED => "not_found"]])
 {
     render_status_json(404, $error);
 }
@@ -29,7 +29,7 @@ function render_ok()
     http_response_code(200);
 }
 
-function render_unsupported_media_type($error = [JSON_ERROR => [UNSPECIFIED => "Unsupported media type"]])
+function render_unsupported_media_type($error = [JSON_ERROR => [UNSPECIFIED => "unsupported_media_type"]])
 {
     render_status_json(415, $error);
 }
@@ -39,12 +39,12 @@ function render_conflict($error)
     render_status_json(409, $error);
 }
 
-function render_internal_server_error($error = [JSON_ERROR => [UNSPECIFIED => "Something went wrong"]])
+function render_internal_server_error($error = [JSON_ERROR => [UNSPECIFIED => "something_went_wrong"]])
 {
     render_status_json(500, $error);
 }
 
-function render_not_allowed_json($error = [JSON_ERROR => [UNSPECIFIED => "Method not allowed"]])
+function render_not_allowed_json($error = [JSON_ERROR => [UNSPECIFIED => "method_not_allowed"]])
 {
     render_status_json(405, $error);
 }
@@ -56,12 +56,12 @@ function render_bad_request_json($error)
     ob_flush();
 }
 
-function render_not_authorized_json($error = [JSON_ERROR => [UNSPECIFIED => "Not authorized"]])
+function render_not_authorized_json($error = [JSON_ERROR => [UNSPECIFIED => "not_authorized"]])
 {
     render_status_json(401, $error);
 }
 
-function render_forbidden($error = [JSON_ERROR => [UNSPECIFIED => "Forbidden"]])
+function render_forbidden($error = [JSON_ERROR => [UNSPECIFIED => "forbidden"]])
 {
     render_status_json(403, $error);
 }

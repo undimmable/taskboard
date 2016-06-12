@@ -262,7 +262,7 @@ function payment_process_transaction($tx_id, $id_from, $amount = null)
     }
 }
 
-function payment_get_unprocessed_transaction($entity_id_from, $entity_id_to, $type)
+function payment_get_transaction_by_participants($entity_id_from, $entity_id_to, $type)
 {
     $db_errors = initialize_db_errors();
     $connection = get_payment_connection();
@@ -270,7 +270,7 @@ function payment_get_unprocessed_transaction($entity_id_from, $entity_id_to, $ty
         add_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "SELECT id FROM db_tx.tx WHERE id_from=? AND id_to=? AND type=? AND NOT processed");
+    $stmt = mysqli_prepare($connection, "SELECT id, processed FROM db_tx.tx WHERE id_from=? AND id_to=? AND type=?");
     if (!$stmt) {
         add_error($connection, $db_errors);
         return false;
@@ -292,7 +292,7 @@ function payment_get_unprocessed_transaction($entity_id_from, $entity_id_to, $ty
         mysqli_stmt_close($stmt);
         return null;
     }
-    if (!mysqli_stmt_bind_result($stmt, $id)) {
+    if (!mysqli_stmt_bind_result($stmt, $id, $processed)) {
         add_error($connection, $db_errors);
         return false;
     }
@@ -307,7 +307,10 @@ function payment_get_unprocessed_transaction($entity_id_from, $entity_id_to, $ty
     if (mysqli_errno($connection) !== 0) {
         return false;
     }
-    return $id;
+    return [
+        ID => $id,
+        PROCESSED => $processed
+    ];
 }
 
 function __payment_transaction_set_processed($id)

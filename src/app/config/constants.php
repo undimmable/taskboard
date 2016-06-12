@@ -36,6 +36,7 @@ define('HASHED_PASSWORD', 'hashed_password');
 define('DESCRIPTION', 'description');
 define('AMOUNT', 'amount');
 define('PAID', 'paid');
+define('PROCESSED', 'processed');
 define('GET', 'GET');
 define('POST', 'POST');
 define('PUT', 'PUT');
