@@ -337,11 +337,11 @@ function api_task_fix($task_id)
     __validate_task_fix_input($task_id, $customer_id, $csrf);
     $amount = dal_task_fetch_unpaid_price($task_id, $customer_id);
     if (is_null($amount) || !$amount) {
-        render_bad_request_json([JSON_ERROR => [TASK_DB => "unable_to_process"]]);
+        render_bad_request_json([JSON_ERROR => [UNSPECIFIED => "task_unable_to_process"]]);
         return;
     }
     if (!payment_check_able_to_process($customer_id, $amount)) {
-        render_conflict([JSON_ERROR => [AMOUNT => "not_enough"]]);
+        render_conflict([JSON_ERROR => [POPUP => "task_not_enough_money"]]);
         return;
     }
 
@@ -351,7 +351,7 @@ function api_task_fix($task_id)
     }
     $success = payment_lock_balance($customer_id, $lock_tx_id, $amount);
     if (is_null($success)) {
-        render_conflict([JSON_ERROR => [AMOUNT => "not_enough"]]);
+        render_conflict([JSON_ERROR => [POPUP => "task_not_enough_money"]]);
         return;
     } elseif (!$success) {
         render_internal_server_error();
@@ -399,15 +399,15 @@ function api_task_delete_by_id($task_id)
         render_forbidden();
         return;
     }
-    if ($task[PAID]) {
-        render_conflict([JSON_ERROR => [UNSPECIFIED => 'task_already_paid']]);
+    if (!$task[PAID]) {
+        render_conflict([JSON_ERROR => [POPUP => 'task_already_paid']]);
         return;
     }
     $task_deleted = dal_task_delete($task_id);
     if ($task_deleted) {
         render_ok_json("");
     } else {
-        render_conflict([JSON_ERROR => [UNSPECIFIED => 'task_already_paid']]);
+        render_conflict([JSON_ERROR => [POPUP => 'task_already_paid']]);
     }
     return;
 }

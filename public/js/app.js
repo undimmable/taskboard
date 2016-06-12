@@ -1,6 +1,11 @@
+String.prototype.replaceAll = function (search, replacement) {
+    var target = this;
+    return target.split(search).join(replacement);
+};
+
 function Taskboard($) {
     "use strict";
-    var errorPopupKey = 'error-popup';
+    var errorNoticeKey = 'error-popup';
     var taskboardApplication = this;
     var feed = null;
     var role = null;
@@ -230,7 +235,7 @@ function Taskboard($) {
         };
     };
 
-    this.initializePopup = function (storageItemName) {
+    this.initializeNotice = function (storageItemName) {
         var popupItem = taskboardApplication.localStorageGetItem(storageItemName);
         if (popupItem === null)
             return;
@@ -404,7 +409,7 @@ function Taskboard($) {
         return $(form).attr('id') == 'account-form';
     };
 
-    this.onFormSuccess = function (response) {
+    this.onPostSuccess = function (response) {
         var taskForm = taskboardApplication.isTaskForm(taskboardApplication.currentForm);
         var balanceForm = taskboardApplication.isBalanceForm(taskboardApplication.currentForm);
         taskboardApplication.removeFormSpinner();
@@ -431,9 +436,9 @@ function Taskboard($) {
     };
 
     this.closeFormOnUnknownError = function (message) {
-        taskboardApplication.localStorageAddItem(errorPopupKey, message);
+        taskboardApplication.localStorageAddItem(errorNoticeKey, message);
         taskboardApplication.closeFormModal();
-        taskboardApplication.initializePopup(errorPopupKey);
+        taskboardApplication.initializeNotice(errorNoticeKey);
         taskboardApplication.finalizeForm();
     };
 
@@ -443,7 +448,7 @@ function Taskboard($) {
         $('#task-unpaid-modal').modal('show');
     };
 
-    this.onFormError = function (response) {
+    this.onPostError = function (response) {
         taskboardApplication.removeFormSpinner();
         taskboardApplication.enableModals();
         var json = taskboardApplication.parseJsonResponse(response);
@@ -541,8 +546,8 @@ function Taskboard($) {
                     "X-CSRF-TOKEN": csrf
                 },
                 data: data,
-                success: taskboardApplication.onFormSuccess,
-                error: taskboardApplication.onFormError
+                success: taskboardApplication.onPostSuccess,
+                error: taskboardApplication.onPostError
             });
         });
     };
@@ -576,13 +581,15 @@ function Taskboard($) {
     this.parseJsonResponseError = function (response) {
         var json = taskboardApplication.parseJsonResponse(response);
         if (json && json.hasOwnProperty('error') && json['error'] != null) {
-            if(json.error['unspecified']) {
-                return taskboardApplication.localizedMessage(json.error.unspecified) || json.error.unspecified;
+            if (json.error['unspecified']) {
+                return {error: taskboardApplication.localizedMessage(json.error.unspecified) || json.error.unspecified};
+            } else if (json.error['popup']) {
+                return {popup: json.error.popup};
             } else {
-                return JSON.stringify($.parseJSON(json.error));
+                return {error: JSON.stringify($.parseJSON(json.error))};
             }
         } else {
-            return "Unknown error";
+            return {error: taskboardApplication.localizedMessage('error_unknown')};
         }
     };
 
@@ -602,6 +609,49 @@ function Taskboard($) {
             },
             off: function () {
                 return taskboardApplication.localizedMessage('i_am_performer');
+            }
+        });
+    };
+
+    this.onNonPostError = function (response) {
+        var responseError = taskboardApplication.parseJsonResponseError(response);
+        if (responseError['popup']) {
+            var selector = '#'.concat(responseError.popup.replaceAll('_', '-')).concat('-modal');
+            $(selector).modal('show')
+        } else if (responseError['error']) {
+            taskboardApplication.localStorageAddItem(errorNoticeKey, responseError.error);
+            taskboardApplication.initializeNotice(errorNoticeKey);
+        } else {
+            console.error("Silently ignore unknown error");
+        }
+    };
+
+    this.onTaskRemove = function (task) {
+        task.remove();
+        taskboardApplication.updateBalance();
+    };
+
+    this.onTaskCreate = function (response, task) {
+        task.replaceWith(response);
+        taskboardApplication.updateBalance();
+    };
+
+    this.sendNonPost = function (el, method, successCallback, errorCallback) {
+        var task = $(el).closest('.task-feed-item');
+        var id = task.data('id');
+        var csrf = $(el).data('csrf');
+        $.ajax({
+            url: 'api/v1/task/' + id,
+            contentType: 'application/json; charset=UTF-8',
+            type: method,
+            headers: {
+                "X-CSRF-TOKEN": csrf
+            },
+            success: function (response) {
+                return successCallback(response, task);
+            },
+            error: function (response) {
+                return errorCallback(response, task);
             }
         });
     };
@@ -626,7 +676,7 @@ function Taskboard($) {
         if (taskboardApplication.initialized)
             return this;
         taskboardApplication.initialized = true;
-        taskboardApplication.initializePopup(errorPopupKey);
+        taskboardApplication.initializeNotice(errorNoticeKey);
         taskboardApplication.initializeListeners();
         taskboardApplication.initializeFormListeners();
         taskboardApplication.initializeFormModals();
@@ -638,68 +688,29 @@ function Taskboard($) {
         }
         if (role == customerRole) {
             $(document).on('click', '.delete-task', function () {
-                var task = $(this).closest('.task-feed-item');
-                var id = task.data('id');
-                var csrf = $(this).data('csrf');
-                $.ajax({
-                    url: 'api/v1/task/' + id,
-                    contentType: 'application/json; charset=UTF-8',
-                    type: "DELETE",
-                    headers: {
-                        "X-CSRF-TOKEN": csrf
-                    },
-                    success: function () {
-                        task.remove();
-                        taskboardApplication.updateBalance();
-                    },
-                    error: function (response) {
-                        taskboardApplication.localStorageAddItem(errorPopupKey, taskboardApplication.parseJsonResponseError(response));
-                        taskboardApplication.initializePopup(errorPopupKey);
-                    }
+                var el = $(this);
+                taskboardApplication.sendNonPost(el, 'DELETE', function (response, task) {
+                    taskboardApplication.onTaskRemove(task);
+                }, function (response, task) {
+                    taskboardApplication.onNonPostError(response, task);
                 });
             });
             $(document).on('click', '.fix-task', function () {
-                var task = $(this).closest('.task-feed-item');
-                var id = task.data('id');
-                var csrf = $(this).data('csrf');
-                $.ajax({
-                    url: 'api/v1/task/' + id,
-                    contentType: 'application/json; charset=UTF-8',
-                    type: "POST",
-                    headers: {
-                        "X-CSRF-TOKEN": csrf
-                    },
-                    success: function (response) {
-                        task.replaceWith(response);
-                        taskboardApplication.updateBalance();
-                    },
-                    error: function (response) {
-                        taskboardApplication.localStorageAddItem(errorPopupKey, taskboardApplication.parseJsonResponseError(response));
-                        taskboardApplication.initializePopup(errorPopupKey);
-                    }
+                var el = $(this);
+                taskboardApplication.sendNonPost(el, 'POST', function (response, task) {
+                    taskboardApplication.onTaskCreate(response, task);
+                }, function (response, task) {
+                    taskboardApplication.onNonPostError(response, task);
                 });
             });
         }
         if (role == performerRole) {
             $(document).on('click', '.perform-task', function () {
-                var task = $(this).closest('.task-feed-item');
-                var id = task.data('id');
-                var csrf = $(this).data('csrf');
-                $.ajax({
-                    url: 'api/v1/task/' + id,
-                    contentType: 'application/json; charset=UTF-8',
-                    type: "PUT",
-                    headers: {
-                        "X-CSRF-TOKEN": csrf
-                    },
-                    success: function () {
-                        task.remove();
-                        taskboardApplication.updateBalance();
-                    },
-                    error: function (response) {
-                        taskboardApplication.localStorageAddItem(errorPopupKey, taskboardApplication.parseJsonResponseError(response));
-                        taskboardApplication.initializePopup(errorPopupKey);
-                    }
+                var el = $(this);
+                taskboardApplication.sendNonPost(el, 'PUT', function (response, task) {
+                    taskboardApplication.onTaskRemove(task);
+                }, function (response, task) {
+                    taskboardApplication.onNonPostError(response, task);
                 });
             });
         }

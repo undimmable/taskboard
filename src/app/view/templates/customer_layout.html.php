@@ -73,6 +73,22 @@ $csrf = get_account_csrf(get_authorized_user()[ID]);
     </div>
 </div>
 
+<div id="task-not-enough-money-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header col-md-12">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h1 class="text-center l10n l10n-text" data-l10n="not_enough_money_notice_header"></h1>
+            </div>
+            <div class="modal-body col-md-12 l10n l10n-text" data-l10n="not_enough_money_notice_body"></div>
+            <div class="modal-footer">
+                <div class="col-md-12">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="task-already-paid-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
