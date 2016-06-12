@@ -400,7 +400,7 @@ function api_task_delete_by_id($task_id)
         return;
     }
     if ($task[PAID]) {
-        render_conflict([JSON_ERROR => ['task' => 'already_paid']]);
+        render_conflict([JSON_ERROR => [UNSPECIFIED => 'task_already_paid']]);
         return;
     }
     $task_deleted = dal_task_delete($task_id);
