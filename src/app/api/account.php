@@ -39,7 +39,6 @@ $authorization = [
  * Validate amount
  *
  * @param $amount integer
- * @param bool $is_task boolean
  * @param $validation_context array
  * @return bool true if validation succeeds and false otherwise
  */
@@ -70,7 +69,7 @@ function __validate_amount($amount, &$validation_context)
  *
  * @param $amount integer
  * @param $user_id integer
- * @param $validation_context array
+ * @param $csrf string
  * @return bool true if validation succeeds and false otherwise
  */
 

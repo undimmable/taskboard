@@ -189,7 +189,7 @@ function __try_fix_unprocessed_transaction($user_id, $is_customer = true)
         if (is_null($transactions) || $transactions == false) {
             return false;
         } else {
-            return __payment_transaction_set_processed($id);
+            return _payment_transaction_set_processed($id);
         }
     }
 }
@@ -269,7 +269,17 @@ function api_task_perform($task_id)
                 render_conflict([JSON_ERROR => [POPUP => "task_already_performed"]]);
                 return;
             } else {
-                payment_init_pay_transaction($task[ID], $performer_id, $task[AMOUNT], $task[COMMISSION]);
+                $tx_id = payment_init_pay_transaction($task[ID], $performer_id, $task[PRICE]);
+                $processed = payment_process_pay_transaction($tx_id, $task[CUSTOMER_ID], $performer_id, $task[PRICE], $task[COMMISSION]);
+                if ($processed) {
+                    $paid_success = dal_task_update_set_paid($task[ID]);
+                    if ($paid_success)
+                        render_ok_json(dal_task_fetch($task_id));
+                    else
+                        render_internal_server_error();
+                } else {
+                    render_internal_server_error();
+                }
             }
         } else {
             render_conflict([JSON_ERROR => [POPUP => "task_already_performed"]]);

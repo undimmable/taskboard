@@ -14,40 +14,6 @@
  * @since     1.0.0
  */
 require_once "dal/dal_helper.php";
-//$payment_connection = null;
-$account_connection = null;
-
-function get_payment_connection()
-{
-    return get_mysqli_connection(TX_DB);
-}
-
-function get_account_connection()
-{
-    global $account_connection;
-    if ($account_connection === null) {
-        $account_connection = get_mysqli_connection(ACCOUNT_DB);
-    }
-    return $account_connection;
-}
-
-function close_account_connection()
-{
-    global $account_connection;
-    if ($account_connection !== null) {
-        mysqli_close($account_connection);
-        unset($account_connection);
-    }
-}
-
-function close_payment_connection()
-{
-    global $payment_connection;
-    if ($payment_connection !== null) {
-        mysqli_close($payment_connection);
-        unset($payment_connection);
-    }
-}
 
 function payment_check_able_to_process($user_id, $amount)
 {
@@ -132,6 +98,33 @@ function payment_lock_balance($user_id, $tx_id, $amount)
     }
     mysqli_stmt_close($stmt);
     return true;
+}
+
+function payment_pay($tx_id, $customer_id, $performer_id, $amount, $commission)
+{
+    $connection = get_account_connection();
+    mysqli_autocommit($connection, false);
+    if (mysqli_multi_query($connection, "UPDATE db_account.account SET locked_balance = locked_balance - $amount - $commission, balance = balance - $amount - $commission WHERE user_id=$customer_id; UPDATE db_account.account SET balance = balance + $amount, last_tx_id=$tx_id WHERE user_id=$performer_id AND last_tx_id < $tx_id")) {
+        while (mysqli_next_result($connection)) {
+            if ($result = mysqli_store_result($connection)) {
+                mysqli_free_result($result);
+            }
+            if (mysqli_more_results($connection)) {
+            }
+        }
+        if (mysqli_error($connection)) {
+            mysqli_rollback($connection);
+            mysqli_autocommit($connection, true);
+            return false;
+        } else {
+            mysqli_commit($connection);
+            mysqli_autocommit($connection, true);
+            return true;
+        }
+    } else {
+        mysqli_autocommit($connection, true);
+        return false;
+    }
 }
 
 function payment_unlock_balance($user_id, $amount)
@@ -227,7 +220,7 @@ function payment_retry_lock_transaction($task_id, $customer_id, $amount)
     $lock_tx_id_processed = payment_get_transaction_by_participants($customer_id, $task_id, 'l');
     if (is_null($lock_tx_id_processed) || $lock_tx_id_processed[PROCESSED] === false) {
         $tx_id = is_null($lock_tx_id_processed) ? $lock_tx_id_processed[ID] : null;
-        $tx_lock_processed = __lock($customer_id, $task_id, $amount, $tx_id);
+        $tx_lock_processed = _lock($customer_id, $task_id, $amount, $tx_id);
         return $tx_lock_processed;
     } else {
         $tx_lock_processed = true;
@@ -235,7 +228,7 @@ function payment_retry_lock_transaction($task_id, $customer_id, $amount)
     }
 }
 
-function __lock($user_id, $task_id, $amount, $tx_id)
+function _lock($user_id, $task_id, $amount, $tx_id)
 {
     if (is_null($tx_id)) {
         $tx_id = payment_init_lock_transaction($user_id, $task_id, $amount);
@@ -245,7 +238,7 @@ function __lock($user_id, $task_id, $amount, $tx_id)
     return payment_process_lock_transaction($tx_id, $user_id);
 }
 
-function __payment_init_transaction($id_from, $id_to, $amount, $type)
+function _payment_init_transaction($id_from, $id_to, $amount, $type)
 {
     $db_errors = initialize_db_errors();
     $connection = get_payment_connection();
@@ -280,12 +273,12 @@ function __payment_init_transaction($id_from, $id_to, $amount, $type)
 
 function payment_init_lock_transaction($id_from, $id_to, $amount)
 {
-    return __payment_init_transaction($id_from, $id_to, $amount, 'l');
+    return _payment_init_transaction($id_from, $id_to, $amount, 'l');
 }
 
-function payment_init_pay_transaction($id_from, $id_to, $amount, $commission)
+function payment_init_pay_transaction($task_id, $performer_id, $amount)
 {
-    return __payment_init_transaction($id_from, $id_to, $amount, 'p');
+    return _payment_init_transaction($task_id, $performer_id, $amount, 'p');
 }
 
 function payment_process_lock_transaction($tx_id, $id_from, $amount = null)
@@ -305,29 +298,31 @@ function payment_process_lock_transaction($tx_id, $id_from, $amount = null)
         }
     }
     if (payment_lock_balance($id_from, $tx_id, $amount)) {
-        return __payment_transaction_set_processed($tx_id);
+        return _payment_transaction_set_processed($tx_id);
     } else {
         return false;
     }
 }
 
-function payment_process_pay_transaction($tx_id, $id_from, $id_to, $price = null, $commission = null)
+function payment_process_pay_transaction($tx_id, $customer_id = null, $performer_id = null, $amount = null, $commission = null)
 {
-    if ($price == null || $commission == null) {
-        $result = mysqli_query(get_payment_connection(), "SELECT amount from db_tx.tx WHERE id=$tx_id", MYSQLI_STORE_RESULT);
-        if (!$result || mysqli_num_rows($result) < 1) {
+    if (is_null($amount) || is_null($commission)) {
+        $payment_connection = get_payment_connection();
+        $result = mysqli_query($payment_connection, "SELECT id_from FROM db_tx.tx WHERE id=$tx_id");
+        if (!$result) {
+            mysqli_free_result($result);
             return false;
         }
-        $amount_array = mysqli_fetch_array($result, MYSQLI_ASSOC);
+        $task_id = mysqli_fetch_array($result, MYSQLI_ASSOC)['id_from'];
         mysqli_free_result($result);
-        if (!$amount_array) {
+        $task = dal_task_fetch($task_id);
+        if ($task)
             return false;
-        } else {
-            $amount = $amount_array[AMOUNT];
-        }
+        $amount = $task[PRICE];
+        $commission = $task[COMMISSION];
     }
-    if (payment_lock_balance($id_from, $tx_id, $amount)) {
-        return __payment_transaction_set_processed($tx_id);
+    if (payment_pay($tx_id, $customer_id, $performer_id, $amount, $commission)) {
+        return _payment_transaction_set_processed($tx_id);
     } else {
         return false;
     }
@@ -384,12 +379,12 @@ function payment_get_transaction_by_participants($entity_id_from, $entity_id_to,
     ];
 }
 
-function __payment_transaction_set_processed($id)
+function _payment_transaction_set_processed($id)
 {
     $connection = get_payment_connection();
     $mysqli_result = mysqli_query($connection, "UPDATE db_tx.tx SET processed=TRUE WHERE id=$id");
     $success = false;
-    if($mysqli_result) {
+    if ($mysqli_result) {
         $success = true;
     }
     mysqli_free_result($mysqli_result);

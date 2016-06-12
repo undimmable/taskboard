@@ -16,17 +16,6 @@
 require_once "../bootstrap.php";
 require_once "dal_helper.php";
 
-$user_connection = null;
-
-function get_user_connection()
-{
-    global $user_connection;
-    if ($user_connection === null) {
-        $user_connection = get_mysqli_connection(USER_DB);
-    }
-    return $user_connection;
-}
-
 function create_user($email, $role, $hashed_password, $confirmation_token)
 {
     if (user_exists($email)) {

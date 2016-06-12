@@ -22,6 +22,88 @@ define('TX_DB', 'tx');
 define('USER_DB', 'user');
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
+$task_connection = null;
+$account_connection = null;
+$payment_connection = null;
+$user_connection = null;
+
+/**
+ * Helper function returning cached connection
+ *
+ * @return mysqli
+ */
+function get_task_connection()
+{
+    global $task_connection;
+    if ($task_connection === null) {
+        $task_connection = get_mysqli_connection(TASK_DB);
+    }
+    return $task_connection;
+}
+
+function get_payment_connection()
+{
+    global $payment_connection;
+    if ($payment_connection === null) {
+        $payment_connection = get_mysqli_connection(TX_DB);
+    }
+    return $payment_connection;
+}
+
+function get_account_connection()
+{
+    global $account_connection;
+    if ($account_connection === null) {
+        $account_connection = get_mysqli_connection(ACCOUNT_DB);
+    }
+    return $account_connection;
+}
+
+function get_user_connection()
+{
+    global $user_connection;
+    if ($user_connection === null) {
+        $user_connection = get_mysqli_connection(USER_DB);
+    }
+    return $user_connection;
+}
+
+function close_user_connection()
+{
+    global $user_connection;
+    if ($user_connection !== null) {
+        mysqli_close($user_connection);
+        unset($user_connection);
+    }
+}
+
+function close_account_connection()
+{
+    global $account_connection;
+    if ($account_connection !== null) {
+        mysqli_close($account_connection);
+        unset($account_connection);
+    }
+}
+
+function close_payment_connection()
+{
+    global $payment_connection;
+    if ($payment_connection !== null) {
+        mysqli_close($payment_connection);
+        unset($payment_connection);
+    }
+}
+
+function close_task_connection()
+{
+    global $task_connection;
+    if ($task_connection != null) {
+        mysqli_close($task_connection);
+        unset($task_connection);
+    }
+}
+
 function &initialize_db_errors()
 {
     $db_errors = [];

@@ -18,30 +18,6 @@
  */
 require_once "../bootstrap.php";
 require_once "dal_helper.php";
-$task_connection = null;
-
-/**
- * Helper function returning cached task connection
- *
- * @return mysqli
- */
-function get_task_connection()
-{
-    global $task_connection;
-    if ($task_connection === null) {
-        $task_connection = get_mysqli_connection(TASK_DB);
-    }
-    return $task_connection;
-}
-
-function close_task_connection()
-{
-    global $task_connection;
-    if ($task_connection != null) {
-        mysqli_close($task_connection);
-        unset($task_connection);
-    }
-}
 
 /**
  * Set locked_balance status to task
