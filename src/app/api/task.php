@@ -261,6 +261,51 @@ function api_task_perform($task_id)
     if (!__validate_task_perform_input($task_id, $performer_id, $csrf)) {
         return;
     }
+    $last_tx_id = payment_get_last_user_tx_id($performer_id);
+    if (is_null($last_tx_id)) {
+        $unprocessed_tx = payment_fetch_transactions_after($performer_id, $last_tx_id, false);
+        if ($unprocessed_tx) {
+            $tx = payment_get_transaction_by_participants($unprocessed_tx['id_from'], $performer_id, 'p');
+            $task = dal_task_fetch($unprocessed_tx['id_from']);
+            if (!$task) {
+                render_internal_server_error();
+                return;
+            }
+            if (!$tx) {
+                $tx_id = payment_init_pay_transaction($unprocessed_tx['id_from'], $performer_id, $task[PRICE]);
+                $processed = payment_process_pay_transaction($tx_id, $task[CUSTOMER_ID], $performer_id, $task[AMOUNT], $task[COMMISSION]);
+                if ($processed) {
+                    $paid_success = dal_task_update_set_paid($task[ID]);
+                    if ($paid_success)
+                        render_ok_json(dal_task_fetch($task_id));
+                    else
+                        render_internal_server_error();
+                } else {
+                    render_internal_server_error();
+                }
+            } else if (!$tx[PROCESSED]) {
+                $processed = payment_process_pay_transaction($tx[ID], $task[CUSTOMER_ID], $performer_id, $task[PRICE], $task[COMMISSION]);
+                if ($processed) {
+                    $paid_success = dal_task_update_set_paid($task[ID]);
+                    if ($paid_success)
+                        render_ok_json(dal_task_fetch($task_id));
+                    else
+                        render_internal_server_error();
+                } else {
+                    render_internal_server_error();
+                }
+            } else {
+                $paid_success = dal_task_update_set_paid($task[ID]);
+                if ($paid_success)
+                    render_ok_json(dal_task_fetch($task_id));
+                else
+                    render_internal_server_error();
+            }
+        }
+    } else if (!$last_tx_id) {
+        render_internal_server_error();
+        return;
+    }
     $task = dal_task_fetch($task_id);
     if ($task[BALANCE_LOCKED]) {
         if (is_null($task[PERFORMER_ID])) {
@@ -281,9 +326,9 @@ function api_task_perform($task_id)
                     render_internal_server_error();
                 }
             }
-        } elseif($task[PERFORMER_ID] == $performer_id) {
+        } elseif ($task[PERFORMER_ID] == $performer_id) {
             $tx = payment_get_transaction_by_participants($task_id, $performer_id, 'p');
-            if(!$tx) {
+            if (!$tx) {
                 $tx_id = payment_init_pay_transaction($task[ID], $performer_id, $task[PRICE]);
                 $processed = payment_process_pay_transaction($tx_id, $task[CUSTOMER_ID], $performer_id, $task[AMOUNT], $task[COMMISSION]);
                 if ($processed) {
@@ -295,7 +340,7 @@ function api_task_perform($task_id)
                 } else {
                     render_internal_server_error();
                 }
-            } else if(!$tx[PROCESSED]) {
+            } else if (!$tx[PROCESSED]) {
                 $processed = payment_process_pay_transaction($tx[ID], $task[CUSTOMER_ID], $performer_id, $task[PRICE], $task[COMMISSION]);
                 if ($processed) {
                     $paid_success = dal_task_update_set_paid($task[ID]);

@@ -69,7 +69,7 @@ function payment_fetch_transactions_after($tx_id, $user_id, $is_customer)
 {
     $connection = get_payment_connection();
     $query = $is_customer ? "id_from=$user_id" : "id_to = $user_id";
-    $mysqli_result = mysqli_query($connection, "SELECT id,amount,processed,type FROM db_tx.tx WHERE $query AND id>$tx_id", MYSQLI_ASSOC);
+    $mysqli_result = mysqli_query($connection, "SELECT id,id_from,amount,processed,type FROM db_tx.tx WHERE $query AND id>$tx_id", MYSQLI_ASSOC);
     $result = mysqli_fetch_array($mysqli_result);
     mysqli_free_result($mysqli_result);
     return $result;
