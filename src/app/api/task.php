@@ -401,15 +401,17 @@ function api_task_delete_by_id($task_id)
         render_forbidden();
         return;
     }
-    if (!$task[PAID]) {
+    if ($task[PAID]) {
         render_conflict([JSON_ERROR => [POPUP => 'task_already_paid']]);
         return;
     }
     $task_deleted = dal_task_delete($task_id);
     if ($task_deleted) {
         render_ok_json("");
-    } else {
+    } elseif (is_null($task_deleted)) {
         render_conflict([JSON_ERROR => [POPUP => 'task_already_paid']]);
+    } else {
+        render_internal_server_error();
     }
     return;
 }
