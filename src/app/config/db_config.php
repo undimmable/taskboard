@@ -20,7 +20,7 @@ function initialize_configuration()
     global $php_config_path, $db_config;
     if (is_null($db_config)) {
         /** @noinspection PhpIncludeInspection */
-        $db_config = include "$php_config_path/taskboard_db_config.php";
+        $db_config = include "taskboard_db_config.php";
     }
 }
 

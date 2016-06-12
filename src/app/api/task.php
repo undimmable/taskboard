@@ -335,7 +335,7 @@ function api_task_fix($task_id)
     $customer_id = $user[ID];
     $csrf = parse_csrf_token_header();
     __validate_task_fix_input($task_id, $customer_id, $csrf);
-    $amount = dal_task_fetch_price($task_id, $customer_id);
+    $amount = dal_task_fetch_unpaid_price($task_id, $customer_id);
     if (is_null($amount) || !$amount) {
         render_bad_request_json([JSON_ERROR => ["task" => "unable_to_process"]]);
         return;

@@ -21,7 +21,7 @@ function get_validation_config()
     global $php_config_path, $validation_config;
     if (is_null($validation_config)) {
         /** @noinspection PhpIncludeInspection */
-        $validation_config = include "$php_config_path/taskboard_validation_config.php";
+        $validation_config = include "taskboard_validation_config.php";
     }
     return $validation_config;
 }

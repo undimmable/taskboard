@@ -21,7 +21,7 @@ function get_security_config()
     global $php_config_path, $security_config;
     if (is_null($security_config)) {
         /** @noinspection PhpIncludeInspection */
-        $security_config = include "$php_config_path/taskboard_security_config.php";
+        $security_config = include "taskboard_security_config.php";
     }
     return $security_config;
 }

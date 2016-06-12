@@ -13,11 +13,8 @@
  * @link      https://taskboards.top
  * @since     1.0.0
  */
-
-if (!isset($php_config_path)) {
-    $php_config_path = "/var/www/taskboard_config";
-};
 set_include_path(get_include_path() . PATH_SEPARATOR . '/var/www/taskboard/src/app');
+set_include_path(get_include_path() . PATH_SEPARATOR . '/var/www/taskboard_config');
 require_once "config/constants.php";
 require_once "config/db_config.php";
 require_once "config/security_config.php";

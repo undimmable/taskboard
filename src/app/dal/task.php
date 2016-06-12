@@ -162,7 +162,7 @@ function dal_task_fetch($task_id)
         add_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "SELECT id, timestampdiff(SECOND, now(), created_at), customer_id, performer_id, amount, description, lock_tx_id FROM db_task.task WHERE id=?");
+    $stmt = mysqli_prepare($connection, "SELECT id, timestampdiff(SECOND, now(), created_at), customer_id, performer_id, amount, description, paid FROM db_task.task WHERE id=?");
     if (!$stmt) {
         add_error($connection, $db_errors);
         return false;
@@ -183,7 +183,7 @@ function dal_task_fetch($task_id)
     if (mysqli_stmt_num_rows($stmt) < 1) {
         return null;
     }
-    if (!mysqli_stmt_bind_result($stmt, $id, $created_at, $customer_id, $performer_id, $amount, $description, $lock_tx_id)) {
+    if (!mysqli_stmt_bind_result($stmt, $id, $created_at, $customer_id, $performer_id, $amount, $description, $paid)) {
         add_error($connection, $db_errors);
         return false;
     }
@@ -204,7 +204,7 @@ function dal_task_fetch($task_id)
         CUSTOMER_ID => $customer_id,
         PERFORMER_ID => $performer_id,
         CREATED_AT_OFFSET => $created_at,
-        LOCK_TX_ID => $lock_tx_id,
+        PAID => $paid,
         AMOUNT => $amount
     ];
 }
@@ -216,7 +216,7 @@ function dal_task_fetch($task_id)
  * @param $customer_id
  * @return null|bool|int  null if the row with specified task_id/customer_id doesn't exists, price if there's such row and false if there was some errors
  */
-function dal_task_fetch_price($task_id, $customer_id)
+function dal_task_fetch_unpaid_price($task_id, $customer_id)
 {
     $db_errors = initialize_db_errors();
     $connection = get_task_connection();
@@ -224,7 +224,7 @@ function dal_task_fetch_price($task_id, $customer_id)
         add_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "SELECT amount FROM db_task.task WHERE id=? AND customer_id=? AND (task.lock_tx_id IS NULL OR lock_tx_id = -1)");
+    $stmt = mysqli_prepare($connection, "SELECT amount FROM db_task.task WHERE id=? AND customer_id=? AND NOT paid");
     if (!$stmt) {
         add_error($connection, $db_errors);
         return false;

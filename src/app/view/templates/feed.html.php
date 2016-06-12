@@ -3,7 +3,7 @@
         <div class="panel panel-info">
             <div class="panel-heading text-center">
                 <span class="l10n l10n-text" data-l10n="task_feed"></span>
-                <?php if (is_customer(get_current_user()[ROLE])) {
+                <?php if (is_customer(get_authorized_user()[ROLE])) {
                     echo "<span class=\"pull-right\">
                     <label>
                         <span class=\"l10n l10n-text\" data-l10n=\"hide_completed\"></span>
