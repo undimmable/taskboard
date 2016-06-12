@@ -586,6 +586,7 @@ function Taskboard($) {
         $('.l10n').each(function () {
             taskboardApplication.updateLocale($(this));
         });
+        $('.timestamp').substituteTime();
     };
 
     this.initializeToggler = function () {
