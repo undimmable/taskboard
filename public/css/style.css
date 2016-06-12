@@ -29,10 +29,9 @@ textarea {
     margin-bottom: 25px;
 }
 
-small > span,button {
-    white-space:nowrap;
+small > span, button {
+    white-space: nowrap;
 }
-
 
 @keyframes spin {
     from {
@@ -77,6 +76,10 @@ small > span,button {
 
 .task-completed {
     color: slategrey !important;
+}
+
+.feed-header {
+    display: inline-block;
 }
 
 .system-price {

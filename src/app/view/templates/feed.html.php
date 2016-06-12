@@ -2,13 +2,15 @@
     <div class="feed-wrapper">
         <div class="panel panel-info">
             <div class="panel-heading text-center">
-                <span class="l10n l10n-text" data-l10n="task_feed"></span>
+                <h4 class="feed-header"><span class="l10n l10n-text" data-l10n="task_feed"></span></h4>
                 <?php if (is_customer(get_authorized_user()[ROLE])) {
                     echo "<span class=\"pull-right\">
+                <h5 class=\"feed-header hide-completed\">
                     <label>
                         <span class=\"l10n l10n-text\" data-l10n=\"hide_completed\"></span>
-                        <input type=\"checkbox\" id=\"hide-completed\">
+                        <input type=\"checkbox\" id=\"hide-completed\" checked>
                     </label>
+                    </h5>
                 </span>";
                 } ?>
             </div>
