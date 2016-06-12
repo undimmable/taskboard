@@ -93,7 +93,7 @@ function parse_user_client()
 
 function is_task_active($task)
 {
-    return array_key_exists(PAID, $task) && ($task[PAID]);
+    return array_key_exists(BALANCE_LOCKED, $task) && ($task[BALANCE_LOCKED]);
 }
 
 function is_task_completed($task)
@@ -133,6 +133,7 @@ function get_account_csrf($user_id)
 
 function get_random_payload($user = null)
 {
+    //TODO: check if needed
     return 0;
 }
 

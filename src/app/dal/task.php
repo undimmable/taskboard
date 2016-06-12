@@ -52,6 +52,7 @@ function dal_task_update_set_paid($task_id)
     if (!$result) {
         add_error($connection, $db_errors);
     }
+    //TODO: send event
     return $result;
 }
 
@@ -175,7 +176,7 @@ function dal_task_fetch($task_id)
         add_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "SELECT id, timestampdiff(SECOND, now(), created_at), customer_id, performer_id, amount + commission, description, paid FROM db_task.task WHERE id=?");
+    $stmt = mysqli_prepare($connection, "SELECT id, timestampdiff(SECOND, now(), created_at), customer_id, performer_id, amount + commission, amount as price, commission, description, balance_locked, paid FROM db_task.task WHERE id=?");
     if (!$stmt) {
         add_error($connection, $db_errors);
         return false;
@@ -196,7 +197,7 @@ function dal_task_fetch($task_id)
     if (mysqli_stmt_num_rows($stmt) < 1) {
         return null;
     }
-    if (!mysqli_stmt_bind_result($stmt, $id, $created_at, $customer_id, $performer_id, $amount, $description, $paid)) {
+    if (!mysqli_stmt_bind_result($stmt, $id, $created_at, $customer_id, $performer_id, $amount, $price, $commission, $description, $balance_locked, $paid)) {
         add_error($connection, $db_errors);
         return false;
     }
@@ -217,7 +218,10 @@ function dal_task_fetch($task_id)
         CUSTOMER_ID => $customer_id,
         PERFORMER_ID => $performer_id,
         CREATED_AT_OFFSET => $created_at,
+        BALANCE_LOCKED => $balance_locked,
         PAID => $paid,
+        COMMISSION => $commission,
+        PRICE => $price,
         AMOUNT => $amount
     ];
 }
@@ -317,7 +321,7 @@ function dal_task_fetch_tasks_less_than_last_id_limit($callback, $user_id, $paid
     }
     $last_id_clause = $last_id === null ? '' : "AND id < $last_id";
 
-    $query = "SELECT id, timestampdiff(SECOND, now(), created_at), amount as price, customer_id, performer_id, amount + commission as amount, description, paid FROM db_task.task WHERE $paid AND not deleted AND $select_user_type <=> ? $last_id_clause ORDER BY id DESC LIMIT ?";
+    $query = "SELECT id, timestampdiff(SECOND, now(), created_at), amount as price, customer_id, performer_id, amount + commission as amount, description, balance_locked, paid FROM db_task.task WHERE $paid AND not deleted AND $select_user_type <=> ? $last_id_clause ORDER BY id DESC LIMIT ?";
     $stmt = mysqli_prepare($connection, $query);
     if (!$stmt) {
         add_error($connection, $db_errors);
@@ -333,7 +337,7 @@ function dal_task_fetch_tasks_less_than_last_id_limit($callback, $user_id, $paid
         add_error($connection, $db_errors);
         return false;
     }
-    if (!mysqli_stmt_bind_result($stmt, $id, $created_at, $price, $customer_id, $performer_id, $amount, $description, $paid)) {
+    if (!mysqli_stmt_bind_result($stmt, $id, $created_at, $price, $customer_id, $performer_id, $amount, $description, $balance_locked, $paid)) {
         add_error($connection, $db_errors);
         return false;
     }
@@ -348,6 +352,7 @@ function dal_task_fetch_tasks_less_than_last_id_limit($callback, $user_id, $paid
             AMOUNT => $amount,
             PRICE => $price,
             DESCRIPTION => $description,
+            BALANCE_LOCKED => $balance_locked,
             PAID => $paid
         ];
         call_user_func($callback, $task);
