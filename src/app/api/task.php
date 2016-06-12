@@ -265,8 +265,18 @@ function api_task_perform($task_id)
     $user = get_authorized_user();
     $performer_id = $user[ID];
     $csrf = parse_csrf_token_header();
-    __validate_task_perform_input($task_id, $performer_id, $csrf);
-
+    if (!__validate_task_perform_input($task_id, $performer_id, $csrf)) {
+        return;
+    }
+    $task = dal_task_fetch($task_id);
+    if ($task[PAID]) {
+        if (is_null($task[PERFORMER_ID])) {
+        } else {
+            render_conflict([JSON_ERROR => [POPUP => "task_already_performed"]]);
+        }
+    } else {
+        render_forbidden();
+    }
 }
 
 /**
@@ -344,7 +354,9 @@ function api_task_fix($task_id)
     $user = get_authorized_user();
     $customer_id = $user[ID];
     $csrf = parse_csrf_token_header();
-    __validate_task_fix_input($task_id, $customer_id, $csrf);
+    if (!__validate_task_fix_input($task_id, $customer_id, $csrf)) {
+        return;
+    }
     $amount = dal_task_fetch_unpaid_price($task_id, $customer_id);
     if (is_null($amount) || !$amount) {
         render_bad_request_json([JSON_ERROR => [UNSPECIFIED => "task_unable_to_process"]]);

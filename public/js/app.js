@@ -710,6 +710,13 @@ function Taskboard($) {
                 taskboardApplication.sendNonPost(el, 'PUT', function (response, task) {
                     taskboardApplication.onTaskRemove(task);
                 }, function (response, task) {
+                    if (response.status == 409) {
+                        try {
+                            task.remove();
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    }
                     taskboardApplication.onNonPostError(response, task);
                 });
             });
