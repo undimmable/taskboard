@@ -7,9 +7,9 @@
         require 'view/templates/signup_form.html.php';
     } else {
         if (is_customer($user[ROLE])) {
-            require 'view/templates/customer_navbar.html.php';
+            require 'view/templates/customer_layout.html.php';
         } else {
-            require 'view/templates/user_navbar.html.php';
+            require 'view/templates/user_layout.html.php';
         }
         require 'view/templates/logout_button.html.php';
     }
