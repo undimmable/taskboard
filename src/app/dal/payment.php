@@ -198,7 +198,7 @@ function payment_create_account($user_id, $balance = DEFAULT_BALANCE)
     return true;
 }
 
-function payment_create_transaction($id_from, $id_to, $amount, $type)
+function __payment_init_transaction($id_from, $id_to, $amount, $type)
 {
     $db_errors = initialize_db_errors();
     $connection = get_payment_connection();
@@ -229,6 +229,37 @@ function payment_create_transaction($id_from, $id_to, $amount, $type)
     }
     $id = mysqli_insert_id($connection);
     return $id;
+}
+
+function payment_init_lock_transaction($id_from, $id_to, $amount)
+{
+    return __payment_init_transaction($id_from, $id_to, $amount, 'l');
+}
+
+function payment_init_pay_transaction($id_from, $id_to, $amount)
+{
+    return __payment_init_transaction($id_from, $id_to, $amount, 'p');
+}
+
+function payment_process_transaction($tx_id, $id_from, $amount = null)
+{
+    if ($amount == null) {
+        $result = mysqli_query(get_payment_connection(), "SELECT amount from db_tx.tx WHERE id=$tx_id", MYSQLI_STORE_RESULT);
+        if (!$result || mysqli_num_rows($result) < 1) {
+            return false;
+        }
+        $amount_array = mysqli_fetch_array($result, MYSQLI_ASSOC);
+        if (!$amount_array) {
+            return false;
+        } else {
+            $amount = $amount_array[AMOUNT];
+        }
+    }
+    if (payment_lock_balance($id_from, $tx_id, $amount)) {
+        return __payment_transaction_set_processed($tx_id);
+    } else {
+        return false;
+    }
 }
 
 function payment_get_unprocessed_transaction($entity_id_from, $entity_id_to, $type)
@@ -279,10 +310,9 @@ function payment_get_unprocessed_transaction($entity_id_from, $entity_id_to, $ty
     return $id;
 }
 
-function payment_process_transaction($id_from, $id_to, $amount)
+function __payment_transaction_set_processed($id)
 {
-    $connection = get_payment_connection();
-    $stmt = mysqli_prepare($connection, "UPDATE db_account.account SET locked_balance = locked_balance + $amount WHERE user_id=? AND $amount < account.balance - account.locked_balance");
+    return mysqli_query(get_payment_connection(), "UPDATE db_tx.tx SET processed=TRUE WHERE id=$id");
 }
 
 function payment_fetch_balance($user_id)

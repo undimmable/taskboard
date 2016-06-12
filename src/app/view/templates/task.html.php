@@ -29,11 +29,11 @@ if ($user_customer) {
         <img class="avatar-img" src="<?php echo $current_task_img ?>">
     </a>
     <div class="row media-body task-item">
-        <div class="col-md-9">
+        <div class="col-lg-9 col-md-9 col-sm-9 col-xs-8 pull-left">
             <?php echo $strong ?>
             <p class="task-description"><?php echo $current_task_description ?></p>
         </div>
-        <div class="col-md-3">
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 pull-right">
             <small class="text-muted pull-right">
                 <span class="timestamp created_at"
                       data-timestamp-offset="<?php echo $current_task_ts_offset ?>"></span>
@@ -46,12 +46,12 @@ if ($user_customer) {
     </div>
     <?php if (is_customer($user[ROLE])) {
         if (!is_task_completed($current_task)) {
-            echo '<button type="button" data-l10n="delete_task" class="l10n l10n-text delete-task btn-link pull-right no-shadow" data-csrf="' . $csrf . '">Delete</button>';
             if (!is_task_active($current_task)) {
+                echo '<button type="button" data-l10n="delete_task" class="l10n l10n-text delete-task btn-link pull-right no-shadow" data-csrf="' . $csrf . '">Delete</button>';
                 echo '<button type="button" data-l10n="fix_task" class="l10n l10n-text fix-task btn-link pull-right no-shadow" data-csrf="' . $csrf . '">Try again</button>';
             }
         } else {
-            echo '<span class="pull-right ">Completed</span>';
+            echo '<button class="pull-right l10n l10n-text btn-link no-shadow task-completed" data-l10n="task_completed" disabled>Completed</button>';
         }
     }
     ?>

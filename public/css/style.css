@@ -29,6 +29,11 @@ textarea {
     margin-bottom: 25px;
 }
 
+small > span,button {
+    white-space:nowrap;
+}
+
+
 @keyframes spin {
     from {
         transform: scale(1) rotate(0deg);

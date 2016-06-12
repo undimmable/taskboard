@@ -223,13 +223,13 @@ function api_task_get_last_n()
     $last_id = parse_integer_param('last_id');
     $limit = parse_integer_param('limit');
     $limit = $limit < get_config_max_task_selection_limit() ? $limit : get_config_max_task_selection_limit();
-    $lock_tx_id_clause = "TRUE";
+    $paid_clause = "TRUE";
     if (is_customer($user[ROLE])) {
         $user_id = $user[ID];
         $select_user_type = 'customer_id';
     } else {
         $select_user_type = 'performer_id';
-        $lock_tx_id_clause = "paid";
+        $paid_clause = "paid";
     }
     if (is_customer($user[ROLE]) && is_null($last_id)) {
         $task = dal_task_fetch_last($user[ID]);
@@ -237,7 +237,7 @@ function api_task_get_last_n()
         $create_csrf = get_customer_task_create_csrf($user[ID], $last_task_id);
         echo "<!--json-$create_csrf-json-->";
     }
-    $tasks = dal_task_fetch_tasks_less_than_last_id_limit("_render_task", $user_id, $lock_tx_id_clause, $select_user_type, $limit, $last_id);
+    $tasks = dal_task_fetch_tasks_less_than_last_id_limit("_render_task", $user_id, $paid_clause, $select_user_type, $limit, $last_id);
     if (is_null($tasks)) {
         render_ok();
     } else if ($tasks === false) {
@@ -293,8 +293,8 @@ function api_task_create()
         return;
     }
     $task_id = dal_task_create($customer_id, $amount, $description);
-    $lock_tx_id = payment_create_transaction($customer_id, $task_id, $amount, 'l');
-    $success = payment_lock_balance($customer_id, $lock_tx_id, $amount);
+    $lock_tx_id = payment_init_lock_transaction($customer_id, $task_id, $amount);
+    $success = payment_process_transaction($lock_tx_id, $customer_id);
     if (is_null($success)) {
         render_conflict([
             "error" => ["amount" => "not_enough"]
@@ -304,7 +304,7 @@ function api_task_create()
         render_internal_server_error();
         return;
     }
-    $updated = dal_task_update_set_lock_tx_id($task_id, $lock_tx_id);
+    $updated = dal_task_update_set_paid($task_id);
     if (is_null($updated)) {
         error_log("Trying set lock_tx_id when it's already set");
     } elseif (!$updated) {
@@ -337,7 +337,7 @@ function api_task_fix($task_id)
     __validate_task_fix_input($task_id, $customer_id, $csrf);
     $amount = dal_task_fetch_unpaid_price($task_id, $customer_id);
     if (is_null($amount) || !$amount) {
-        render_bad_request_json([JSON_ERROR => ["task" => "unable_to_process"]]);
+        render_bad_request_json([JSON_ERROR => [TASK_DB => "unable_to_process"]]);
         return;
     }
     if (!payment_check_able_to_process($customer_id, $amount)) {
@@ -346,6 +346,9 @@ function api_task_fix($task_id)
     }
 
     $lock_tx_id = payment_get_unprocessed_transaction($customer_id, $task_id, 'l');
+    if (is_null($lock_tx_id)) {
+
+    }
     $success = payment_lock_balance($customer_id, $lock_tx_id, $amount);
     if (is_null($success)) {
         render_conflict([JSON_ERROR => [AMOUNT => "not_enough"]]);
@@ -354,7 +357,7 @@ function api_task_fix($task_id)
         render_internal_server_error();
         return;
     }
-    $updated = dal_task_update_set_lock_tx_id($task_id, $lock_tx_id);
+    $updated = dal_task_update_set_paid($task_id);
     if (is_null($updated)) {
         error_log("Trying set lock_tx_id when it's already set");
     } else {
@@ -396,9 +399,14 @@ function api_task_delete_by_id($task_id)
         render_forbidden();
         return;
     }
+    if ($task[PAID]) {
+        render_conflict([JSON_ERROR => ['task' => 'already_paid']]);
+    }
     $task_deleted = dal_task_delete($task_id);
     if ($task_deleted) {
         payment_unlock_balance($customer_id, $task[AMOUNT]);
+    } else {
+        render_conflict([JSON_ERROR => ['task' => 'already_paid']]);
     }
     return;
 }

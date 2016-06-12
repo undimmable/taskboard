@@ -42,6 +42,8 @@ function Localization() {
     this.fix_task_ru = "Оплатить";
     this.unpaid_en = "Unpaid";
     this.unpaid_ru = "Не оплачен";
+    this.task_already_paid_ru = "Already paid";
+    this.task_already_paid_en = "Заказ уже оплачен";
     this.task_feed_en = "Task Feed";
     this.task_feed_ru = "Лента заказов";
     this.loading_en = "Loading...";
@@ -121,7 +123,9 @@ function Localization() {
     this.hour_ago_en = "About an hour ago";
     this.hour_ago_ru = "Около часа назад";
     this.hide_completed_en = "Hide Completed";
-    this.hide_completed_ru = "Спрятать завершённые";
+    this.hide_completed_ru = "Скрыть завершённые";
+    this.task_completed_en = "Completed";
+    this.task_completed_ru = "Выполнен";
     this.unspecified_too_many_attempts_en = this.too_many_attempts_en;
     this.unspecified_too_many_attempts_ru = this.too_many_attempts_ru;
     this.error_unknown_en = "Unknown error occurred";

@@ -11,7 +11,7 @@
                             <img class="avatar-img" src="/img/w.png">
                         </a>
                         <div class="row media-body task-item">
-                            <div class="col-md-9">
+                            <div class="col-lg-9 col-md-9 col-sm-9 col-xs-8 pull-left">
                                 <strong class="task-header">Jean Customer</strong>
                                 <p class="task-description">In ornare venenatis nibh nec eleifend. Vestibulum eget
                                     vulputate lacus. Sed ultricies dolor felis, id dapibus lorem feugiat a. In cursus
@@ -20,7 +20,7 @@
                                     blandit ipsum sed nibh pretium porta sed in justo.
                                 </p>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 pull-right">
                                 <small class="text-muted pull-right">
                                     <span class="created_at  l10n  l10n-text" data-l10n="hour_ago">about an hour ago</span>
                                 </small>
@@ -36,13 +36,13 @@
                             <img class="avatar-img" src="/img/w.png">
                         </a>
                         <div class="row media-body task-item">
-                            <div class="col-md-9">
+                            <div class="col-lg-9 col-md-9 col-sm-9 col-xs-8 pull-left">
                                 <strong class="task-header">Jean Customer</strong>
                                 <p class="task-description">Mauris nunc justo, feugiat vitae viverra non, gravida ut
                                     tortor. Proin tempus leo sem, vel rutrum purus tincidunt id. Integer at eros
                                     eleifend, aliquet lectus quis, feugiat turpis.</p>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 pull-right">
                                 <small class="text-muted pull-right">
                                     <span class="created_at  l10n  l10n-text" data-l10n="hour_ago">about an hour ago</span>
                                 </small>
@@ -57,7 +57,7 @@
                             <img class="avatar-img" src="/img/w.png">
                         </a>
                         <div class="row media-body task-item">
-                            <div class="col-md-9">
+                            <div class="col-lg-9 col-md-9 col-sm-9 col-xs-8 pull-left">
                                 <strong class="task-header">Jean Customer</strong>
                                 <p class="task-description">Praesent scelerisque scelerisque ornare. Duis fermentum
                                     vehicula nulla, ac convallis mi bibendum nec. Integer sapien nibh, laoreet sed
@@ -65,7 +65,7 @@
                                     molestie eu, dignissim et ex.
                                 </p>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 pull-right">
                                 <small class="text-muted pull-right">
                                     <span class="created_at l10n  l10n-text" data-l10n="hour_ago">about an hour ago</span>
                                 </small>
@@ -81,12 +81,12 @@
                             <img class="avatar-img" src="/img/w.png">
                         </a>
                         <div class="row media-body task-item">
-                            <div class="col-md-9">
+                            <div class="col-lg-9 col-md-9 col-sm-9 col-xs-8 pull-left">
                                 <strong class="task-header">Jean Customer</strong>
                                 <p class="task-description">Fusce tristique nibh nisi, ac ullamcorper massa suscipit at.
                                 </p>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 pull-right">
                                 <small class="text-muted pull-right">
                                     <span class="created_at  l10n l10n-text" data-l10n="hour_ago">about an hour ago</span>
                                 </small>
@@ -102,7 +102,7 @@
                             <img class="avatar-img" src="/img/w.png">
                         </a>
                         <div class="row media-body task-item">
-                            <div class="col-md-9">
+                            <div class="col-lg-9 col-md-9 col-sm-9 col-xs-8 pull-left">
                                 <strong class="task-header">Jean Customer</strong>
                                 <p class="task-description">Vivamus euismod bibendum lorem vitae imperdiet. Nam luctus
                                     urna sed quam ornare suscipit. Fusce ut consequat velit. In consectetur mi leo, sit
@@ -110,7 +110,7 @@
                                     parturient montes, nascetur ridiculus mus. Vestibulum iaculis gravida fringilla.
                                     Nullam laoreet pretium eros et rhoncus.</p>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 pull-right">
                                 <small class="text-muted pull-right">
                                     <span class="created_at  l10n  l10n-text" data-l10n="hour_ago">about an hour ago</span>
                                 </small>
@@ -126,14 +126,14 @@
                             <img class="avatar-img" src="/img/w.png">
                         </a>
                         <div class="row media-body task-item">
-                            <div class="col-md-9">
+                            <div class="col-lg-9 col-md-9 col-sm-9 col-xs-8 pull-left">
                                 <strong class="task-header">Jean Customer</strong>
                                 <p class="task-description">Vivamus dictum, velit eu tempor bibendum, leo augue lacinia
                                     massa, id convallis nulla orci a justo. Nulla facilisi. Ut pellentesque sapien at
                                     odio dapibus, quis posuere turpis rutrum.
                                 </p>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 pull-right">
                                 <small class="text-muted pull-right">
                                     <span class="created_at  l10n  l10n-text" data-l10n="hour_ago">about an hour ago</span>
                                 </small>

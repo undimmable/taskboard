@@ -38,10 +38,9 @@ function get_task_connection()
  * Set transaction id to task
  *
  * @param $task_id
- * @param $tx_id
  * @return bool|null null if the row with specified task_id doesn't exists, true if update was successful and false if there was some errors
  */
-function dal_task_update_set_lock_tx_id($task_id, $tx_id)
+function dal_task_update_set_paid($task_id)
 {
     $db_errors = initialize_db_errors();
     $connection = get_task_connection();
@@ -49,26 +48,11 @@ function dal_task_update_set_lock_tx_id($task_id, $tx_id)
         add_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "UPDATE db_task.task SET lock_tx_id = ? WHERE id = ? AND lock_tx_id = -1");
-    if (!$stmt) {
+    $result = mysqli_query($connection, "UPDATE db_task.task SET paid=TRUE WHERE id = $task_id");
+    if (!$result) {
         add_error($connection, $db_errors);
-        return false;
     }
-    /** @noinspection PhpMethodParametersCountMismatchInspection */
-    if (!mysqli_stmt_bind_param($stmt, 'ii', $tx_id, $task_id)) {
-        add_error($connection, $db_errors);
-        return false;
-    }
-    if (!mysqli_stmt_execute($stmt)) {
-        add_error($connection, $db_errors);
-        return false;
-    }
-    if (mysqli_stmt_affected_rows($stmt) != 1) {
-        mysqli_stmt_close($stmt);
-        return null;
-    }
-    mysqli_stmt_close($stmt);
-    return true;
+    return $result;
 }
 
 /**
@@ -85,7 +69,7 @@ function dal_task_delete($task_id)
         add_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "UPDATE db_task.task SET deleted=TRUE WHERE id=?");
+    $stmt = mysqli_prepare($connection, "UPDATE db_task.task SET deleted=TRUE WHERE id=? AND NOT paid");
     if (!$stmt) {
         add_error($connection, $db_errors);
         return false;
@@ -346,7 +330,7 @@ function dal_task_fetch_tasks_less_than_last_id_limit($callback, $user_id, $paid
         add_error($connection, $db_errors);
         return false;
     }
-    if (!mysqli_stmt_bind_result($stmt, $id, $created_at, $customer_id, $performer_id, $amount, $description, $lock_tx_id)) {
+    if (!mysqli_stmt_bind_result($stmt, $id, $created_at, $customer_id, $performer_id, $amount, $description, $paid)) {
         add_error($connection, $db_errors);
         return false;
     }
@@ -360,7 +344,7 @@ function dal_task_fetch_tasks_less_than_last_id_limit($callback, $user_id, $paid
             PERFORMER_ID => $performer_id,
             AMOUNT => $amount,
             DESCRIPTION => $description,
-            'lock_tx_id' => $lock_tx_id
+            PAID => $paid
         ];
         call_user_func($callback, $task);
     }
