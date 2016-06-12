@@ -20,7 +20,7 @@ function Localization() {
     this.login_ru = "Войти";
     this.signup_en = "Sign Up";
     this.signup_ru = "Регистрация";
-    this.to_signup_ru = "Sign Up";
+    this.to_signup_en = "Sign Up";
     this.to_signup_ru = "Зарегистрироваться";
     this.refill_en = "Refill";
     this.refill_ru = "Пополнить";
