@@ -13,6 +13,11 @@
  * @link      https://taskboards.top
  * @since     1.0.0
  */
+
+/**
+ * @param $routes array
+ * @param null $authorization array
+ */
 function route_request($routes, $authorization = null)
 {
     ob_start();
