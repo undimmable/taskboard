@@ -34,7 +34,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             ]
         );
         $this->assertResponseForbidden($response);
-        $this->assertResponseError($response, "reason", "Forbidden");
+        $this->assertResponseError($response, "unspecified", "forbidden");
     }
 
     public function testLoginAuthorizedUserReturnsForbidden()
@@ -57,7 +57,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             ]
         );
         $this->assertResponseForbidden($response);
-        $this->assertResponseError($response, "reason", "Forbidden");
+        $this->assertResponseError($response, "unspecified", "forbidden");
     }
 
     public function testSignupExistingUserReturnsConflict()
@@ -71,7 +71,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
         ];
         $response = $this->api->request(
             'POST',
-            'auth/signup',
+            'auth/signup?XDEBUG_SESSION_START=PHPStorm_Remote',
             [
                 'json' => $credentials,
                 'headers' => [
@@ -81,7 +81,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             ]
         );
         $this->assertResponseConflict($response);
-        $this->assertResponseError($response, "email", "User with this email already registered");
+        $this->assertResponseError($response, "email", "already_registered");
         $this->assertNoCookie(ApiIntegrationTest::$authorizationCookieName);
     }
 
@@ -106,7 +106,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             ]
         );
         $this->assertResponseBadRequest($response);
-        $this->assertResponseError($response, "signup_csrf_token", "wrong");
+        $this->assertResponseError($response, "unspecified", "token_wrong");
         $this->assertNoCookie(ApiIntegrationTest::$authorizationCookieName);
     }
 
@@ -130,7 +130,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             ]
         );
         $this->assertResponseBadRequest($response);
-        $this->assertResponseError($response, "password_repeat", "Password repeat not provided");
+        $this->assertResponseError($response, "password_repeat", "not_provided");
         $this->assertNoCookie(ApiIntegrationTest::$authorizationCookieName);
     }
 
@@ -153,7 +153,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             ]
         );
         $this->assertResponseBadRequest($response);
-        $this->assertResponseError($response, "password", "Password not provided");
+        $this->assertResponseError($response, "password", "not_provided");
         $this->assertNoCookie(ApiIntegrationTest::$authorizationCookieName);
     }
 
@@ -178,7 +178,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             ]
         );
         $this->assertResponseBadRequest($response);
-        $this->assertResponseError($response, "password", "Passwords don't match");
+        $this->assertResponseError($response, "password", "mismatch");
         $this->assertNoCookie(ApiIntegrationTest::$authorizationCookieName);
     }
 
@@ -201,7 +201,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             ]
         );
         $this->assertResponseBadRequest($response);
-        $this->assertResponseError($response, "password", "Password not provided");
+        $this->assertResponseError($response, "password", "not_provided");
         $this->assertNoCookie(ApiIntegrationTest::$authorizationCookieName);
     }
 
@@ -225,7 +225,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             ]
         );
         $this->assertResponseBadRequest($response);
-        $this->assertResponseError($response, "password", "Password is too short");
+        $this->assertResponseError($response, "password", "is_too_short");
         $this->assertNoCookie(ApiIntegrationTest::$authorizationCookieName);
     }
 
@@ -250,7 +250,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             ]
         );
         $this->assertResponseBadRequest($response);
-        $this->assertResponseError($response, "email", "Email is invalid");
+        $this->assertResponseError($response, "email", "is_invalid");
         $this->assertNoCookie(ApiIntegrationTest::$authorizationCookieName);
     }
 
@@ -271,7 +271,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             ]
         );
         $this->assertResponseBadRequest($response);
-        $this->assertResponseError($response, "signup_csrf_token", "wrong");
+        $this->assertResponseError($response, "unspecified", "token_wrong");
         $this->assertNoCookie(ApiIntegrationTest::$authorizationCookieName);
     }
 
@@ -296,7 +296,8 @@ class AuthIntegrationTest extends ApiIntegrationTest
             ]
         );
         $this->assertResponseOk($response);
-        $this->assertNoCookie(ApiIntegrationTest::$authorizationCookieName);
+        $this->assertCookiePresent(ApiIntegrationTest::$authorizationCookieName);
+        $this->assertCookieNotDeleted(ApiIntegrationTest::$authorizationCookieName);
     }
 
     public function testLoginExistingUserReturnsToken()
@@ -343,7 +344,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             ]
         );
         $this->assertResponseUnauthorized($response);
-        $this->assertResponseError($response, "email", "Wrong username and/or password");
+        $this->assertResponseError($response, "email", "no_such_user");
         $this->assertNoCookie(ApiIntegrationTest::$authorizationCookieName);
     }
 
@@ -365,7 +366,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             ]
         );
         $this->assertResponseBadRequest($response);
-        $this->assertResponseError($response, "login_csrf_token", "wrong");
+        $this->assertResponseError($response, "unspecified", "token_wrong");
         $this->assertNoCookie(ApiIntegrationTest::$authorizationCookieName);
     }
 
@@ -384,7 +385,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             ]
         );
         $this->assertResponseBadRequest($response);
-        $this->assertResponseError($response, "login_csrf_token", "wrong");
+        $this->assertResponseError($response, "unspecified", "token_wrong");
         $this->assertNoCookie(ApiIntegrationTest::$authorizationCookieName);
     }
 
@@ -407,7 +408,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             ]
         );
         $this->assertResponseBadRequest($response);
-        $this->assertResponseError($response, "login_csrf_token", "wrong");
+        $this->assertResponseError($response, "unspecified", "token_wrong");
         $this->assertNoCookie(ApiIntegrationTest::$authorizationCookieName);
     }
 
@@ -428,7 +429,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             ]
         );
         $this->assertResponseBadRequest($response);
-        $this->assertResponseError($response, "email", "Email not provided");
+        $this->assertResponseError($response, "email", "not_provided");
         $this->assertNoCookie(ApiIntegrationTest::$authorizationCookieName);
     }
 
@@ -450,7 +451,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             ]
         );
         $this->assertResponseBadRequest($response);
-        $this->assertResponseError($response, "password", "Password not provided");
+        $this->assertResponseError($response, "password", "not_provided");
         $this->assertNoCookie(ApiIntegrationTest::$authorizationCookieName);
     }
 
@@ -470,8 +471,8 @@ class AuthIntegrationTest extends ApiIntegrationTest
             ]
         );
         $this->assertResponseBadRequest($response);
-        $this->assertResponseError($response, "password", "Password not provided");
-        $this->assertResponseError($response, "email", "Email not provided");
+        $this->assertResponseError($response, "password", "not_provided");
+        $this->assertResponseError($response, "email", "not_provided");
         $this->assertNoCookie(ApiIntegrationTest::$authorizationCookieName);
     }
 
@@ -485,7 +486,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
             ]
         );
         $this->assertResponseForbidden($response);
-        $this->assertResponseError($response, "reason", "Forbidden");
+        $this->assertResponseError($response, "unspecified", "forbidden");
         $this->assertNoCookie(ApiIntegrationTest::$authorizationCookieName);
     }
 

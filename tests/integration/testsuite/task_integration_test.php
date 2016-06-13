@@ -57,7 +57,7 @@ class TaskIntegrationTest extends ApiIntegrationTest
             ]
         );
         $this->assertResponseForbidden($response);
-        $this->assertResponseError($response, "reason", "Forbidden");
+        $this->assertResponseError($response, "unspecified", "forbidden");
     }
 
     public function testCreateTaskPerformerReturnsForbidden()
@@ -80,7 +80,7 @@ class TaskIntegrationTest extends ApiIntegrationTest
             ]
         );
         $this->assertResponseForbidden($response);
-        $this->assertResponseError($response, "reason", "Forbidden");
+        $this->assertResponseError($response, "unspecified", "forbidden");
     }
 
     public function testCreateTaskSystemReturnsForbidden()
@@ -103,7 +103,7 @@ class TaskIntegrationTest extends ApiIntegrationTest
             ]
         );
         $this->assertResponseForbidden($response);
-        $this->assertResponseError($response, "reason", "Forbidden");
+        $this->assertResponseError($response, "unspecified", "forbidden");
     }
 
     public function testCreateTaskNotEnoughMoneyReturnsError()
@@ -126,7 +126,7 @@ class TaskIntegrationTest extends ApiIntegrationTest
             ]
         );
         $this->assertResponseConflict($response);
-        $this->assertResponseError($response, "amount", "Not enough money");
+        $this->assertResponseError($response, "amount", "not_enough");
     }
 
     public function tearDown()
