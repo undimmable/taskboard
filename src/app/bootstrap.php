@@ -15,6 +15,9 @@
  */
 set_include_path(get_include_path() . PATH_SEPARATOR . '/var/www/taskboard/src/app');
 set_include_path(get_include_path() . PATH_SEPARATOR . '/var/www/taskboard_config');
+$GLOBALS['staging'] = getenv('TESTS_STAGING');
+if($GLOBALS['staging'] == "")
+    $GLOBALS['staging'] = false;
 require_once "config/constants.php";
 require_once "config/db_config.php";
 require_once "config/security_config.php";

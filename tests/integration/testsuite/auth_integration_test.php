@@ -71,7 +71,7 @@ class AuthIntegrationTest extends ApiIntegrationTest
         ];
         $response = $this->api->request(
             'POST',
-            'auth/signup?XDEBUG_SESSION_START=PHPStorm_Remote',
+            'auth/signup',
             [
                 'json' => $credentials,
                 'headers' => [

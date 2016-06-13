@@ -59,7 +59,7 @@ Vagrant.configure(2) do |config|
     ln -s /home/vagrant/config/fpm/fpm-config.ini /etc/php5/fpm/conf.d/fpm-taskboard.ini >> $INSTALL_LOG 2>&1
     echo "extension=libevent.so" > /etc/php5/mods-available/libevent.ini >> $INSTALL_LOG 2>&1
     rm /etc/php5/fpm/pool.d/www.conf >> $INSTALL_LOG 2>&1
-    ln -s /home/vagrant/config/fpm/www.conf /etc/php5/fpm/pool.d/www.conf >> $INSTALL_LOG 2>&1
+    cp /home/vagrant/config/fpm/www.conf /etc/php5/fpm/pool.d/www.conf >> $INSTALL_LOG 2>&1
 
     echo "Provisioning: configure mailutils" | tee -a $INSTALL_LOG
     rm -rf /etc/postfix/main.cf >> $INSTALL_LOG 2>&1

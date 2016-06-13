@@ -41,4 +41,9 @@ Vagrant.configure(2) do |config|
     echo "xdebug.remote_host=192.168.56.1" >> /etc/php5/mods-available/xdebug.ini
     service php5-fpm restart >> $INSTALL_LOG 2>&1
   SHELL
+  config.vm.provision "enable_staging", type: "shell", inline: <<-SHELL
+    export INSTALL_LOG=/var/log/taskboards-provisioning.log
+    echo "env[TESTS_STAGING] = true" >> /etc/php5/fpm/pool.d/www.conf
+    service php5-fpm restart >> $INSTALL_LOG 2>&1
+  SHELL
 end
