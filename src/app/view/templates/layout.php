@@ -43,23 +43,25 @@
           integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
     <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css"/>
-    <link rel="stylesheet" href="/css/style.css?__nocache=<?php echo rand(0,100000); ?>"/>
+    <link rel="stylesheet" href="/css/style.css?__nocache=<?php echo rand(0, 100000); ?>"/>
     <script type="application/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
     <script type="application/javascript" src="/js/eventstream.js"></script>
     <script type="application/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
             integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
             crossorigin="anonymous"></script>
-    <script type="application/javascript" src="/js/localization.js?__nocache=<?php echo rand(0,100000); ?>"></script>
-    <script type="application/javascript" src="/js/app.js?__nocache=<?php echo rand(0,100000); ?>"></script>
+    <script type="application/javascript" src="/js/localization.js?__nocache=<?php echo rand(0, 100000); ?>"></script>
+    <script type="application/javascript" src="/js/app.js?__nocache=<?php echo rand(0, 100000); ?>"></script>
     <script type="application/javascript"
             src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
 </head>
 <body>
 <?php
 $role = is_authorized() ? get_authorized_user()[ROLE] : 0;
-$payload = get_random_payload(get_authorized_user());
+$payload = get_secrets_payload(get_authorized_user());
+$event_csrf = get_event_csrf(get_authorized_user(), $payload);
 $commission = get_system_commission();
-echo "<div id=\"user-data\" data-role=\"$role\" data-payloadsid=\"$payload\" data-commission=\"$commission\"></div>";
+$current_snapshot_timestamp = get_current_snapshot_timestamp();
+echo "<div id=\"user-data\" data-role=\"$role\" data-evsid=\"$event_csrf\" data-payloadsid=\"$payload\" data-commission=\"$commission\" data-current-snapshot-timestamp=\"$current_snapshot_timestamp\"></div>";
 ?>
 <nav class="navbar navbar-default">
     <div class="container-fluid">
