@@ -30,8 +30,8 @@ Vagrant.configure(2) do |config|
 
     echo "Provisioning: creating MySQL users" | tee -a $INSTALL_LOG
     mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_account identified by '$MYSQL_ACCOUNT_PASS'" >> $INSTALL_LOG 2>&1
+        mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_event identified by '$MYSQL_EVENT_PASS'" >> $INSTALL_LOG 2>&1
     mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_login identified by '$MYSQL_LOGIN_PASS'" >> $INSTALL_LOG 2>&1
-    mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_message identified by '$MYSQL_MESSAGE_PASS'" >> $INSTALL_LOG 2>&1
     mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_task identified by '$MYSQL_TASK_PASS'" >> $INSTALL_LOG 2>&1
     mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_text_idx identified by '$MYSQL_TEXT_IDX_PASS'" >> $INSTALL_LOG 2>&1
     mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_tx identified by '$MYSQL_TX_PASS'" >> $INSTALL_LOG 2>&1
@@ -39,8 +39,8 @@ Vagrant.configure(2) do |config|
 
     echo "Provisioning: creating MySQL databases" | tee -a $INSTALL_LOG
     mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/account.sql >> $INSTALL_LOG 2>&1
+    mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/event.sql >> $INSTALL_LOG 2>&1
     mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/login.sql >> $INSTALL_LOG 2>&1
-    mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/message.sql >> $INSTALL_LOG 2>&1
     mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/task.sql >> $INSTALL_LOG 2>&1
     mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/text_idx.sql >> $INSTALL_LOG 2>&1
     mysql --user=root --password=$MYSQL_PASS < /home/vagrant/config/db/tx.sql >> $INSTALL_LOG 2>&1
@@ -87,18 +87,25 @@ Vagrant.configure(2) do |config|
     echo "Provisioning: PHP database configuration inside $DB_CONFIG_FULL_PATH" | tee -a $INSTALL_LOG
     sed -i -e 's/rplc_account_password/'"$MYSQL_ACCOUNT_PASS"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_account_host/'"$MYSQL_ACCOUNT_HOST"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
+    sed -i -e 's/rplc_account_db/'"$MYSQL_ACCOUNT_DB"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
+    sed -i -e 's/rplc_event_password/'"$MYSQL_EVENT_PASS"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
+    sed -i -e 's/rplc_event_host/'"$MYSQL_EVENT_HOST"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
+    sed -i -e 's/rplc_event_host/'"$MYSQL_EVENT_HOST"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_login_password/'"$MYSQL_LOGIN_PASS"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_login_host/'"$MYSQL_LOGIN_HOST"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
-    sed -i -e 's/rplc_message_password/'"$MYSQL_MESSAGE_PASS"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
-    sed -i -e 's/rplc_message_host/'"$MYSQL_MESSAGE_HOST"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
+    sed -i -e 's/rplc_login_db/'"$MYSQL_LOGIN_DB"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_task_password/'"$MYSQL_TASK_PASS"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_task_host/'"$MYSQL_TASK_HOST"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
+    sed -i -e 's/rplc_task_db/'"$MYSQL_TASK_DB"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_text_idx_password/'"$MYSQL_TEXT_IDX_PASS"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_text_idx_host/'"$MYSQL_TEXT_IDX_HOST"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
+    sed -i -e 's/rplc_text_idx_db/'"$MYSQL_TEXT_IDX_DB"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_tx_password/'"$MYSQL_TX_PASS"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_tx_host/'"$MYSQL_TX_HOST"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
+    sed -i -e 's/rplc_tx_db/'"$MYSQL_TX_DB"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_user_password/'"$MYSQL_USER_PASS"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_user_host/'"$MYSQL_USER_HOST"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
+    sed -i -e 's/rplc_user_db/'"$MYSQL_USER_DB"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
 
     echo "Provisioning PHP keys configuration inside $SECURITY_CONFIG_FULL_PATH" | tee -a $INSTALL_LOG
     sed -i -e 's/rplc_jwt_secret/'"$JWT_SECRET"'/g' $SECURITY_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
