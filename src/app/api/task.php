@@ -182,11 +182,11 @@ function __try_fix_unprocessed_transaction($user_id, $is_customer = true)
     $id = payment_get_last_user_tx_id($user_id);
     if (is_null($id)) {
         return null;
-    } elseif ($id == false) {
+    } elseif ($id === false) {
         return false;
     } else {
         $transactions = payment_fetch_transactions_after($id, $user_id, $is_customer);
-        if (is_null($transactions) || $transactions == false) {
+        if (is_null($transactions) || $transactions === false) {
             return false;
         } else {
             return _payment_transaction_set_processed($id);
@@ -390,7 +390,7 @@ function api_task_create()
     }
     if (!is_null($last_task) && !$last_task[BALANCE_LOCKED]) {
         $transaction_fix_result = __try_fix_unprocessed_transaction($customer_id, true);
-        if (is_null($transaction_fix_result) || $transaction_fix_result == false) {
+        if (is_null($transaction_fix_result) || $transaction_fix_result === false) {
             render_conflict([
                 JSON_ERROR => ["task-unpaid" => true]
             ]);
@@ -429,6 +429,9 @@ function api_task_create()
         error_log("Setting lock_tx_id failed");
     }
     $task = dal_task_fetch($task_id);
+    $ts = json_encode($task);
+    $shm_id = shm_attach($user[ID], 1024);
+    shm_put_var($shm_id, 0, $ts);
     if (!$task) {
         error_log("Couldn't fetch task");
         render_bad_request_json([JSON_ERROR => get_db_errors()]);
