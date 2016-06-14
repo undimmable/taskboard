@@ -15,7 +15,7 @@ Vagrant.configure(2) do |config|
   config.vm.provider "virtualbox" do |v|
     v.gui = false
     v.name = "taskboard"
-    v.memory = 512
+    v.memory = 1024
     v.cpus = 1
     v.customize ["modifyvm", :id, "--cpuexecutioncap", "50"]
   end
@@ -43,7 +43,7 @@ Vagrant.configure(2) do |config|
   SHELL
   config.vm.provision "enable_staging", type: "shell", inline: <<-SHELL
     export INSTALL_LOG=/var/log/taskboards-provisioning.log
-    echo "env[TESTS_STAGING] = true" >> /etc/php5/fpm/pool.d/www.conf
+    echo "\nenv[TESTS_STAGING] = true" >> /etc/php5/fpm/pool.d/www.conf
     service php5-fpm restart >> $INSTALL_LOG 2>&1
   SHELL
 end
