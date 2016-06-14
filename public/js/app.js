@@ -250,10 +250,10 @@ function Taskboard($) {
     };
 
     this.initializeEventStream = function () {
-        if (!taskboardApplication.supportEvents)
-            return;
+        // if (!taskboardApplication.supportEvents)
+        //     return;
         if (window.es === undefined) {
-            window.es = new EventSource("/api/v1/sse");
+            window.es = new EventSource("/events");
             window.es.onmessage = function (e) {
                 window.msg = e.data;
                 console.log("EventStream: ".concat(window.msg));
@@ -685,6 +685,7 @@ function Taskboard($) {
         taskboardApplication.initializeTooltips();
         if (role != unauthorizedRole) {
             taskboardApplication.initializeFeed();
+            taskboardApplication.initializeEventStream();
         }
         if (role == customerRole) {
             $(document).on('click', '.delete-task', function () {
@@ -719,7 +720,7 @@ function Taskboard($) {
                     }
                     taskboardApplication.onNonPostError(response, task);
                 });
-            });
+            });/**/
         }
         return taskboardApplication;
     };
@@ -729,10 +730,4 @@ function Taskboard($) {
 $(document).ready(function () {
     "use strict";
     window.taskboard = new Taskboard($);
-    if (typeof (EventSource) !== "undefined") {
-        var eventSource = new EventSource('events');
-        eventSource.onmessage = function (event) {
-            console.log("Got an event ".concat(event));
-        }
-    }
 });

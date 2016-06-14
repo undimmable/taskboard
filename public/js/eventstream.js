@@ -1,5 +1,5 @@
 (function (global) {
-    if ("EventSource" in global) return;
+    // if ("EventSource" in global) return;
     var reTrim = /^(\s|\u00A0)+|(\s|\u00A0)+$/g;
     var EventSource = function (url) {
         var eventsource = this,
@@ -30,6 +30,9 @@
                 xhr.setRequestHeader('Accept', 'text/event-stream');
                 xhr.setRequestHeader('Cache-Control', 'no-cache');
                 xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                var userData = document.getElementById('user-data');
+                xhr.setRequestHeader('X-CSRF-TOKEN', userData.getAttribute('data-evsid'));
+                xhr.setRequestHeader('X-CURRENT-SNAPSHOT-TIMESTAMP', userData.getAttribute('data-current-snapshot-timestamp'));
 
                 if (lastEventId != null) xhr.setRequestHeader('Last-Event-ID', lastEventId);
                 cache = '';
