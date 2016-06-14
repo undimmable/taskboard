@@ -56,12 +56,7 @@ function get_config_payload_secret()
     return get_security_config()['payload_secret'];
 }
 
-function get_config_vk_client_id()
+function get_config_events_secret()
 {
-    return get_security_config()['vk_client_id'];
-}
-
-function get_config_vk_secret()
-{
-    return get_security_config()['vk_secret'];
+    return get_security_config()['events_secret'];
 }
