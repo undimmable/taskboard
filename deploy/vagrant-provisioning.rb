@@ -82,6 +82,7 @@ Vagrant.configure(2) do |config|
     VALIDATION_CONFIG_FULL_PATH=$PHP_ADDITIONAL_INCLUDE_PATH/$VALIDATION_CONFIG_FILE
     mkdir -p $PHP_ADDITIONAL_INCLUDE_PATH >> $INSTALL_LOG 2>&1
     cp /home/vagrant/config/php/*.php $PHP_ADDITIONAL_INCLUDE_PATH >> $INSTALL_LOG 2>&1
+    cp /home/vagrant/config/daemons/*.conf /etc/init/ >> $INSTALL_LOG 2>&1
 
     echo "Provisioning: PHP database configuration inside $DB_CONFIG_FULL_PATH" | tee -a $INSTALL_LOG
     sed -i -e 's/rplc_account_password/'"$MYSQL_ACCOUNT_PASS"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
@@ -147,6 +148,8 @@ Vagrant.configure(2) do |config|
     echo "root soft nofile 8192" >> /etc/security/limits.conf
     echo "root hard nofile 16384" >> /etc/security/limits.conf
     echo "session required pam_limits.so" >> /etc/pam.d/common-session
+    sudo chgrp -R www-data /var/www
+    sudo chmod -R g+w /var/www
 
     echo "Provisioning: starting services" | tee -a $INSTALL_LOG
     initctl reload-configuration >> $INSTALL_LOG 2>&1
@@ -156,6 +159,7 @@ Vagrant.configure(2) do |config|
     service nginx start >> $INSTALL_LOG 2>&1
     service mmonit restart >> $INSTALL_LOG 2>&1
     service monit restart >> $INSTALL_LOG 2>&1
+    service php-async restart >> $INSTALL_LOG 2>&1
 
     echo "Provisioning: DONE" | tee -a $INSTALL_LOG
   SHELL
