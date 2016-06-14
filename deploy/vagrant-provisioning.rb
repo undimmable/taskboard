@@ -109,6 +109,7 @@ Vagrant.configure(2) do |config|
     sed -i -e 's/rplc_task_csrf_secret/'"$TASK_CSRF_SECRET"'/g' $SECURITY_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_account_csrf_secret/'"$ACCOUNT_CSRF_SECRET"'/g' $SECURITY_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_payload_secret/'"$PAYLOAD_SECRET"'/g' $SECURITY_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
+    sed -i -e 's/rplc_event_secret/'"$EVENT_SECRET"'/g' $SECURITY_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
 
     echo "Provisioning: add certs" | tee -a $INSTALL_LOG
     openssl genrsa -des3 -passout pass:x -out /etc/ssl/taskboards.top.pass.key 2048  >> $INSTALL_LOG 2>&1
