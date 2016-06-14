@@ -38,17 +38,27 @@ function parse_token_from_cookie()
 {
     if (!array_key_exists(PRIVATE_TOKEN, $_COOKIE))
         return null;
-    $privateToken = $_COOKIE[PRIVATE_TOKEN];
-    if (is_null($privateToken))
+    $private_token = $_COOKIE[PRIVATE_TOKEN];
+    return parse_token_from_string($private_token);
+
+}
+
+function parse_token_from_string($private_token)
+{
+    if (is_null($private_token))
         return null;
-    return JWT_decode($privateToken, get_config_jwt_secret());
+    return JWT_decode($private_token, get_config_jwt_secret());
 }
 
 function try_authenticate_from_cookie()
 {
     if (!is_null(get_authorized_user()))
         return;
-    $token = parse_token_from_cookie();
+    authorize_user(parse_token_from_cookie());
+}
+
+function authorize_user($token)
+{
     if (is_null($token))
         return;
     $user = parse_user_from_token($token);
