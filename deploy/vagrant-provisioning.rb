@@ -158,6 +158,8 @@ Vagrant.configure(2) do |config|
     echo "session required pam_limits.so" >> /etc/pam.d/common-session
     sudo chgrp -R www-data /var/www
     sudo chmod -R g+w /var/www
+    sudo chgrp -R www-data /var/log
+    sudo chmod -R g+w /var/log
 
     echo "Provisioning: starting services" | tee -a $INSTALL_LOG
     initctl reload-configuration >> $INSTALL_LOG 2>&1
