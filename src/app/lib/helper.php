@@ -103,7 +103,7 @@ function is_task_completed($task)
 
 function get_customer_task_csrf($user_id, $task_id)
 {
-    if($GLOBALS['staging']) {
+    if ($GLOBALS['staging']) {
         return 10;
     }
     return hash("sha256", "$user_id.$task_id." . get_config_task_csrf_secret(), false);
@@ -111,23 +111,33 @@ function get_customer_task_csrf($user_id, $task_id)
 
 function get_customer_task_create_csrf($user_id, $task_id)
 {
-    if($GLOBALS['staging']) {
+    if ($GLOBALS['staging']) {
         return 10;
     }
     return hash("sha256", "$user_id.$task_id." . get_config_task_csrf_secret(), false);
+}
+
+function get_event_token_header()
+{
+    return "HTTP_X_EVENT_SECRET: " . get_config_events_secret();
 }
 
 function get_performer_task_csrf($user_id, $task_id)
 {
-    if($GLOBALS['staging']) {
+    if ($GLOBALS['staging']) {
         return 10;
     }
     return hash("sha256", "$user_id.$task_id." . get_config_task_csrf_secret(), false);
 }
 
+function get_event_csrf($user_id, $payload)
+{
+    return hash("sha256", "$user_id.$payload" . get_config_events_secret(), false);
+}
+
 function get_login_csrf()
 {
-    if($GLOBALS['staging']) {
+    if ($GLOBALS['staging']) {
         return 9;
     }
     return hash("sha256", 0 . " ." . parse_ip() . "." . parse_user_client() . ".gilon" . get_config_login_csrf_secret(), false);
@@ -135,7 +145,7 @@ function get_login_csrf()
 
 function get_signup_csrf()
 {
-    if($GLOBALS['staging']) {
+    if ($GLOBALS['staging']) {
         return 8;
     }
     return hash("sha256", 0 . "." . parse_ip() . "." . parse_user_client() . ".gnsiup" . get_config_login_csrf_secret(), false);
@@ -143,16 +153,16 @@ function get_signup_csrf()
 
 function get_account_csrf($user_id)
 {
-    if($GLOBALS['staging']) {
+    if ($GLOBALS['staging']) {
         return 11;
     }
     return hash("sha256", ".$user_id.account" . get_config_account_csrf_secret(), false);
 }
 
-function get_random_payload($user = null)
+function get_secrets_payload($user = null)
 {
-    //TODO: check if needed
-    return 0;
+    $id = is_null($user) ? 0 : $user[ID];
+    return hash("sha256", $id . "." . parse_ip() . "." . parse_user_client() . ".gnsiev" . get_config_payload_secret(), false);
 }
 
 function get_performer_img()
@@ -168,6 +178,10 @@ function get_customer_img()
 function get_system_img()
 {
     return "/icons/favicon-96x96.png";
+}
+
+function get_current_snapshot_timestamp() {
+    return -1;
 }
 
 function get_task_img($task, $user)

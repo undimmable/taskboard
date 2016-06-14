@@ -13,7 +13,6 @@
  * @link      https://taskboards.top
  * @since     1.0.0
  */
-require_once "bootstrap.php";
 require_once "dal_helper.php";
 
 $login_connection = null;
