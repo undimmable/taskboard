@@ -729,4 +729,10 @@ function Taskboard($) {
 $(document).ready(function () {
     "use strict";
     window.taskboard = new Taskboard($);
+    if (typeof (EventSource) !== "undefined") {
+        var eventSource = new EventSource('events');
+        eventSource.onmessage = function (event) {
+            console.log("Got an event ".concat(event));
+        }
+    }
 });
