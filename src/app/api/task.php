@@ -26,7 +26,7 @@ $routes = [
         '/\d+/' => 'api_task_fix'
     ],
     GET => [
-        ROOT => 'api_task_get_last_n',
+        ROOT => 'api_task_get_all',
         '/\d+/' => 'api_task_get_by_id'
     ],
     PUT => [
@@ -40,7 +40,7 @@ $routes = [
 $authorization = [
     'api_task_create' => get_role_key(CUSTOMER),
     'api_task_fix' => get_role_key(CUSTOMER),
-    'api_task_get_last_n' => get_role_key(PERFORMER) + get_role_key(CUSTOMER) + get_role_key(SYSTEM),
+    'api_task_get_all' => get_role_key(PERFORMER) + get_role_key(CUSTOMER) + get_role_key(SYSTEM),
     'api_task_get_by_id' => get_role_key(CUSTOMER),
     'api_task_perform' => get_role_key(PERFORMER),
     'api_task_delete_by_id' => get_role_key(CUSTOMER)
@@ -167,7 +167,7 @@ function __validate_task_fix_input($task_id, $customer_id, $csrf)
 function __validate_task_perform_input($task_id, $performer_id, $csrf)
 {
     $validation_context = initialize_validation_context();
-    __validate_id($task_id, $validation_context);
+    __validate_id($task_id, ID, $validation_context);
     __validate_id($task_id, PERFORMER_ID, $validation_context);
     __validate_performer_task_csrf($csrf, $performer_id, $task_id, $validation_context);
     if (validation_context_has_errors($validation_context)) {
@@ -218,11 +218,18 @@ function api_task_get_by_id($task_id)
 /**
  * Api get last n tasks for user
  */
-function api_task_get_last_n()
+function api_task_get_all()
 {
     $user = get_authorized_user();
     $user_id = null;
     $select_user_type = null;
+    $latest_task_id_query = "";
+    if (array_key_exists('HTTP_X_FETCH_NEW', $_SERVER)) {
+        $latest_task_id = filter_var($_SERVER['HTTP_X_FETCH_NEW'], FILTER_SANITIZE_NUMBER_INT);
+        if (!is_null($latest_task_id_query) && $latest_task_id > 0) {
+            $latest_task_id_query = "AND id > $latest_task_id ";
+        }
+    }
     $last_id = parse_integer_param('last_id');
     $limit = parse_integer_param('limit');
     $limit = $limit < get_config_max_task_selection_limit() ? $limit : get_config_max_task_selection_limit();
@@ -240,7 +247,7 @@ function api_task_get_last_n()
         $create_csrf = get_customer_task_create_csrf($user[ID], $last_task_id);
         echo "<!--json-$create_csrf-json-->";
     }
-    $tasks = dal_task_fetch_tasks_less_than_last_id_limit("_render_task", $user_id, $balance_locked_clause, $select_user_type, $limit, $last_id);
+    $tasks = dal_task_fetch_tasks_complex_query_limit("_render_task", $user_id, $balance_locked_clause, $select_user_type, $limit, $latest_task_id_query, $last_id);
     if (is_null($tasks)) {
         render_ok();
     } else if ($tasks === false) {
@@ -287,19 +294,23 @@ function api_task_perform($task_id)
                 $processed = payment_process_pay_transaction($tx[ID], $task[CUSTOMER_ID], $performer_id, $task[PRICE], $task[COMMISSION]);
                 if ($processed) {
                     $paid_success = dal_task_update_set_paid($task[ID]);
-                    if ($paid_success)
+                    if ($paid_success) {
                         render_ok_json(dal_task_fetch($task_id));
-                    else
+                    } else {
                         render_internal_server_error();
+                        return;
+                    }
                 } else {
                     render_internal_server_error();
+                    return;
                 }
             } else {
                 $paid_success = dal_task_update_set_paid($task[ID]);
-                if ($paid_success)
+                if ($paid_success) {
                     render_ok_json(dal_task_fetch($task_id));
-                else
+                } else {
                     render_internal_server_error();
+                }
             }
         }
     } else if (!$last_tx_id) {
@@ -314,6 +325,7 @@ function api_task_perform($task_id)
                 render_conflict([JSON_ERROR => [POPUP => "task_already_performed"]]);
                 return;
             } else {
+                write_event(null, $task_id, 'p');
                 $tx_id = payment_init_pay_transaction($task[ID], $performer_id, $task[PRICE]);
                 $processed = payment_process_pay_transaction($tx_id, $task[CUSTOMER_ID], $performer_id, $task[PRICE], $task[COMMISSION]);
                 if ($processed) {
