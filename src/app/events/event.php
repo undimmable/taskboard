@@ -13,13 +13,28 @@
  * @link      https://taskboards.top
  * @since     1.0.0
  */
-
+/**
+ * require dal helper
+ */
+require_once "dal/event.php";
 /**
  * @param $entity_id        integer Id of an entity
  * @param $json             string Event object
  * @param $type             string Event type
  */
-function send_generic_event($entity_id, $json, $type)
+function send_generic_event($entity_id, $json, $type = 'c')
 {
-    
+    write_event($entity_id, $json, $type);
+}
+
+/**
+ * Apply callback for fetched event
+ *
+ * @param $entity_id integer
+ * @param $timestamp_ms integer
+ * @return array|bool|null
+ */
+function fetch_generic_event($entity_id, $timestamp_ms)
+{
+    return fetch_events_after($entity_id, $timestamp_ms);
 }
