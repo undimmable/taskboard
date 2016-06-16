@@ -14,6 +14,7 @@
  * @since     1.0.0
  */
 define('ACCOUNT_DB', 'account');
+define('EVENT_DB', 'event');
 define('LOGIN_DB', 'login');
 define('MESSAGE_DB', 'message');
 define('TASK_DB', 'task');
@@ -26,6 +27,7 @@ $task_connection = null;
 $account_connection = null;
 $payment_connection = null;
 $user_connection = null;
+$event_connection = null;
 
 /**
  * Helper function returning cached connection
@@ -66,6 +68,15 @@ function get_user_connection()
         $user_connection = get_mysqli_connection(USER_DB);
     }
     return $user_connection;
+}
+
+function get_event_connection()
+{
+    global $event_connection;
+    if($event_connection === null) {
+        $event_connection = get_mysqli_connection(EVENT_DB);
+    }
+    return $event_connection;
 }
 
 function close_user_connection()
