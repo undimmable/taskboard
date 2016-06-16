@@ -13,6 +13,8 @@ function Taskboard($) {
     var customerRole = 2;
     var unauthorizedRole = 0;
     var timestampRefreshPeriod = 60000;
+    window.taskboard = this;
+    this.newItemsCounter = 0;
     this.locale = 'ru';
     this.localization = new Localization();
     this.initialized = false;
@@ -249,28 +251,70 @@ function Taskboard($) {
         taskboardApplication.localStorageRemoveItem(storageItemName);
     };
 
+    this.deleteTaskById = function (id) {
+        $('#task-feed').find('li[data-id="'.concat(id, '"]')).fadeOut(400, function () {
+            $(this).remove();
+        });
+    };
+
+    this.incrementBadge = function (number) {
+        var newItemsCounter = this.newItemsCounter;
+        this.newItemsCounter += number;
+        var $badge = $('#new-items-badge');
+        $badge.find('.l10n').each(function () {
+            taskboardApplication.updateLocale($(this));
+        });
+        if (newItemsCounter == 0) {
+            $badge.fadeIn("300");
+        }
+    };
+
+    this.decrementBadge = function () {
+        this.newItemsCounter = 0;
+        $('#new-items-badge').fadeOut(300);
+    };
+
+    this.onEvent = function (e) {
+        if (e.hasOwnProperty('data')) {
+            var data = e['data'];
+            console.log(e['data']);
+            var jsonData = $.parseJSON(data);
+            if (jsonData.constructor === Array) {
+                $.each(jsonData, function () {
+                    if (this.hasOwnProperty('d')) {
+                        $.each(this['d'], function () {
+                            taskboardApplication.deleteTaskById(this);
+                        });
+                    } else if (this.hasOwnProperty('p')) {
+                        $.each(this['p'], function () {
+                            taskboardApplication.deleteTaskById(this);
+                        });
+                    } else if (this.hasOwnProperty('c')) {
+                        $.each(this['c'], function () {
+                            taskboardApplication.incrementBadge(1);
+                        });
+                    } else {
+                        console.log("Unknown event type");
+                    }
+                });
+            }
+        } else {
+            console.log("Unknown event");
+        }
+    };
+
     this.initializeEventStream = function () {
-        // if (!taskboardApplication.supportEvents)
-        //     return;
         if (window.es === undefined) {
             window.es = new EventSource("/events");
-            window.es.onmessage = function (e) {
-                window.msg = e.data;
-                console.log("EventStream: ".concat(window.msg));
-            };
+            window.es.onmessage = taskboardApplication.onEvent;
             window.es.onerror = function (e) {
                 e = e || event;
-                window.msg = '';
-
                 switch (e.target.readyState) {
                     case EventSource.CONNECTING:
-                        window.msg = 'Reconnecting…';
                         break;
                     case EventSource.CLOSED:
-                        window.msg = 'Connection failed. Will create new one.';
                         break;
                 }
-                console.log("EventStream: ".concat(window.msg));
             };
         }
     };
@@ -656,6 +700,42 @@ function Taskboard($) {
         });
     };
 
+    this.initializeBadgeUpdate = function () {
+        $('#new-items-badge').click(function () {
+            if (feed.loading)
+                return;
+            feed.loading = true;
+            var latestTaskID = 0;
+            $('#task-feed').find('li').each(function () {
+                var id = parseInt($(this).data('id'));
+                if (id > latestTaskID) {
+                    latestTaskID = id;
+                }
+            });
+            $.ajax({
+                url: 'api/v1/task',
+                contentType: 'application/json; charset=UTF-8',
+                type: "GET",
+                headers: {
+                    "X-FETCH-NEW": latestTaskID
+                },
+                success: function (response) {
+                    feed.loading = false;
+                    if (response != null) {
+                        if (response.trim() != "")
+                            taskboardApplication.renderHtmlTask(response, true);
+                        taskboardApplication.decrementBadge();
+                    }
+                },
+                error: function (response) {
+                    feed.loading = false;
+                    taskboardApplication.decrementBadge();
+                    console.log(response);
+                }
+            });
+        });
+    };
+
     this.initialize = function () {
         "use strict";
         taskboardApplication.initializeExtensions();
@@ -685,31 +765,47 @@ function Taskboard($) {
         if (role && role != unauthorizedRole) {
             taskboardApplication.initializeFeed();
             taskboardApplication.initializeEventStream();
+            taskboardApplication.initializeBadgeUpdate();
         }
         if (role == customerRole) {
             $(document).on('click', '.delete-task', function () {
+                if (feed.loading)
+                    return;
+                feed.loading = true;
                 var el = $(this);
                 taskboardApplication.sendNonPost(el, 'DELETE', function (response, task) {
+                    feed.loading = false;
                     taskboardApplication.onTaskRemove(task);
                 }, function (response, task) {
+                    feed.loading = false;
                     taskboardApplication.onNonPostError(response, task);
                 });
             });
             $(document).on('click', '.fix-task', function () {
+                if (feed.loading)
+                    return;
+                feed.loading = true;
                 var el = $(this);
                 taskboardApplication.sendNonPost(el, 'POST', function (response, task) {
+                    feed.loading = false;
                     taskboardApplication.onTaskCreate(response, task);
                 }, function (response, task) {
+                    feed.loading = false;
                     taskboardApplication.onNonPostError(response, task);
                 });
             });
         }
         if (role == performerRole) {
             $(document).on('click', '.perform-task', function () {
+                if (feed.loading)
+                    return;
+                feed.loading = true;
                 var el = $(this);
                 taskboardApplication.sendNonPost(el, 'PUT', function (response, task) {
+                    feed.loading = false;
                     taskboardApplication.onTaskRemove(task);
                 }, function (response, task) {
+                    feed.loading = false;
                     if (response.status == 409) {
                         try {
                             task.remove();
@@ -719,7 +815,8 @@ function Taskboard($) {
                     }
                     taskboardApplication.onNonPostError(response, task);
                 });
-            });/**/
+            });
+            /**/
         }
         return taskboardApplication;
     };
