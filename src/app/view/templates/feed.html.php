@@ -15,7 +15,8 @@
                 } ?>
             </div>
             <div class="panel-body">
-                <div id="new-items-badge"><span id="new-items-counter" class="l10n l10n-text" data-l10n="new_items"></div>
+                <div id="new-items-badge" class="container row new-items-badge">
+                    <span id="new-items-counter" class="l10n l10n-text" data-l10n="new_items"></span></div>
                 <ul id="task-feed" class="media-list">
                 </ul>
             </div>

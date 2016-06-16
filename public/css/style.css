@@ -16,6 +16,18 @@ textarea {
     display: inline-block;
 }
 
+.new-items-badge {
+    display: none;
+    text-align: center;
+    cursor: pointer;
+    background-color: rgba(229, 247, 237, 0.57);
+    padding-top: 15px;
+    padding-bottom: 15px;
+    margin-top: -5px;
+    margin-bottom: 20px;
+    width: inherit;
+}
+
 .panel-info {
     border-color: #bce8f1;
 }
