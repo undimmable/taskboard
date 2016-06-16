@@ -57,8 +57,9 @@
 <body>
 <?php
 $role = is_authorized() ? get_authorized_user()[ROLE] : 0;
-$payload = get_secrets_payload(get_authorized_user());
-$event_csrf = get_event_csrf(get_authorized_user(), $payload);
+$user_id = is_authorized() ? get_authorized_user()[ID] : 0;
+$payload = get_secrets_payload($user_id);
+$event_csrf = get_event_csrf($user_id, $payload);
 $commission = get_system_commission();
 $current_snapshot_timestamp = get_current_snapshot_timestamp();
 echo "<div id=\"user-data\" data-role=\"$role\" data-evsid=\"$event_csrf\" data-payloadsid=\"$payload\" data-commission=\"$commission\" data-current-snapshot-timestamp=\"$current_snapshot_timestamp\"></div>";

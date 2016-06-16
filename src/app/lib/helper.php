@@ -159,10 +159,9 @@ function get_account_csrf($user_id)
     return hash("sha256", ".$user_id.account" . get_config_account_csrf_secret(), false);
 }
 
-function get_secrets_payload($user = null)
+function get_secrets_payload($user_id)
 {
-    $id = is_null($user) ? 0 : $user[ID];
-    return hash("sha256", $id . "." . parse_ip() . "." . parse_user_client() . ".gnsiev" . get_config_payload_secret(), false);
+    return hash("sha256", $user_id . "." . parse_ip() . "." . parse_user_client() . ".gnsiev" . get_config_payload_secret(), false);
 }
 
 function get_performer_img()
@@ -180,8 +179,10 @@ function get_system_img()
     return "/icons/favicon-96x96.png";
 }
 
-function get_current_snapshot_timestamp() {
-    return -1;
+function get_current_snapshot_timestamp()
+{
+    require_once 'dal/event.php';
+    return dal_now()['ts'];
 }
 
 function get_task_img($task, $user)
@@ -199,7 +200,7 @@ function get_task_img($task, $user)
 
 function get_system_commission()
 {
-    return 30;
+    return SYSTEM_COMMISSION_PERCENT;
 }
 
 function get_balance($user_id)
