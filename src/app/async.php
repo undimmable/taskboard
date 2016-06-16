@@ -8,7 +8,15 @@ set_include_path(get_include_path() . PATH_SEPARATOR . '/var/www/taskboard/src/a
 set_include_path(get_include_path() . PATH_SEPARATOR . '/var/www/taskboard_config');
 set_include_path(get_include_path() . PATH_SEPARATOR . '/Users/dimyriy/Development/projects/vk/taskboard/src/app');
 set_include_path(get_include_path() . PATH_SEPARATOR . '/Users/dimyriy/Development/projects/vk/taskboard/config/php');
-require('bootstrap.php');
+require_once 'config/constants.php';
+require_once 'config/db_config.php';
+require_once 'config/security_config.php';
+require_once 'dal/event.php';
+require_once 'events/event.php';
+require_once 'dal/login.php';
+require_once 'lib/helper.php';
+require_once 'security/JWT.php';
+require_once 'security/token_auth.php';
 date_default_timezone_set('UTC');
 $master = null;
 $clients = [];
@@ -24,19 +32,19 @@ function log_msg($msg, $file)
 
 function log_info($msg)
 {
-    log_msg($msg, "/var/log/async_php_access.log");
+    log_msg($msg, "/Users/dimyriy/async_php_access.log");
 }
 
 function log_error($msg)
 {
-    log_msg($msg, "/var/log/async_php_error.log");
+    log_msg($msg, "/Users/dimyriy/async_php_error.log");
 }
 
 function log_debug($msg)
 {
     global $debug_enabled;
     if ($debug_enabled)
-        log_msg($msg, "/var/log/async_php_debug.log");
+        log_msg($msg, "/Users/dimyriy/async_php_debug.log");
 }
 
 function send_event_to_client($client, $str)
@@ -74,7 +82,7 @@ function add_client($client)
 {
     global $clients_size, $master, $clients, $critical_client_size;
     $user_id = $client[USER_ID];
-    print("Connected client $user_id");
+    log_info("Connected client $user_id");
     if (socket_last_error($master)) {
         socket_clear_error($master);
     } else {
@@ -85,7 +93,7 @@ function add_client($client)
             if (!array_key_exists($user_id, $clients)) {
                 $clients[$user_id] = [];
             }
-            $clients[USER_ID][] = $client;
+            $clients[$user_id][] = $client;
             @socket_write($client['connection'], "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nCache-Control: no-cache\r\nConnection: keep-alive\r\nX-Frame-Options: SAMEORIGIN\r\nX-Xss-Protection:1; mode=block\r\nX-Content-Type-Options: nosniff\r\n\r\n");
         }
     }
@@ -164,13 +172,13 @@ function parse_client($connection)
     }
     $user_id = $user[ID];
     if ($event_csrf != get_event_csrf($user_id, get_secrets_payload($user_id))) {
-        log_info("Client provided wrong token $event_csrf, will drop");
+        log_info("Client provided wrong token $event_csrf instead of get_secrets_payload($user_id), will drop");
         return null;
     }
     $login = dal_login_fetch($user[ID], parse_ip(), parse_user_client());
     if (!$login) {
         log_info("Client provided token for unauthenticated user $user_id, will drop");
-        return null;
+//        return null;
     }
     return [
         'user_id' => $user_id,
@@ -183,18 +191,22 @@ function parse_client($connection)
 function fetch_events()
 {
     global $clients;
-    foreach ($clients as $user_id => $client_array) {
-        foreach ($client_array as $existing_client) {
-            $id = $existing_client[USER_ID];
-            $shm_id = shm_attach($id, 1024);
-            if (($var = shm_get_var($shm_id, 0))) {
-                send_event_to_client($existing_client, $var);
+    foreach ($clients as &$client_array) {
+        foreach ($client_array as &$existing_client) {
+            $ev = fetch_generic_event($existing_client[USER_ID], $existing_client['last_event_timestamp']);
+            if ($GLOBALS['debug_enabled']) {
+                log_debug("Fetched events" . $ev['ev_list']);
+            }
+            if ($ev && count($ev) > 0 && array_key_exists('ts', $ev) && $ev['ts']) {
+                $existing_client['last_event_timestamp'] = (int)$ev['ts'];
+                send_event_to_client($existing_client, $ev['ev_list']);
             }
         }
     }
 }
 
-$socket_file = "/var/www/taskboards-events.sock";
+//$socket_file = "/var/www/taskboards-events.sock";
+$socket_file = "/Users/dimyriy/taskboards-events.sock";
 $master = socket_create(AF_UNIX, SOCK_STREAM, 0);
 if (!$master) {
     log_error("Couldn't create socket, dying. " . socket_strerror(socket_last_error($master)));
@@ -214,8 +226,8 @@ if (!socket_listen($master, $critical_client_size)) {
 }
 for (; ;) {
     $connection = socket_accept($master);
-    log_info("Socket accepted incoming connection " . $connection);
     if ($connection) {
+        log_info("Socket accepted incoming connection " . $connection);
         $incoming_client = parse_client($connection);
         $client_str = print_r($incoming_client, true);
         log_info("Parsed client $client_str");
