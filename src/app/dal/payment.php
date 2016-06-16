@@ -107,7 +107,8 @@ function payment_pay($tx_id, $customer_id, $performer_id, $amount, $commission)
     if (mysqli_multi_query($connection, "UPDATE db_account.account SET locked_balance = locked_balance - $amount - $commission, balance = balance - $amount - $commission WHERE user_id=$customer_id; UPDATE db_account.account SET balance = balance + $amount, last_tx_id=$tx_id WHERE user_id=$performer_id AND last_tx_id < $tx_id")) {
         while (mysqli_next_result($connection)) {
             if ($result = mysqli_store_result($connection)) {
-                mysqli_free_result($result);
+                if(!is_bool($result))
+                    mysqli_free_result($result);
             }
             if (mysqli_more_results($connection)) {
             }
@@ -404,10 +405,8 @@ function _payment_transaction_set_processed($id)
     $connection = get_payment_connection();
     $mysqli_result = mysqli_query($connection, "UPDATE db_tx.tx SET processed=TRUE WHERE id=$id");
     $success = false;
-    if ($mysqli_result) {
+    if ($mysqli_result)
         $success = true;
-    }
-    mysqli_free_result($mysqli_result);
     return $success;
 }
 
