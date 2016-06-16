@@ -201,20 +201,23 @@ function Localization() {
     this.numbers_ru = [];
     this.new_items_en = function () {
         var newItemsCounter = window.taskboard.newItemsCounter;
-        if (newItemsCounter > 1) {
-            return "There's {0} new items".format(newItemsCounter);
+        if (newItemsCounter > 10) {
+            return "There's more than 10 new tasks";
+        } else if (newItemsCounter > 1) {
+            return "There're {0} new tasks".format(newItemsCounter);
         } else if (newItemsCounter === 1) {
-            return "There's 1 new item";
+            return "There's 1 new task";
         }
     };
     this.new_items_ru = function () {
         var newItemsCounter = window.taskboard.newItemsCounter;
         switch (newItemsCounter) {
             case 1:
-                return "{0} новое задание".format(newItemsCounter);
+                return "{0} новый заказ".format(newItemsCounter);
             case 2:
             case 3:
-                return "{0} новых задания".format(newItemsCounter);
+            case 4:
+                return "{0} новых заказа".format(newItemsCounter);
                 break;
             case 5:
             case 6:
@@ -222,10 +225,10 @@ function Localization() {
             case 8:
             case 9:
             case 10:
-                return "{0} новых заданий".format(newItemsCounter);
+                return "{0} новых заказов".format(newItemsCounter);
                 break;
             default:
-                return "Более 10 новых заданий".format(newItemsCounter);
+                return "Более 10 новых заказов".format(newItemsCounter);
         }
     };
 }
