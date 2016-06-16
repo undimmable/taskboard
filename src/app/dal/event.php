@@ -62,7 +62,7 @@ function write_event($entity_id, $message, $type)
         return false;
     }
     /** @noinspection PhpMethodParametersCountMismatchInspection */
-    if (!mysqli_stmt_bind_param($stmt, 'is', $entity_id, $message, $type)) {
+    if (!mysqli_stmt_bind_param($stmt, 'iss', $entity_id, $message, $type)) {
         add_error($connection, $db_errors);
         return false;
     }
