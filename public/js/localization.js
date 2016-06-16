@@ -148,6 +148,8 @@ function Localization() {
     this.already_performed_notice_header_ru = "Внимание";
     this.already_performed_notice_body_en = "Seems like this task already performed. Try to perform another task.";
     this.already_performed_notice_body_ru = "Похоже, заказ уже выполнен. Попробуйте выполнить другой заказ.";
+    this.already_performed_notice_body_en = "Seems like this task already performed. Try to perform another task.";
+    this.already_performed_notice_body_ru = "Похоже, заказ уже выполнен. Попробуйте выполнить другой заказ.";
     this.not_enough_money_notice_header_en = "Error";
     this.not_enough_money_notice_header_ru = "Ошибка";
     this.not_enough_money_notice_body_en = "You don't have enough money to pay for this task.";
@@ -195,6 +197,35 @@ function Localization() {
     this.years_ru = "{0} лет";
     this.wordSeparator_en = " ";
     this.wordSeparator_ru = " ";
-    this.numbers_en = [];
+    this.numbers_en = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
     this.numbers_ru = [];
+    this.new_items_en = function () {
+        var newItemsCounter = window.taskboard.newItemsCounter;
+        if (newItemsCounter > 1) {
+            return "There's {0} new items".format(newItemsCounter);
+        } else if (newItemsCounter === 1) {
+            return "There's 1 new item";
+        }
+    };
+    this.new_items_ru = function () {
+        var newItemsCounter = window.taskboard.newItemsCounter;
+        switch (newItemsCounter) {
+            case 1:
+                return "{0} новое задание".format(newItemsCounter);
+            case 2:
+            case 3:
+                return "{0} новых задания".format(newItemsCounter);
+                break;
+            case 5:
+            case 6:
+            case 7:
+            case 8:
+            case 9:
+            case 10:
+                return "{0} новых заданий".format(newItemsCounter);
+                break;
+            default:
+                return "Более 10 новых заданий".format(newItemsCounter);
+        }
+    };
 }
