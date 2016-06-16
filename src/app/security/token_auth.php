@@ -16,7 +16,6 @@
 
 $user = null;
 require_once 'dal/login.php';
-require_once 'lib/helper.php';
 
 function create_jwt_token($email, $role, $id)
 {
