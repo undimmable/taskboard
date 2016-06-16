@@ -13,19 +13,8 @@
  * @link      https://taskboards.top
  * @since     1.0.0
  */
+
 require_once "dal/dal_helper.php";
-
-$login_connection = null;
-
-function get_login_connection()
-{
-    global $login_connection;
-    if ($login_connection === null) {
-        $login_connection = get_mysqli_connection(LOGIN_DB);
-    }
-    return $login_connection;
-}
-
 
 function dal_login_create_or_update($user_id, $ip, $client)
 {

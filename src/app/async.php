@@ -32,19 +32,19 @@ function log_msg($msg, $file)
 
 function log_info($msg)
 {
-    log_msg($msg, "/Users/dimyriy/async_php_access.log");
+    log_msg($msg, "/var/log/async_php_access.log");
 }
 
 function log_error($msg)
 {
-    log_msg($msg, "/Users/dimyriy/async_php_error.log");
+    log_msg($msg, "/var/log/async_php_error.log");
 }
 
 function log_debug($msg)
 {
     global $debug_enabled;
     if ($debug_enabled)
-        log_msg($msg, "/Users/dimyriy/async_php_debug.log");
+        log_msg($msg, "/var/log/async_php_debug.log");
 }
 
 function send_event_to_client($client, $str)
@@ -205,8 +205,7 @@ function fetch_events()
     }
 }
 
-//$socket_file = "/var/www/taskboards-events.sock";
-$socket_file = "/Users/dimyriy/taskboards-events.sock";
+$socket_file = "/var/www/taskboards-events.sock";
 $master = socket_create(AF_UNIX, SOCK_STREAM, 0);
 if (!$master) {
     log_error("Couldn't create socket, dying. " . socket_strerror(socket_last_error($master)));

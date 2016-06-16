@@ -15,7 +15,6 @@
  */
 
 $user = null;
-require_once 'dal/login.php';
 
 function create_jwt_token($email, $role, $id)
 {

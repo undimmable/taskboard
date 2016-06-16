@@ -681,9 +681,8 @@ function Taskboard($) {
         taskboardApplication.initializeFormListeners();
         taskboardApplication.initializeFormModals();
         taskboardApplication.initializeTimestampRefresher(timestampRefreshPeriod);
-        taskboardApplication.initializeEventStream();
         taskboardApplication.initializeTooltips();
-        if (role != unauthorizedRole) {
+        if (role && role != unauthorizedRole) {
             taskboardApplication.initializeFeed();
             taskboardApplication.initializeEventStream();
         }

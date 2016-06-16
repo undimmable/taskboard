@@ -42,7 +42,7 @@ function dal_now()
         add_error($connection, $db_errors);
         return false;
     }
-    $mysqli_result = mysqli_query($connection, "SELECT round(UNIX_TIMESTAMP(max(created_at)) * 1000) as ts; ");
+    $mysqli_result = mysqli_query($connection, "SELECT round(UNIX_TIMESTAMP(CURRENT_TIMESTAMP(3)) * 1000) as ts");
     $result = mysqli_fetch_array($mysqli_result, MYSQLI_ASSOC);
     mysqli_free_result($mysqli_result);
     return $result;
