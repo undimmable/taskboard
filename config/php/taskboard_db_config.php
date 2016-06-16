@@ -12,7 +12,7 @@ return [
         'port' => 3306,
         'user' => 'user_event',
         'password' => 'rplc_event_password',
-        'database' => 'rplc_account_db',
+        'database' => 'rplc_event_db',
     ],
     'login' => [
         'host' => 'rplc_login_host',

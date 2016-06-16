@@ -90,7 +90,7 @@ Vagrant.configure(2) do |config|
     sed -i -e 's/rplc_account_db/'"$MYSQL_ACCOUNT_DB"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_event_password/'"$MYSQL_EVENT_PASS"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_event_host/'"$MYSQL_EVENT_HOST"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
-    sed -i -e 's/rplc_event_host/'"$MYSQL_EVENT_HOST"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
+    sed -i -e 's/rplc_event_db/'"$MYSQL_EVENT_DB"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_login_password/'"$MYSQL_LOGIN_PASS"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_login_host/'"$MYSQL_LOGIN_HOST"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_login_db/'"$MYSQL_LOGIN_DB"'/g' $DB_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
@@ -109,9 +109,7 @@ Vagrant.configure(2) do |config|
 
     echo "Provisioning PHP keys configuration inside $SECURITY_CONFIG_FULL_PATH" | tee -a $INSTALL_LOG
     sed -i -e 's/rplc_jwt_secret/'"$JWT_SECRET"'/g' $SECURITY_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
-    sed -i -e 's/rplc_confirmation_key/'"$CONFIRMATION_SECRET"'/g' $SECURITY_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
-    sed -i -e 's/rplc_vk_client_id/'"$VK_APP_ID"'/g' $SECURITY_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
-    sed -i -e 's/rplc_vk_secret/'"$VK_APP_SECRET"'/g' $SECURITY_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
+    sed -i -e 's/rplc_confirmation_secret/'"$CONFIRMATION_SECRET"'/g' $SECURITY_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_login_csrf_secret/'"$LOGIN_CSRF_SECRET"'/g' $SECURITY_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_task_csrf_secret/'"$TASK_CSRF_SECRET"'/g' $SECURITY_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
     sed -i -e 's/rplc_account_csrf_secret/'"$ACCOUNT_CSRF_SECRET"'/g' $SECURITY_CONFIG_FULL_PATH >> $INSTALL_LOG 2>&1
