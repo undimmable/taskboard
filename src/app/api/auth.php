@@ -29,8 +29,7 @@ $routes = [
     ],
     'GET' => [
         'verify' => 'api_auth_verify_action',
-        'logout' => 'api_auth_logout_action',
-        'signup_vk' => 'api_auth_signup_vk_action'
+        'logout' => 'api_auth_logout_action'
     ],
     'PUT' => [],
     'DELETE' => []
@@ -40,8 +39,7 @@ $authorization = [
     'api_auth_login_action' => auth_unauthenticated(),
     'api_auth_signup_action' => auth_unauthenticated(),
     'api_auth_verify_action' => auth_unauthenticated(),
-    'api_auth_logout_action' => auth_any_authenticated(),
-    'api_auth_signup_vk_action' => auth_unauthenticated()
+    'api_auth_logout_action' => auth_any_authenticated()
 ];
 
 /**
