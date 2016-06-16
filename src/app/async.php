@@ -94,6 +94,7 @@ function add_client($client)
                 $clients[$user_id] = [];
             }
             $clients[$user_id][] = $client;
+            socket_set_option($client['connection'], SOL_SOCKET, SO_KEEPALIVE, 1);
             @socket_write($client['connection'], "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nCache-Control: no-cache\r\nConnection: keep-alive\r\nX-Frame-Options: SAMEORIGIN\r\nX-Xss-Protection:1; mode=block\r\nX-Content-Type-Options: nosniff\r\n\r\n");
         }
     }
@@ -194,10 +195,10 @@ function fetch_events()
     foreach ($clients as &$client_array) {
         foreach ($client_array as &$existing_client) {
             $ev = fetch_generic_event($existing_client[USER_ID], $existing_client['last_event_timestamp']);
-            if ($GLOBALS['debug_enabled']) {
-                log_debug("Fetched events" . $ev['ev_list']);
-            }
             if ($ev && count($ev) > 0 && array_key_exists('ts', $ev) && $ev['ts']) {
+                if ($GLOBALS['debug_enabled']) {
+                    log_debug("Fetched events" . $ev['ev_list']);
+                }
                 $existing_client['last_event_timestamp'] = (int)$ev['ts'];
                 send_event_to_client($existing_client, $ev['ev_list']);
             }
@@ -212,6 +213,7 @@ if (!$master) {
     die(2);
 }
 @unlink($socket_file);
+socket_set_option($master, SOL_SOCKET, SO_KEEPALIVE, 1);
 if (!@socket_bind($master, $socket_file)) {
     log_error("Couldn't bind socket, dying. " . socket_strerror(socket_last_error($master)));
     die(2);

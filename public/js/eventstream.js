@@ -39,7 +39,7 @@
 
                 xhr.timeout = 50000;
                 xhr.onreadystatechange = function () {
-                    if (this.readyState == 3 || (this.readyState == 4 && this.status == 200)) {
+                    if (this.readyState == 3 || (this.readyState == 4 && (this.status == 200 || this.status == 0))) {
                         // on success
                         if (eventsource.readyState == eventsource.CONNECTING) {
                             eventsource.readyState = eventsource.OPEN;
@@ -83,7 +83,7 @@
                             }
                         }
 
-                        if (this.readyState == 4) pollAgain(interval);
+                        if (this.readyState == 4 && this.status != 0) pollAgain(interval);
                     } else if (eventsource.readyState !== eventsource.CLOSED) {
                         if (this.readyState == 4) { // and some other status
                             // dispatch error
