@@ -13,7 +13,7 @@
  * @link      https://taskboards.top
  * @since     1.0.0
  */
-function __validate_customer_task_csrf($csrf, $customer_id, $task_id, &$validation_context)
+function _validate_customer_task_csrf($csrf, $customer_id, $task_id, &$validation_context)
 {
     if ($csrf != get_customer_task_csrf($customer_id, $task_id)) {
         add_validation_error($validation_context, 'unspecified', 'token_wrong');
@@ -22,7 +22,7 @@ function __validate_customer_task_csrf($csrf, $customer_id, $task_id, &$validati
         return true;
 }
 
-function __validate_task_create_csrf($csrf, $customer_id, $task_id, &$validation_context)
+function _validate_task_create_csrf($csrf, $customer_id, $task_id, &$validation_context)
 {
     if ($csrf != get_customer_task_create_csrf($customer_id, $task_id)) {
         add_validation_error($validation_context, 'unspecified', 'token_wrong');
@@ -31,7 +31,7 @@ function __validate_task_create_csrf($csrf, $customer_id, $task_id, &$validation
         return true;
 }
 
-function __validate_performer_task_csrf($csrf, $performer_id, $task_id, &$validation_context)
+function _validate_performer_task_csrf($csrf, $performer_id, $task_id, &$validation_context)
 {
     if ($csrf != get_performer_task_csrf($performer_id, $task_id)) {
         add_validation_error($validation_context, 'unspecified', 'token_wrong');

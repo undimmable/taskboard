@@ -53,7 +53,7 @@ $authorization = [
  * @param $validation_context array
  * @return bool true if validation succeeds and false otherwise
  */
-function __validate_amount($amount, &$validation_context)
+function _validate_amount($amount, &$validation_context)
 {
     if (is_null($amount)) {
         add_validation_error($validation_context, AMOUNT, 'not_provided');
@@ -83,7 +83,7 @@ function __validate_amount($amount, &$validation_context)
  * @param $validation_context array
  * @return bool true if validation succeeds and false otherwise
  */
-function __validate_id(&$id, $error_key = 'id', &$validation_context)
+function _validate_id(&$id, $error_key = 'id', &$validation_context)
 {
     if (is_null($id)) {
         add_validation_error($validation_context, $error_key, 'not_provided');
@@ -104,7 +104,7 @@ function __validate_id(&$id, $error_key = 'id', &$validation_context)
  * @param $validation_context array
  * @return bool true if validation succeeds and false otherwise
  */
-function __validate_description($description, &$validation_context)
+function _validate_description($description, &$validation_context)
 {
     if (is_null($description) || strlen($description) < 1 || ctype_space($description)) {
         add_validation_error($validation_context, DESCRIPTION, 'not_provided');
@@ -122,12 +122,12 @@ function __validate_description($description, &$validation_context)
  * @param $csrf string
  * @return bool true if validation succeeds and false otherwise
  */
-function __validate_task_create_input($last_task_id, $amount, $description, $csrf)
+function _validate_task_create_input($last_task_id, $amount, $description, $csrf)
 {
     $validation_context = initialize_validation_context();
-    __validate_task_create_csrf($csrf, get_authorized_user()[ID], $last_task_id, $validation_context);
-    __validate_amount($amount, $validation_context);
-    __validate_description($description, $validation_context);
+    _validate_task_create_csrf($csrf, get_authorized_user()[ID], $last_task_id, $validation_context);
+    _validate_amount($amount, $validation_context);
+    _validate_description($description, $validation_context);
     if (validation_context_has_errors($validation_context)) {
         render_bad_request_json([JSON_ERROR => get_all_validation_errors($validation_context)]);
         return false;
@@ -143,12 +143,12 @@ function __validate_task_create_input($last_task_id, $amount, $description, $csr
  * @param $csrf string
  * @return bool true if validation succeeds and false otherwise
  */
-function __validate_task_fix_input($task_id, $customer_id, $csrf)
+function _validate_task_fix_input($task_id, $customer_id, $csrf)
 {
     $validation_context = initialize_validation_context();
-    __validate_id($task_id, ID, $validation_context);
-    __validate_id($customer_id, CUSTOMER_ID, $validation_context);
-    __validate_customer_task_csrf($csrf, $customer_id, $task_id, $validation_context);
+    _validate_id($task_id, ID, $validation_context);
+    _validate_id($customer_id, CUSTOMER_ID, $validation_context);
+    _validate_customer_task_csrf($csrf, $customer_id, $task_id, $validation_context);
     if (validation_context_has_errors($validation_context)) {
         render_bad_request_json([JSON_ERROR => get_all_validation_errors($validation_context)]);
         return false;
@@ -164,12 +164,12 @@ function __validate_task_fix_input($task_id, $customer_id, $csrf)
  * @param $csrf string
  * @return bool true if validation succeeds and false otherwise
  */
-function __validate_task_perform_input($task_id, $performer_id, $csrf)
+function _validate_task_perform_input($task_id, $performer_id, $csrf)
 {
     $validation_context = initialize_validation_context();
-    __validate_id($task_id, ID, $validation_context);
-    __validate_id($task_id, PERFORMER_ID, $validation_context);
-    __validate_performer_task_csrf($csrf, $performer_id, $task_id, $validation_context);
+    _validate_id($task_id, ID, $validation_context);
+    _validate_id($task_id, PERFORMER_ID, $validation_context);
+    _validate_performer_task_csrf($csrf, $performer_id, $task_id, $validation_context);
     if (validation_context_has_errors($validation_context)) {
         render_bad_request_json([JSON_ERROR => get_all_validation_errors($validation_context)]);
         return false;
@@ -177,7 +177,7 @@ function __validate_task_perform_input($task_id, $performer_id, $csrf)
     return true;
 }
 
-function __try_fix_unprocessed_transaction($user_id, $is_customer = true)
+function _try_fix_unprocessed_transaction($user_id, $is_customer = true)
 {
     $id = payment_get_last_user_tx_id($user_id);
     if (is_null($id)) {
@@ -265,7 +265,7 @@ function api_task_perform($task_id)
     $user = get_authorized_user();
     $performer_id = $user[ID];
     $csrf = parse_csrf_token_header();
-    if (!__validate_task_perform_input($task_id, $performer_id, $csrf)) {
+    if (!_validate_task_perform_input($task_id, $performer_id, $csrf)) {
         return;
     }
     $last_tx_id = payment_get_last_user_tx_id($performer_id);
@@ -397,11 +397,11 @@ function api_task_create()
     $csrf = parse_csrf_token_header();
     $last_task = dal_task_fetch_last($customer_id);
     $last_task_id = $last_task ? $last_task[ID] : -1;
-    if (!__validate_task_create_input($last_task_id, $amount, $description, $csrf)) {
+    if (!_validate_task_create_input($last_task_id, $amount, $description, $csrf)) {
         return;
     }
     if (!is_null($last_task) && !$last_task[BALANCE_LOCKED]) {
-        $transaction_fix_result = __try_fix_unprocessed_transaction($customer_id, true);
+        $transaction_fix_result = _try_fix_unprocessed_transaction($customer_id, true);
         if (is_null($transaction_fix_result) || $transaction_fix_result === false) {
             render_conflict([
                 JSON_ERROR => ["task-unpaid" => true]
@@ -464,7 +464,7 @@ function api_task_fix($task_id)
     $user = get_authorized_user();
     $customer_id = $user[ID];
     $csrf = parse_csrf_token_header();
-    if (!__validate_task_fix_input($task_id, $customer_id, $csrf)) {
+    if (!_validate_task_fix_input($task_id, $customer_id, $csrf)) {
         return;
     }
     $amount = dal_task_fetch_non_locked_price($task_id, $customer_id);
@@ -505,7 +505,7 @@ function api_task_delete_by_id($task_id)
     $customer_id = $user[ID];
     $csrf = parse_csrf_token_header();
     $validation_context = initialize_validation_context();
-    if (!__validate_customer_task_csrf($csrf, $customer_id, $task_id, $validation_context)) {
+    if (!_validate_customer_task_csrf($csrf, $customer_id, $task_id, $validation_context)) {
         if (validation_context_has_errors($validation_context)) {
             render_bad_request_json([JSON_ERROR => get_all_validation_errors($validation_context)]);
             return;

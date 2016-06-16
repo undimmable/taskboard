@@ -199,7 +199,7 @@ function rollback_db_transaction($connection)
     }
 }
 
-function __build_values_clause($param_values)
+function _build_values_clause($param_values)
 {
     if (is_null($param_values))
         return '';

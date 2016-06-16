@@ -52,7 +52,7 @@ $authorization = [
  * @param $csrf string
  * @return bool true if validation succeeds and false otherwise
  */
-function __validate_signup_input($email, &$role, $password, $password_repeat, $csrf)
+function _validate_signup_input($email, &$role, $password, $password_repeat, $csrf)
 {
     $validation_context = initialize_validation_context();
     is_signup_csrf_token_valid($csrf, $validation_context);
@@ -75,7 +75,7 @@ function __validate_signup_input($email, &$role, $password, $password_repeat, $c
  * @param $csrf string
  * @return bool true if validation succeeds and false otherwise
  */
-function __validate_login_input($email, $password, $csrf)
+function _validate_login_input($email, $password, $csrf)
 {
     $validation_context = initialize_validation_context();
     is_login_csrf_token_valid($csrf, $validation_context);
@@ -98,7 +98,7 @@ function __validate_login_input($email, $password, $csrf)
  * @param $client string
  * @param $remember_me boolean
  */
-function __login($user_id, $user_role, $email, $ip, $client, $remember_me)
+function _login($user_id, $user_role, $email, $ip, $client, $remember_me)
 {
     dal_login_create_or_update($user_id, $ip, $client);
     $token = create_jwt_token($email, $user_role, $user_id);
@@ -120,7 +120,7 @@ function api_auth_login_action()
     $password = $data[PASSWORD];
     $remember_me = is_checked($data[REMEMBER_ME]);
     $csrf = parse_csrf_token_header();
-    if (!__validate_login_input($email, $password, $csrf)) {
+    if (!_validate_login_input($email, $password, $csrf)) {
         return;
     }
     $ip = parse_ip();
@@ -137,7 +137,7 @@ function api_auth_login_action()
         render_not_authorized_json([JSON_ERROR => [EMAIL => 'no_such_user']]);
         return;
     }
-    __login($user[ID], $user[ROLE], $user[EMAIL], $ip, $client, $remember_me);
+    _login($user[ID], $user[ROLE], $user[EMAIL], $ip, $client, $remember_me);
 }
 
 
@@ -161,7 +161,7 @@ function api_auth_signup_action()
         $role = get_role_key(PERFORMER);
     }
     $csrf = parse_csrf_token_header();
-    if (!__validate_signup_input($email, $role, $password, $password_repeat, $csrf)) {
+    if (!_validate_signup_input($email, $role, $password, $password_repeat, $csrf)) {
         return;
     }
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
@@ -182,7 +182,7 @@ function api_auth_signup_action()
         $account = payment_create_account($user[ID], DEFAULT_BALANCE);
     }
     send_verification_request_email($email, $_SERVER['HTTP_HOST'], $confirmation_token);
-    __login($user[ID], $role, $email, parse_ip(), parse_user_client(), true);
+    _login($user[ID], $role, $email, parse_ip(), parse_user_client(), true);
 }
 
 /**

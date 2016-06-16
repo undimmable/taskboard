@@ -30,10 +30,10 @@ function check_ip_limits($ip)
     if (empty($ip)) {
         return false;
     }
-    if (!isset ($__ipStorage[$ip])) {
+    if (!isset ($_ipStorage[$ip])) {
         return true;
     }
-    return ($__ipStorage[$ip] > $_max_connections_per_ip) ? false : true;
+    return ($_ipStorage[$ip] > $_max_connections_per_ip) ? false : true;
 }
 
 function check_request_limits($client_id)

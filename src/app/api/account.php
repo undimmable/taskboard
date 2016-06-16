@@ -42,7 +42,7 @@ $authorization = [
  * @param $validation_context array
  * @return bool true if validation succeeds and false otherwise
  */
-function __validate_amount($amount, &$validation_context)
+function _validate_amount($amount, &$validation_context)
 {
     if (is_null($amount)) {
         add_validation_error($validation_context, AMOUNT, 'not_provided');
@@ -73,11 +73,11 @@ function __validate_amount($amount, &$validation_context)
  * @return bool true if validation succeeds and false otherwise
  */
 
-function __validate_account_input($amount, $user_id, $csrf)
+function _validate_account_input($amount, $user_id, $csrf)
 {
     $validation_context = initialize_validation_context();
     is_account_csrf_token_valid($csrf, $user_id, $validation_context);
-    __validate_amount($amount, $validation_context);
+    _validate_amount($amount, $validation_context);
     if (validation_context_has_errors($validation_context)) {
         render_bad_request_json([JSON_ERROR => get_all_validation_errors($validation_context)]);
         return false;
@@ -117,7 +117,7 @@ function api_refill_balance()
     $customer_id = $user[ID];
     $amount = $data[AMOUNT];
     $csrf = parse_csrf_token_header();
-    if (!__validate_account_input($amount, $customer_id, $csrf)) {
+    if (!_validate_account_input($amount, $customer_id, $csrf)) {
         return;
     }
     $updated = payment_refill_balance($customer_id, $amount);
