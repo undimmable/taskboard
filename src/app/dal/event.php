@@ -28,7 +28,7 @@ function fetch_events_after($entity_id, $timestamp_ms, $limit = 10)
         add_error($connection, $db_errors);
         return false;
     }
-    $mysqli_result = mysqli_query($connection, "SELECT max(ev.ts) AS ts, concat('[', group_concat(ev.event_list), ']') as ev_list FROM (SELECT round(UNIX_TIMESTAMP(max(created_at)) * 1000) AS ts, concat('{\"', type, '\":[', group_concat(DISTINCT concat('\"', message, '\"')), ']}') AS event_list FROM (SELECT type, message, created_at FROM db_event.event WHERE target_id = $entity_id AND created_at > FROM_UNIXTIME($timestamp_ms/1000) LIMIT $limit) AS t_event GROUP BY t_event.type) AS ev");
+    $mysqli_result = mysqli_query($connection, "SELECT max(ev.ts) AS ts, concat('[', group_concat(ev.event_list), ']') as ev_list FROM (SELECT round(UNIX_TIMESTAMP(max(created_at)) * 1000) AS ts, concat('{\"', type, '\":[', group_concat(DISTINCT concat('\"', message, '\"')), ']}') AS event_list FROM (SELECT type, message, created_at FROM db_event.event WHERE created_at > FROM_UNIXTIME($timestamp_ms/1000) AND (target_id = $entity_id OR target_id is null) LIMIT $limit) AS t_event GROUP BY t_event.type) AS ev");
     $result = mysqli_fetch_array($mysqli_result, MYSQLI_ASSOC);
     mysqli_free_result($mysqli_result);
     return $result;
@@ -48,21 +48,23 @@ function dal_now()
     return $result;
 }
 
-function write_event($entity_id, $message, $type)
+function write_event($entity_id = "NULL", $message, $type)
 {
+    if(is_null($entity_id))
+        $entity_id = "NULL";
     $db_errors = initialize_db_errors();
     $connection = get_event_connection();
     if (!$connection) {
         add_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "INSERT INTO db_event.event (target_id, message, type) VALUES (?,?,?)");
+    $stmt = mysqli_prepare($connection, "INSERT INTO db_event.event (target_id, message, type) VALUES ($entity_id,?,?)");
     if (!$stmt) {
         add_error($connection, $db_errors);
         return false;
     }
     /** @noinspection PhpMethodParametersCountMismatchInspection */
-    if (!mysqli_stmt_bind_param($stmt, 'iss', $entity_id, $message, $type)) {
+    if (!mysqli_stmt_bind_param($stmt, 'ss', $message, $type)) {
         add_error($connection, $db_errors);
         return false;
     }
