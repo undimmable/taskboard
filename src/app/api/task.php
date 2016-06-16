@@ -429,9 +429,7 @@ function api_task_create()
         error_log("Setting lock_tx_id failed");
     }
     $task = dal_task_fetch($task_id);
-    $ts = json_encode($task);
-    $shm_id = shm_attach($user[ID], 1024);
-    shm_put_var($shm_id, 0, $ts);
+    send_generic_event($customer_id, $task_id, 'c');
     if (!$task) {
         error_log("Couldn't fetch task");
         render_bad_request_json([JSON_ERROR => get_db_errors()]);
