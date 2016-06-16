@@ -441,7 +441,7 @@ function api_task_create()
         error_log("Setting lock_tx_id failed");
     }
     $task = dal_task_fetch($task_id);
-    send_generic_event($customer_id, $task_id, 'c');
+    send_generic_event(null, $task_id, 'c');
     if (!$task) {
         error_log("Couldn't fetch task");
         render_bad_request_json([JSON_ERROR => get_db_errors()]);
