@@ -4,7 +4,7 @@ GRANT ALL ON db_login.* TO 'user_login'@'%';
 USE db_login;
 CREATE TABLE login (
   id             BIGINT PRIMARY KEY AUTO_INCREMENT,
-  user_id        BIGINT             DEFAULT NULL,
+  user_id        BIGINT             NOT NULL DEFAULT -1,
   ip             VARBINARY(16)           NOT NULL,
   user_client    VARCHAR(255)             NOT NULL,
   last_login     TIMESTAMP DEFAULT now() NOT NULL,
@@ -13,4 +13,4 @@ CREATE TABLE login (
   ENGINE = InnoDB
   DEFAULT CHARSET UTF8;
 ALTER TABLE login
-  ADD UNIQUE unique_ip_agent (ip, user_client);
+  ADD UNIQUE unique_ip_agent (ip, user_client, user_id);
