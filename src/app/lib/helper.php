@@ -77,14 +77,23 @@ function parse_integer_param($param_name)
     return $param;
 }
 
-function parse_ip()
+function parse_ip($ip)
 {
-    return inet_pton($_SERVER['REMOTE_ADDR']);
+    return inet_pton($ip);
 }
 
-function parse_user_client()
+function parse_ip_from_server()
 {
-    $agent = $_SERVER['HTTP_USER_AGENT'];
+    return parse_ip($_SERVER['REMOTE_ADDR']);
+}
+
+function parse_user_client_from_server()
+{
+    return parse_user_client($_SERVER['HTTP_USER_AGENT']);
+}
+
+function parse_user_client($agent)
+{
     if (strlen($agent <= 256))
         return $agent;
     else
@@ -130,17 +139,12 @@ function get_performer_task_csrf($user_id, $task_id)
     return hash("sha256", "$user_id.$task_id." . get_config_task_csrf_secret(), false);
 }
 
-function get_event_csrf($user_id, $payload)
-{
-    return hash("sha256", "$user_id.$payload" . get_config_events_secret(), false);
-}
-
 function get_login_csrf()
 {
     if ($GLOBALS['staging']) {
         return 9;
     }
-    return hash("sha256", 0 . " ." . parse_ip() . "." . parse_user_client() . ".gilon" . get_config_login_csrf_secret(), false);
+    return hash("sha256", 0 . " ." . parse_ip_from_server() . "." . parse_user_client_from_server() . ".gilon" . get_config_login_csrf_secret(), false);
 }
 
 function get_signup_csrf()
@@ -148,7 +152,7 @@ function get_signup_csrf()
     if ($GLOBALS['staging']) {
         return 8;
     }
-    return hash("sha256", 0 . "." . parse_ip() . "." . parse_user_client() . ".gnsiup" . get_config_login_csrf_secret(), false);
+    return hash("sha256", 0 . "." . parse_ip_from_server() . "." . parse_user_client_from_server() . ".gnsiup" . get_config_login_csrf_secret(), false);
 }
 
 function get_account_csrf($user_id)
@@ -157,11 +161,6 @@ function get_account_csrf($user_id)
         return 11;
     }
     return hash("sha256", ".$user_id.account" . get_config_account_csrf_secret(), false);
-}
-
-function get_secrets_payload($user_id)
-{
-    return hash("sha256", $user_id . "." . parse_ip() . "." . parse_user_client() . ".gnsiev" . get_config_payload_secret(), false);
 }
 
 function get_performer_img()
@@ -179,10 +178,14 @@ function get_system_img()
     return "/icons/favicon-96x96.png";
 }
 
-function get_current_snapshot_timestamp()
+function get_last_event_id()
 {
     require_once 'dal/event.php';
-    return dal_now()['ts'];
+    $dal_last_event_id = dal_last_event_id();
+    if ($dal_last_event_id && array_key_exists('id', $dal_last_event_id))
+        return $dal_last_event_id['id'];
+    else
+        return -1;
 }
 
 function get_task_img($task, $user)

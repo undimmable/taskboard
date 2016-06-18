@@ -61,7 +61,7 @@ function authorize_user($token)
         return;
     $user = parse_user_from_token($token);
     $user_id = $user[ID];
-    $login = dal_login_fetch($user_id, parse_ip(), parse_user_client());
+    $login = dal_login_fetch($user_id, parse_ip_from_server(), parse_user_client_from_server());
     if (is_null($login) || !$login) {
         delete_token_cookie();
     } else {
