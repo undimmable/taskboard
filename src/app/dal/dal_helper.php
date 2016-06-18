@@ -32,109 +32,97 @@ $connections[USER_DB] = null;
 
 function get_account_connection()
 {
-    global $connections;
-    if ($connections[ACCOUNT_DB] === null) {
-        $connections[ACCOUNT_DB] = get_mysqli_connection(ACCOUNT_DB);
+    if ($GLOBALS['connections'][ACCOUNT_DB] === null) {
+        $GLOBALS['connections'][ACCOUNT_DB] = get_mysqli_connection(ACCOUNT_DB);
     }
-    return $connections[ACCOUNT_DB];
+    return $GLOBALS['connections'][ACCOUNT_DB];
 }
 
 function get_event_connection()
 {
-    global $connections;
-    if ($connections[EVENT_DB] === null) {
-        $connections[EVENT_DB] = get_mysqli_connection(EVENT_DB);
+    if ($GLOBALS['connections'][EVENT_DB] === null) {
+        $GLOBALS['connections'][EVENT_DB] = get_mysqli_connection(EVENT_DB);
     }
-    return $connections[EVENT_DB];
+    return $GLOBALS['connections'][EVENT_DB];
 }
 
 function get_login_connection()
 {
-    global $connections;
-    if ($connections[LOGIN_DB] === null) {
-        $connections[LOGIN_DB] = get_mysqli_connection(LOGIN_DB);
+    if ($GLOBALS['connections'][LOGIN_DB] === null) {
+        $GLOBALS['connections'][LOGIN_DB] = get_mysqli_connection(LOGIN_DB);
     }
-    return $connections[LOGIN_DB];
+    return $GLOBALS['connections'][LOGIN_DB];
 }
 
 function get_payment_connection()
 {
-    global $connections;
-    if ($connections[TX_DB] === null) {
-        $connections[TX_DB] = get_mysqli_connection(TX_DB);
+    if ($GLOBALS['connections'][TX_DB] === null) {
+        $GLOBALS['connections'][TX_DB] = get_mysqli_connection(TX_DB);
     }
-    return $connections[TX_DB];
+    return $GLOBALS['connections'][TX_DB];
 }
 
 function get_task_connection()
 {
-    global $connections;
-    if ($connections[TASK_DB] === null) {
-        $connections[TASK_DB] = get_mysqli_connection(TASK_DB);
+    if ($GLOBALS['connections'][TASK_DB] === null) {
+        $GLOBALS['connections'][TASK_DB] = get_mysqli_connection(TASK_DB);
     }
-    return $connections[TASK_DB];
+    return $GLOBALS['connections'][TASK_DB];
 }
 
 function get_user_connection()
 {
-    global $connections;
-    if ($connections[USER_DB] === null) {
-        $connections[USER_DB] = get_mysqli_connection(USER_DB);
+    if ($GLOBALS['connections'][USER_DB] === null) {
+        $GLOBALS['connections'][USER_DB] = get_mysqli_connection(USER_DB);
     }
-    return $connections[USER_DB];
+    return $GLOBALS['connections'][USER_DB];
 }
 
 function close_account_connection()
 {
-    global $connections;
-    if ($connections[ACCOUNT_DB] !== null) {
-        mysqli_close($connections[ACCOUNT_DB]);
-        unset($connections[ACCOUNT_DB]);
+    if ($GLOBALS['connections'][ACCOUNT_DB] !== null) {
+        mysqli_close($GLOBALS['connections'][ACCOUNT_DB]);
+        unset($GLOBALS['connections'][ACCOUNT_DB]);
     }
 }
 
 function close_event_connection()
 {
-    global $connections;
-    if ($connections[EVENT_DB] !== null) {
-        mysqli_close($connections[EVENT_DB]);
-        unset($connections[EVENT_DB]);
+    if ($GLOBALS['connections'][EVENT_DB] !== null) {
+        mysqli_close($GLOBALS['connections'][EVENT_DB]);
+        unset($GLOBALS['connections'][EVENT_DB]);
     }
 }
 
 function close_login_connection()
 {
-    global $connections;
-    if ($connections[LOGIN_DB] !== null) {
-        mysqli_close($connections[LOGIN_DB]);
-        unset($connections[LOGIN_DB]);
+    if ($GLOBALS['connections'][LOGIN_DB] !== null) {
+        mysqli_close($GLOBALS['connections'][LOGIN_DB]);
+        unset($GLOBALS['connections'][LOGIN_DB]);
     }
 }
 
 function close_payment_connection()
 {
-    global $connections;
-    if ($connections[TX_DB] !== null) {
-        mysqli_close($connections[TX_DB]);
-        unset($connections[TX_DB]);
+    if ($GLOBALS['connections'][TX_DB] !== null) {
+        mysqli_close($GLOBALS['connections'][TX_DB]);
+        unset($GLOBALS['connections'][TX_DB]);
     }
 }
 
 function close_task_connection()
 {
-    global $connections;
-    if ($connections[TASK_DB] !== null) {
-        mysqli_close($connections[TASK_DB]);
-        unset($connections[TASK_DB]);
+    if ($GLOBALS['connections'][TASK_DB] !== null) {
+        mysqli_close($GLOBALS['connections'][TASK_DB]);
+        unset($GLOBALS['connections'][TASK_DB]);
     }
 }
 
 function close_user_connection()
 {
-    global $connections;
-    if ($connections[USER_DB] !== null) {
-        mysqli_close($connections[USER_DB]);
-        unset($connections[USER_DB]);
+    if ($GLOBALS['connections'][USER_DB] !== null) {
+        mysqli_close($GLOBALS['connections'][USER_DB]);
+        unset($GLOBALS['connections'][USER_DB]);
     }
 }
 
