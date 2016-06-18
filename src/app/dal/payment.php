@@ -102,30 +102,24 @@ function payment_lock_balance($user_id, $tx_id, $amount)
 
 function payment_pay($tx_id, $customer_id, $performer_id, $amount, $commission)
 {
+    $db_errors = initialize_db_errors();
     $connection = get_account_connection();
     mysqli_autocommit($connection, false);
-    if (mysqli_multi_query($connection, "UPDATE db_account.account SET locked_balance = locked_balance - $amount - $commission, balance = balance - $amount - $commission WHERE user_id=$customer_id; UPDATE db_account.account SET balance = balance + $amount, last_tx_id=$tx_id WHERE user_id=$performer_id AND last_tx_id < $tx_id")) {
-        while (mysqli_next_result($connection)) {
-            if ($result = mysqli_store_result($connection)) {
-                if(!is_bool($result))
-                    mysqli_free_result($result);
-            }
-            if (mysqli_more_results($connection)) {
-            }
-        }
-        if (mysqli_error($connection)) {
-            mysqli_rollback($connection);
-            mysqli_autocommit($connection, true);
-            return false;
-        } else {
-            mysqli_commit($connection);
-            mysqli_autocommit($connection, true);
-            return true;
-        }
-    } else {
+    $result = mysqli_query($connection, "UPDATE db_account.account SET locked_balance = locked_balance - $amount - $commission, balance = balance - $amount - $commission WHERE user_id=$customer_id AND locked_balance - $amount - $commission > 0 AND balance - $amount - $commission > 0");
+    if (!$result) {
+        add_error($connection, $db_errors);
+        mysqli_rollback($connection);
         mysqli_autocommit($connection, true);
         return false;
     }
+    $result = mysqli_query($connection, "UPDATE db_account.account SET balance = balance + $amount, last_tx_id=$tx_id WHERE user_id=$performer_id AND (last_tx_id is NULL or last_tx_id < $tx_id)");
+    if (!$result) {
+        add_error($connection, $db_errors);
+        mysqli_rollback($connection);
+        mysqli_autocommit($connection, true);
+        return false;
+    }
+    return mysqli_commit($connection);
 }
 
 function payment_unlock_balance($user_id, $amount)
