@@ -205,9 +205,3 @@ function get_system_commission()
 {
     return SYSTEM_COMMISSION_PERCENT;
 }
-
-function get_balance($user_id)
-{
-    require_once 'dal/payment.php';
-    return payment_fetch_balance($user_id);
-}

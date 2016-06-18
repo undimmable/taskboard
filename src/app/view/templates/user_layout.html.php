@@ -1,8 +1,5 @@
-<?php
-$balance = get_balance(get_authorized_user()[ID]);
-?>
 <li>
-    <a type="button" class="btn btn-link" href="#"><i class="fa fa-usd"></i><span id="user-balance"><?php echo $balance; ?></span>
+    <a type="button" class="btn btn-link" href="#"><i class="fa fa-usd"></i><span id="user-balance"></span>
     </a>
 </li>
 

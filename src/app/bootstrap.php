@@ -26,6 +26,7 @@ require_once "config/role.php";
 require_once 'dal/login.php';
 require_once "events/event.php";
 require_once "lib/helper.php";
+require_once "lib/logger.php";
 require_once "lib/validation.php";
 require_once "lib/router.php";
 require_once "security/force_https.php";

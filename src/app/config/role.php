@@ -53,6 +53,12 @@ function is_performer($key)
     return $key === $roles_reversed[PERFORMER];
 }
 
+function is_system($key)
+{
+    global $roles_reversed;
+    return $key === $roles_reversed[SYSTEM];
+}
+
 function auth_unauthenticated()
 {
     return 0;

@@ -20,6 +20,7 @@ define('TASK_DB', 'task');
 define('TEXT_IDX_DB', 'text_idx');
 define('TX_DB', 'tx');
 define('USER_DB', 'user');
+define('MYSQL_LOG_STATEMENT', true);
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 $connections = [];

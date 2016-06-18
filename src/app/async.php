@@ -13,6 +13,7 @@ require_once 'dal/event.php';
 require_once 'events/event.php';
 require_once 'dal/login.php';
 require_once 'lib/helper.php';
+require_once 'lib/logger.php';
 require_once 'security/jwt.php';
 require_once 'security/token_auth.php';
 date_default_timezone_set('UTC');
@@ -21,28 +22,6 @@ $clients = [];
 $forbidden_clients = [];
 $clients_size = 0;
 $critical_client_size = 500;
-
-function log_msg($msg, $file)
-{
-    error_log("[" . date('Y-m-d H:m:s:u') . "]" . $msg . "\n", 3, $file);
-}
-
-function log_info($msg)
-{
-    log_msg($msg, "/var/log/async_php_access.log");
-}
-
-function log_error($msg)
-{
-    log_msg($msg, "/var/log/async_php_error.log");
-}
-
-function log_debug($msg)
-{
-    global $debug_enabled;
-    if ($debug_enabled)
-        log_msg($msg, "/var/log/async_php_debug.log");
-}
 
 function send_event_to_client($client, $id, $str)
 {

@@ -23,6 +23,41 @@ function payment_check_able_to_process($user_id, $amount)
     return $balance - $amount > 0;
 }
 
+function payment_fix_last_perform_transaction($performer_id)
+{
+    $last_tx_id = payment_get_last_user_tx_id($performer_id);
+    if ($last_tx_id === false) {
+        on_payment_failure();
+        return;
+    }
+    if (is_null($last_tx_id)) {
+        $unprocessed_tx = payment_fetch_transactions_after($performer_id, $last_tx_id, false);
+        if ($unprocessed_tx) {
+            $tx = payment_get_transaction_by_participants($unprocessed_tx['id_from'], $performer_id, 'p');
+            $task = dal_task_fetch($unprocessed_tx['id_from']);
+            if (!$task) {
+                render_internal_server_error();
+                return;
+            }
+            if (!$tx) {
+                $tx_id = payment_init_pay_transaction($unprocessed_tx['id_from'], $performer_id, $task[PRICE]);
+                $tx = [];
+                $tx[ID] = $tx_id;
+                $tx[PROCESSED] = false;
+            }
+            if (!$tx[PROCESSED]) {
+                $tx[PROCESSED] = payment_process_pay_transaction($tx[ID], $task[CUSTOMER_ID], $performer_id, $task[PRICE], $task[COMMISSION]);
+            }
+            if ($tx[PROCESSED]) {
+                set_task_paid($task);
+                on_payment_success($task);
+            } else {
+                on_payment_failure();
+            }
+        }
+    }
+}
+
 function payment_get_last_user_tx_id($user_id)
 {
     $connection = get_account_connection();

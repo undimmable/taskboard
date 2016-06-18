@@ -7,4 +7,5 @@ vendor/
 public/**/temp_*
 *.ipr
 *.iws
+public/js/app.min.js
 /config/env

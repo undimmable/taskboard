@@ -231,6 +231,22 @@ function dal_task_fetch($task_id)
     ];
 }
 
+function dal_task_count_total_paid_commission()
+{
+    //TODO: cache balance
+    $db_errors = initialize_db_errors();
+    $connection = get_task_connection();
+    if (!$connection) {
+        add_error($connection, $db_errors);
+        return false;
+    }
+    $mysqli_result = mysqli_query(get_task_connection(), "SELECT COALESCE(sum(commission),0) AS balance FROM db_task.task WHERE paid=TRUE");
+    if ($mysqli_result === false) {
+        return false;
+    }
+    return mysqli_fetch_assoc($mysqli_result)['balance'];
+}
+
 /**
  * Fetch price of specified task_id owned by customer_id
  *
@@ -327,7 +343,7 @@ function dal_task_fetch_tasks_complex_query_limit($callback, $user_id, $balance_
         return false;
     }
     $last_id_clause = $last_id === null ? '' : "AND id < $last_id";
-    if(!$limit) {
+    if (!$limit) {
         $limit = 100;
     }
     $query = "SELECT id, timestampdiff(SECOND, now(), created_at), amount as price, customer_id, performer_id, amount + commission as amount, description, balance_locked, paid FROM db_task.task WHERE $balance_locked $latest_task_id_query AND not deleted AND $select_user_type <=> ? $last_id_clause ORDER BY id DESC LIMIT ?";

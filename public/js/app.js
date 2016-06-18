@@ -773,6 +773,7 @@ function Taskboard($) {
         taskboardApplication.initializeTimestampRefresher(timestampRefreshPeriod);
         taskboardApplication.initializeTooltips();
         if (role && role != unauthorizedRole) {
+            taskboardApplication.updateBalance();
             taskboardApplication.initializeFeed();
             taskboardApplication.initializeEventStream();
             taskboardApplication.initializeBadgeUpdate();

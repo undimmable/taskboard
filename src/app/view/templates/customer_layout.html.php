@@ -1,11 +1,10 @@
 <?php
-$balance = get_balance(get_authorized_user()[ID]);
 $csrf = get_account_csrf(get_authorized_user()[ID]);
 ?>
 <li>
     <a type="button" class="btn btn-link l10n l10n-tooltip" data-l10n="balance_tooltip" data-toggle="modal" data-type="account"
        data-target="#account-form-modal" rel="tooltip">
-        <i class="fa fa-usd"></i><span id="user-balance"><?php echo $balance; ?> </span> <span class="l10n l10n-text" data-l10n="refill_account"></span>
+        <i class="fa fa-usd"></i><span id="user-balance"></span> <span class="l10n l10n-text" data-l10n="refill_account"></span>
     </a>
 </li>
 <li>

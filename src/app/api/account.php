@@ -90,8 +90,12 @@ function _validate_account_input($amount, $user_id, $csrf)
  */
 function api_get_balance()
 {
-    $user_id = get_authorized_user()[ID];
-    $balance = payment_fetch_balance($user_id);
+    $user = get_authorized_user();
+    if (is_system($user[ROLE])) {
+        $balance = dal_task_count_total_paid_commission();
+    } else {
+        $balance = payment_fetch_balance($user[ID]);
+    }
     if (!$balance) {
         render_internal_server_error([JSON_ERROR => get_db_errors()]);
         return;
