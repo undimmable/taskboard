@@ -123,8 +123,8 @@ function api_auth_login_action()
     if (!_validate_login_input($email, $password, $csrf)) {
         return;
     }
-    $ip = parse_ip();
-    $client = parse_user_client();
+    $ip = parse_ip_from_server();
+    $client = parse_user_client_from_server();
     $interval = get_config_failed_attempt_timeout();
     $failed_attempts = dal_login_being_failed($ip, $client, get_config_failed_attempt_retry(), $interval);
     if ($failed_attempts) {
@@ -182,7 +182,7 @@ function api_auth_signup_action()
         $account = payment_create_account($user[ID], DEFAULT_BALANCE);
     }
     send_verification_request_email($email, $_SERVER['HTTP_HOST'], $confirmation_token);
-    _login($user[ID], $role, $email, parse_ip(), parse_user_client(), true);
+    _login($user[ID], $role, $email, parse_ip_from_server(), parse_user_client_from_server(), true);
 }
 
 /**
