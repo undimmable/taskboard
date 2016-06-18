@@ -45,7 +45,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css"/>
     <link rel="stylesheet" href="/css/style.css?__nocache=<?php echo rand(0, 100000); ?>"/>
     <script type="application/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
-    <script type="application/javascript" src="/js/eventstream.js"></script>
+    <!--[if IE]><script type="application/javascript" src="/js/eventstream.min.js"></script><![endif]-->
     <script type="application/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
             integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
             crossorigin="anonymous"></script>
@@ -58,11 +58,9 @@
 <?php
 $role = is_authorized() ? get_authorized_user()[ROLE] : 0;
 $user_id = is_authorized() ? get_authorized_user()[ID] : 0;
-$payload = get_secrets_payload($user_id);
-$event_csrf = get_event_csrf($user_id, $payload);
 $commission = get_system_commission();
-$current_snapshot_timestamp = get_current_snapshot_timestamp();
-echo "<div id=\"user-data\" data-role=\"$role\" data-evsid=\"$event_csrf\" data-payloadsid=\"$payload\" data-commission=\"$commission\" data-current-snapshot-timestamp=\"$current_snapshot_timestamp\"></div>";
+$last_event_id = get_last_event_id();
+echo "<div id=\"user-data\" data-role=\"$role\" data-commission=\"$commission\" data-last-event-id=\"$last_event_id\"></div>";
 ?>
 <nav class="navbar navbar-default">
     <div class="container-fluid">
