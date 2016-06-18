@@ -261,6 +261,9 @@ function Taskboard($) {
         var changed = indexOf > -1;
         if (changed) {
             feed.loadedTaskIds.splice(indexOf, 1);
+            var smallest = Math.min.apply(feed.loadedTaskIds);
+            if (smallest < feed.lastTaskId)
+                feed.lastTaskId = smallest;
         }
         return changed;
     };
@@ -290,7 +293,6 @@ function Taskboard($) {
         }
         var data = e['data'];
         if (data !== undefined) {
-            console.log(e['data']);
             var jsonData = $.parseJSON(data);
             if (jsonData.constructor === Array) {
                 var changed = false;
@@ -301,7 +303,6 @@ function Taskboard($) {
                         });
                     } else if (this.hasOwnProperty('p')) {
                         $.each(this['p'], function () {
-                            //TODO: check lastTaskId  update
                             changed = taskboardApplication.deleteTaskById(this);
                         });
                     } else if (this.hasOwnProperty('c')) {
@@ -322,16 +323,12 @@ function Taskboard($) {
     };
 
     this.initializeEventStream = function () {
-        if (window.eventsource === undefined) {
-            window.eventsource = new EventSource("/events?lastEventId=".concat(encodeURIComponent(document.getElementById('user-data').getAttribute('data-last-event-id'))));
-            window.eventsource.onmessage = function (e) {
-                if (e.origin != "https://taskboard.dev") {
-                    console.info("Wrong origin ".concat(e.origin));
-                    return;
-                }
+        if (window.es === undefined) {
+            window.es = new EventSource("/events?lastEventId=".concat(encodeURIComponent(document.getElementById('user-data').getAttribute('data-last-event-id'))));
+            window.es.onmessage = function (e) {
                 taskboardApplication.onEvent(e);
             };
-            window.eventsource.onerror = function (e) {
+            window.es.onerror = function (e) {
                 console.log(e);
             };
         }
@@ -832,13 +829,6 @@ function Taskboard($) {
                     feed.loading = false;
                     taskboardApplication.replaceSpinnerWithIcon(el.find('i'));
                     el.attr('disabled', false);
-                    if (response.status == 409) {
-                        try {
-                            task.remove();
-                        } catch (e) {
-                            console.log(e);
-                        }
-                    }
                     taskboardApplication.onNonPostError(response, task);
                 });
             });
