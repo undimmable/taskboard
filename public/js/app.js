@@ -11,6 +11,7 @@ function Taskboard($) {
     var role = null;
     var performerRole = 4;
     var customerRole = 2;
+    var systemRole = 1;
     var unauthorizedRole = 0;
     var timestampRefreshPeriod = 60000;
     var fadeOutSpeed = 1000;
@@ -253,9 +254,15 @@ function Taskboard($) {
     };
 
     this.deleteTaskById = function (id) {
+        var indexOf = $.inArray(parseInt(id), feed.loadedTaskIds);
         $('#task-feed').find('li[data-id="'.concat(id, '"]')).fadeOut(fadeOutSpeed, function () {
             $(this).remove();
         });
+        var changed = indexOf > -1;
+        if (changed) {
+            feed.loadedTaskIds.splice(indexOf, 1);
+        }
+        return changed;
     };
 
     this.incrementBadge = function (id) {
@@ -286,14 +293,16 @@ function Taskboard($) {
             console.log(e['data']);
             var jsonData = $.parseJSON(data);
             if (jsonData.constructor === Array) {
+                var changed = false;
                 $.each(jsonData, function () {
                     if (this.hasOwnProperty('d')) {
                         $.each(this['d'], function () {
-                            taskboardApplication.deleteTaskById(this);
+                            changed = taskboardApplication.deleteTaskById(this);
                         });
                     } else if (this.hasOwnProperty('p')) {
                         $.each(this['p'], function () {
-                            taskboardApplication.deleteTaskById(this);
+                            //TODO: check lastTaskId  update
+                            changed = taskboardApplication.deleteTaskById(this);
                         });
                     } else if (this.hasOwnProperty('c')) {
                         $.each(this['c'], function () {
@@ -303,6 +312,9 @@ function Taskboard($) {
                         console.log("Unknown event type");
                     }
                 });
+                if (changed && role === systemRole) {
+                    taskboardApplication.updateBalance();
+                }
             }
         } else {
             console.log("Unknown event");
@@ -409,9 +421,6 @@ function Taskboard($) {
 
     this.renderHtmlTasks = function (html, prepend) {
         var feedHtml = $('#task-feed');
-        var lastElementIndex = feedHtml.children().length - 1;
-        if (lastElementIndex < 0)
-            lastElementIndex = 0;
         var $html = $(html);
         $html.hide();
         $html.find('.l10n').each(function () {

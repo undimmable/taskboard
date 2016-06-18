@@ -280,7 +280,8 @@ function api_task_perform($task_id)
             if (!$updated) {
                 render_conflict([JSON_ERROR => [POPUP => "task_already_performed"]]);
             } else {
-                if (payment_process_complex($task[ID], $task[PERFORMER_ID], $task[CUSTOMER_ID], $task[PRICE], $task[COMMISSION])) {
+                $task[PERFORMER_ID] = $performer_id;
+                if (payment_process_complex($task)) {
                     on_payment_success($task);
                 } else {
                     on_payment_failure();
@@ -289,7 +290,7 @@ function api_task_perform($task_id)
         } elseif ($task[PERFORMER_ID] == $performer_id) {
             $tx = payment_get_transaction_by_participants($task[ID], $task[PERFORMER_ID], 'p');
             if (!$tx) {
-                payment_process_complex($task[ID], $task[PERFORMER_ID], $task[CUSTOMER_ID], $task[PRICE], $task[COMMISSION]);
+                payment_process_complex($task);
             } else if (!$tx[PROCESSED]) {
                 $processed = payment_process_pay_transaction($tx[ID], $task[CUSTOMER_ID], $performer_id, $task[PRICE], $task[COMMISSION]);
                 if ($processed) {
@@ -298,16 +299,18 @@ function api_task_perform($task_id)
                         $task[PAID] = true;
                         on_payment_success($task);
                     } else
-                        render_internal_server_error();
+                        on_payment_failure();
                 } else {
-                    render_internal_server_error();
+                    on_payment_failure();
                 }
             } else {
                 $paid_success = dal_task_update_set_paid($task[ID]);
-                if ($paid_success)
-                    render_ok_json(dal_task_fetch($task_id));
-                else
-                    render_internal_server_error();
+                if ($paid_success) {
+                    $task[PAID] = true;
+                    on_payment_success($task);
+                } else {
+                    on_payment_failure();
+                }
             }
         } else {
             render_conflict([JSON_ERROR => [POPUP => "task_already_performed"]]);
@@ -325,7 +328,7 @@ function set_task_paid(&$task)
 
 function on_payment_success($task)
 {
-    write_event(null, $task[ID], 'c');
+    write_event(null, $task[ID], 'p');
     render_ok_json($task);
     return;
 }
@@ -337,7 +340,7 @@ function on_payment_failure()
 }
 
 /**
- * @internal param $task
+ * @param $task
  * @return bool
  */
 function payment_process_complex($task)
