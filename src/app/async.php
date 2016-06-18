@@ -107,6 +107,7 @@ function parse_client($connection)
         log_error("Doesn't seem like GET request, will drop.");
         return false;
     }
+    $uri = str_replace("lastEventId=&", "", $uri);
     $query_params = parse_params($uri);
     $headers = [];
     $auth_cookie = null;
@@ -141,7 +142,13 @@ function parse_client($connection)
     }
     if (is_null($client_last_event_id)) {
         if (array_key_exists('lastEventId', $query_params)) {
-            $client_last_event_id = filter_var($query_params['lastEventId'], FILTER_SANITIZE_NUMBER_INT);
+            $filter_var = filter_var($query_params['lastEventId'], FILTER_SANITIZE_NUMBER_INT);
+            if ($filter_var)
+                $client_last_event_id = $filter_var;
+        } else if (array_key_exists('lastEventID', $query_params)) {
+            $filter_var = filter_var($query_params['lastEventID'], FILTER_SANITIZE_NUMBER_INT);
+            if ($filter_var)
+                $client_last_event_id = $filter_var;
         }
     }
     if (is_null($client_last_event_id)) {
