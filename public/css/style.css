@@ -126,3 +126,7 @@ small > span, button {
     -ms-transform: translate(0, 50%) !important;
     -webkit-transform: translate(0, 50%) !important;
 }
+
+.task-feed-item.unpaid button {
+    color: coral;
+}
