@@ -193,20 +193,19 @@ function Taskboard($) {
         $.fn.substituteTime = function () {
             var timestamp = $(this).data('timestamp') || 0;
             var milliseconds = new Date().getTime() - timestamp;
-            var prefix = taskboardApplication.localizedMessage('prefixAgo');
-            var suffix = taskboardApplication.localizedMessage('suffixAgo');
             var seconds = Math.abs(milliseconds) / 1000;
             var minutes = seconds / 60;
             var hours = minutes / 60;
             var days = hours / 24;
             var years = days / 365;
+            var prefix = seconds < 90 ? '' : taskboardApplication.localizedMessage('prefixAgo');
+            var suffix = seconds < 90 ? '' : taskboardApplication.localizedMessage('suffixAgo');
 
             function substituteNumber(number) {
                 return number;
             }
 
-            var words = seconds < 45 && taskboardApplication.localizedMessage('seconds').format(substituteNumber(Math.round(seconds))) ||
-                seconds < 90 && taskboardApplication.localizedMessage('minute').format(substituteNumber(1)) ||
+            var words = seconds < 90 && taskboardApplication.localizedMessage('just_now') ||
                 minutes < 45 && taskboardApplication.localizedMessage('minutes').format(substituteNumber(Math.round(minutes))) ||
                 minutes < 90 && taskboardApplication.localizedMessage('hour').format(substituteNumber(1)) ||
                 hours < 24 && taskboardApplication.localizedMessage('hours').format(substituteNumber(Math.round(hours))) ||
@@ -275,8 +274,11 @@ function Taskboard($) {
     };
 
     this.onEvent = function (e) {
-        if (e.hasOwnProperty('data')) {
-            var data = e['data'];
+        if (e['id'] !== undefined) {
+            $('#user-data').data('last-event-id', e['id']);
+        }
+        var data = e['data'];
+        if (data !== undefined) {
             console.log(e['data']);
             var jsonData = $.parseJSON(data);
             if (jsonData.constructor === Array) {
@@ -304,17 +306,17 @@ function Taskboard($) {
     };
 
     this.initializeEventStream = function () {
-        if (window.es === undefined) {
-            window.es = new EventSource("/events");
-            window.es.onmessage = taskboardApplication.onEvent;
-            window.es.onerror = function (e) {
-                e = e || event;
-                switch (e.target.readyState) {
-                    case EventSource.CONNECTING:
-                        break;
-                    case EventSource.CLOSED:
-                        break;
+        if (window.eventsource === undefined) {
+            window.eventsource = new EventSource("/events?lastEventId=".concat(encodeURIComponent(document.getElementById('user-data').getAttribute('data-last-event-id'))));
+            window.eventsource.onmessage = function (e) {
+                if (e.origin != "https://taskboard.dev") {
+                    console.info("Wrong origin ".concat(e.origin));
+                    return;
                 }
+                taskboardApplication.onEvent(e);
+            };
+            window.eventsource.onerror = function (e) {
+                console.error(e);
             };
         }
     };
@@ -407,7 +409,7 @@ function Taskboard($) {
         if (lastElementIndex < 0)
             lastElementIndex = 0;
         if (prepend) {
-            feedHtml.prepend(html);
+            feedHtml.prepend(html).hide().fadeIn(3000);
             var taskDiv = feedHtml.find('li:first');
             taskDiv.find('.l10n').each(function () {
                 taskboardApplication.updateLocale($(this));
@@ -416,7 +418,7 @@ function Taskboard($) {
             timestamp.setTimestamp();
             timestamp.substituteTime();
         } else {
-            feedHtml.append(html);
+            feedHtml.append(html).hide().fadeIn(3000);
             var gtSelector = lastElementIndex == 0 ? '' : ':gt('.concat(lastElementIndex.toString(), ')');
             feedHtml.find('li'.concat(gtSelector)).each(function () {
                 var currentElement = $(this);
@@ -671,7 +673,9 @@ function Taskboard($) {
     };
 
     this.onTaskRemove = function (task) {
-        task.remove();
+        task.fadeOut(300, function () {
+            task.remove();
+        });
         taskboardApplication.updateBalance();
     };
 
