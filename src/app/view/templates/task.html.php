@@ -31,11 +31,11 @@ if ($user_customer) {
         <img class="avatar-img" src="<?php echo $current_task_img ?>">
     </a>
     <div class="row media-body task-item">
-        <div class="col-lg-9 col-md-9 col-sm-9 col-xs-8 pull-left">
+        <div class="col-lg-10 col-md-10 col-sm-10 col-xs-10 pull-left">
             <?php echo $strong ?>
             <p class="task-description"><?php echo $current_task_description ?></p>
         </div>
-        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 pull-right">
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 pull-right">
             <small class="text-muted pull-right">
                 <span class="timestamp created_at"
                       data-timestamp-offset="<?php echo $current_task_ts_offset ?>"></span>
