@@ -17,6 +17,7 @@
  * Require bootstrap
  */
 require_once "../bootstrap.php";
+require_once "dal/task.php";
 require_once "dal/payment.php";
 
 $routes = [
