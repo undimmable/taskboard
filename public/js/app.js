@@ -41,6 +41,7 @@ function Taskboard($) {
     this.Feed = function (limit) {
         this.lastTaskId = null;
         this.loading = false;
+        this.loadedTaskIds = [];
         var feed = this;
         this.buildQuery = function (limit) {
             if (feed.lastTaskId == null)
@@ -95,7 +96,7 @@ function Taskboard($) {
                             $('#create-task-button').click();
                         }
                     } else {
-                        taskboardApplication.renderHtmlTask(response, false);
+                        taskboardApplication.renderHtmlTasks(response, false);
                     }
                 },
                 error: function (error, status) {
@@ -250,7 +251,7 @@ function Taskboard($) {
     };
 
     this.deleteTaskById = function (id) {
-        $('#task-feed').find('li[data-id="'.concat(id, '"]')).fadeOut(400, function () {
+        $('#task-feed').find('li[data-id="'.concat(id, '"]')).fadeOut(2000, function () {
             $(this).remove();
         });
     };
@@ -315,7 +316,7 @@ function Taskboard($) {
                 taskboardApplication.onEvent(e);
             };
             window.eventsource.onerror = function (e) {
-                console.error(e);
+                console.log(e);
             };
         }
     };
@@ -402,41 +403,37 @@ function Taskboard($) {
         return localStorage.getItem(storageItemName);
     };
 
-    this.renderHtmlTask = function (html, prepend) {
+    this.renderHtmlTasks = function (html, prepend) {
         var feedHtml = $('#task-feed');
         var lastElementIndex = feedHtml.children().length - 1;
         if (lastElementIndex < 0)
             lastElementIndex = 0;
         var $html = $(html);
         $html.hide();
+        $html.find('.l10n').each(function () {
+            taskboardApplication.updateLocale($(this));
+        });
+        $html.each(function () {
+            var dataId = $(this).data('id');
+            if (dataId && $.inArray(dataId, feed.loadedTaskIds) < 0) {
+                feed.loadedTaskIds.push(dataId);
+            }
+        });
+        $html.find('.timestamp').each(function () {
+            var $timestamp = $(this);
+            $timestamp.setTimestamp();
+            $timestamp.substituteTime();
+        });
+        var id = Math.min.apply(null, feed.loadedTaskIds);
+        if (feed.lastTaskId == null || feed.lastTaskId > id) {
+            feed.lastTaskId = id;
+        }
         if (prepend) {
             feedHtml.prepend($html);
-            $html.fadeIn(3000);
-            var taskDiv = feedHtml.find('li:first');
-            taskDiv.find('.l10n').each(function () {
-                taskboardApplication.updateLocale($(this));
-            });
-            var timestamp = taskDiv.find('.timestamp');
-            timestamp.setTimestamp();
-            timestamp.substituteTime();
         } else {
             feedHtml.append($html);
-            $html.fadeIn(3000);
-            var gtSelector = lastElementIndex == 0 ? '' : ':gt('.concat(lastElementIndex.toString(), ')');
-            feedHtml.find('li'.concat(gtSelector)).each(function () {
-                var currentElement = $(this);
-                currentElement.find('.l10n').each(function () {
-                    taskboardApplication.updateLocale($(this));
-                });
-                var id = parseInt(currentElement.data('id'));
-                if (feed.lastTaskId == null || feed.lastTaskId > id) {
-                    feed.lastTaskId = id;
-                }
-                var timestamp = currentElement.find('.timestamp');
-                timestamp.setTimestamp();
-                timestamp.substituteTime();
-            });
         }
+        $html.fadeIn(3000);
     };
 
     this.finalizeForm = function () {
@@ -468,7 +465,7 @@ function Taskboard($) {
         if (taskForm) {
             taskboardApplication.updateBalance();
             taskboardApplication.replaceToken(response);
-            taskboardApplication.renderHtmlTask(response, true);
+            taskboardApplication.renderHtmlTasks(response, true);
             return;
         }
         if (response == null) {
@@ -730,7 +727,7 @@ function Taskboard($) {
                     feed.loading = false;
                     if (response != null) {
                         if (response.trim() != "")
-                            taskboardApplication.renderHtmlTask(response, true);
+                            taskboardApplication.renderHtmlTasks(response, true);
                         taskboardApplication.decrementBadge();
                     }
                 },

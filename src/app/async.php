@@ -21,7 +21,6 @@ $clients = [];
 $forbidden_clients = [];
 $clients_size = 0;
 $critical_client_size = 500;
-$debug_enabled = true;
 
 function log_msg($msg, $file)
 {
@@ -151,7 +150,7 @@ function parse_client($connection)
                         $auth_cookie = substr($auth_cookie, 0, $separator);
                 }
             }
-            if ($key == 'LAST-EVENT-ID') {
+            if ($key == 'Last-Event-ID') {
                 $client_last_event_id = filter_var($value, FILTER_SANITIZE_NUMBER_INT);
             } else if ($key == 'X-Real-IP') {
                 $client_ip = filter_var($value, FILTER_SANITIZE_STRING);
@@ -205,15 +204,16 @@ function parse_client($connection)
 
 function fetch_events()
 {
-    global $clients;
-    foreach ($clients as &$client_array) {
+    foreach ($GLOBALS['clients'] as &$client_array) {
         foreach ($client_array as &$existing_client) {
             $ev = fetch_generic_event($existing_client[USER_ID], $existing_client['last_event_id']);
             if ($ev && count($ev) > 0 && array_key_exists('id', $ev) && $ev['id']) {
                 if ($GLOBALS['debug_enabled']) {
                     log_debug("Fetched events" . $ev['ev_list']);
                 }
+                var_dump($GLOBALS['clients']);
                 $existing_client['last_event_id'] = (int)$ev['id'];
+                var_dump($GLOBALS['clients']);
                 send_event_to_client($existing_client, $existing_client['last_event_id'], $ev['ev_list']);
             }
         }
