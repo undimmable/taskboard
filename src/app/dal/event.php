@@ -20,21 +20,20 @@
 
 require_once 'dal/dal_helper.php';
 
-function fetch_events_after($entity_id, $timestamp_ms, $limit = 10)
+function fetch_events_after($target_id, $last_event_id, $limit)
 {
-    $db_errors = initialize_db_errors();
     $connection = get_event_connection();
     if (!$connection) {
         add_error($connection, $db_errors);
         return false;
     }
-    $mysqli_result = mysqli_query($connection, "SELECT max(ev.ts) AS ts, concat('[', group_concat(ev.event_list), ']') as ev_list FROM (SELECT round(UNIX_TIMESTAMP(max(created_at)) * 1000) AS ts, concat('{\"', type, '\":[', group_concat(DISTINCT concat('\"', message, '\"')), ']}') AS event_list FROM (SELECT type, message, created_at FROM db_event.event WHERE created_at > FROM_UNIXTIME($timestamp_ms/1000) AND (target_id = $entity_id OR target_id is null) LIMIT $limit) AS t_event GROUP BY t_event.type) AS ev");
+    $mysqli_result = @mysqli_query($connection, "SELECT max(ev.id) AS id, concat('[', group_concat(ev.event_list), ']') as ev_list FROM (SELECT max(id) as id, concat('{\"', type, '\":[', group_concat(DISTINCT concat('\"', message, '\"')), ']}') AS event_list FROM (SELECT type, message, id FROM db_event.event WHERE id > $last_event_id AND (target_id = $target_id OR target_id is null) LIMIT $limit) AS t_event GROUP BY t_event.type) AS ev");
     $result = mysqli_fetch_array($mysqli_result, MYSQLI_ASSOC);
-    mysqli_free_result($mysqli_result);
+    @mysqli_free_result($mysqli_result);
     return $result;
 }
 
-function dal_now()
+function dal_last_event_id()
 {
     $db_errors = initialize_db_errors();
     $connection = get_event_connection();
@@ -42,7 +41,7 @@ function dal_now()
         add_error($connection, $db_errors);
         return false;
     }
-    $mysqli_result = mysqli_query($connection, "SELECT round(UNIX_TIMESTAMP(CURRENT_TIMESTAMP(3)) * 1000) as ts");
+    $mysqli_result = mysqli_query($connection, "SELECT max(id) AS id FROM db_event.event;");
     $result = mysqli_fetch_array($mysqli_result, MYSQLI_ASSOC);
     mysqli_free_result($mysqli_result);
     return $result;
@@ -50,7 +49,7 @@ function dal_now()
 
 function write_event($entity_id = "NULL", $message, $type)
 {
-    if(is_null($entity_id))
+    if (is_null($entity_id))
         $entity_id = "NULL";
     $db_errors = initialize_db_errors();
     $connection = get_event_connection();

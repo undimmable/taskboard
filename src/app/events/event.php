@@ -31,10 +31,10 @@ function send_generic_event($entity_id, $json, $type = 'c')
  * Apply callback for fetched event
  *
  * @param $entity_id integer
- * @param $timestamp_ms integer
+ * @param $last_event_id
  * @return array|bool|null
  */
-function fetch_generic_event($entity_id, $timestamp_ms)
+function fetch_generic_event($entity_id, $last_event_id)
 {
-    return fetch_events_after($entity_id, $timestamp_ms);
+    return fetch_events_after($entity_id, $last_event_id, 1000);
 }
