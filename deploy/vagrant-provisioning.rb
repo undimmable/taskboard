@@ -14,20 +14,22 @@ Vagrant.configure(2) do |config|
     locale-gen en_US.UTF-8 >> $INSTALL_LOG 2>&1
     rm -v /etc/apt/apt.conf.d/70debconf >> $INSTALL_LOG 2>&1
     dpkg-reconfigure locales >> $INSTALL_LOG 2>&1
+    echo "Provisioning: set timezone" >> $INSTALL_LOG 2>&1
+    unlink /etc/localtime
+    ln -s /usr/share/zoneinfo/Etc/GMT-3 /etc/localtime
     echo "Provisioning: remove default mysql" >> $INSTALL_LOG 2>&1
     apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys 5072E1F5 >> $INSTALL_LOG 2>&1
     echo "deb http://repo.mysql.com/apt/ubuntu/ trusty mysql-5.7" >> /etc/apt/sources.list.d/mysql.list
     apt-get -y purge mysql-server mysql-client mysql-common mysql-server-5.5 >> $INSTALL_LOG 2>&1
     apt-get -qq update >> $INSTALL_LOG 2>&1
-
     echo "Provisioning: Install MySQL" | tee -a $INSTALL_LOG
     apt-get -q -y install mysql-server >> $INSTALL_LOG 2>&1
     mysqladmin -u root password $MYSQL_PASS >> $INSTALL_LOG 2>&1
 
     echo "Provisioning: install PHP, FPM and mailutils" | tee -a $INSTALL_LOG
-    apt-get install -y mysql-client nginx php5-fpm php5-mysql php5-common php5-dev php5-cli php5-fpm php5-xdebug mailutils  >> $INSTALL_LOG 2>&1
-    yes | pecl install channel://pecl.php.net/libevent-0.1.0  >> $INSTALL_LOG 2>&1
-
+    apt-get install -y mysql-client nginx php5-fpm php5-mysql php5-common php5-dev php5-cli php5-fpm php5-xdebug mailutils htop  >> $INSTALL_LOG 2>&1
+    apt-get autoremove
+    apt-get autoclean
     echo "Provisioning: creating MySQL users" | tee -a $INSTALL_LOG
     mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_account identified by '$MYSQL_ACCOUNT_PASS'" >> $INSTALL_LOG 2>&1
         mysql --user=root --password=$MYSQL_PASS  -e "CREATE user user_event identified by '$MYSQL_EVENT_PASS'" >> $INSTALL_LOG 2>&1
