@@ -169,6 +169,8 @@ function Localization() {
     this.minute_en = "minute";
     this.minute_ru = "минуту";
     this.minutes_ru = "минуты";
+    this.just_now_ru = "только что";
+    this.just_now_en = "just now";
     this.prefixAgo_en = null;
     this.prefixAgo_ru = null;
     this.suffixAgo_en = "ago";
