@@ -13,6 +13,8 @@ function Taskboard($) {
     var customerRole = 2;
     var unauthorizedRole = 0;
     var timestampRefreshPeriod = 60000;
+    var fadeOutSpeed = 1000;
+    var fadeInSpeed = 1000;
     window.taskboard = this;
     this.newItemsCounter = 0;
     this.locale = 'ru';
@@ -243,7 +245,7 @@ function Taskboard($) {
         $('#'.concat(storageItemName, '-text')).text(popupItem);
         var popup = $('#'.concat(storageItemName));
         popup.removeClass('hidden');
-        popup.fadeTo(2000, 500).fadeOut(5000, function () {
+        popup.fadeTo(fadeInSpeed, 500).fadeOut(fadeOutSpeed, function () {
             popup.hide();
             $(popup.find('span')).text('');
         });
@@ -251,26 +253,28 @@ function Taskboard($) {
     };
 
     this.deleteTaskById = function (id) {
-        $('#task-feed').find('li[data-id="'.concat(id, '"]')).fadeOut(2000, function () {
+        $('#task-feed').find('li[data-id="'.concat(id, '"]')).fadeOut(fadeOutSpeed, function () {
             $(this).remove();
         });
     };
 
-    this.incrementBadge = function (number) {
-        var newItemsCounter = this.newItemsCounter;
-        this.newItemsCounter += number;
-        var $badge = $('#new-items-badge');
-        $badge.find('.l10n').each(function () {
-            taskboardApplication.updateLocale($(this));
-        });
-        if (newItemsCounter == 0) {
-            $badge.fadeIn("300");
+    this.incrementBadge = function (id) {
+        if ($.inArray(parseInt(id), feed.loadedTaskIds) === -1) {
+            var newItemsCounter = this.newItemsCounter;
+            this.newItemsCounter++;
+            var $badge = $('#new-items-badge');
+            $badge.find('.l10n').each(function () {
+                taskboardApplication.updateLocale($(this));
+            });
+            if (newItemsCounter == 0) {
+                $badge.fadeIn(fadeInSpeed);
+            }
         }
     };
 
     this.decrementBadge = function () {
         this.newItemsCounter = 0;
-        $('#new-items-badge').fadeOut(300);
+        $('#new-items-badge').fadeOut(fadeOutSpeed);
     };
 
     this.onEvent = function (e) {
@@ -293,7 +297,7 @@ function Taskboard($) {
                         });
                     } else if (this.hasOwnProperty('c')) {
                         $.each(this['c'], function () {
-                            taskboardApplication.incrementBadge(1);
+                            taskboardApplication.incrementBadge(this);
                         });
                     } else {
                         console.log("Unknown event type");
@@ -428,12 +432,14 @@ function Taskboard($) {
         if (feed.lastTaskId == null || feed.lastTaskId > id) {
             feed.lastTaskId = id;
         }
-        if (prepend) {
+        if (prepend === true) {
             feedHtml.prepend($html);
-        } else {
+        } else if (prepend === false) {
             feedHtml.append($html);
+        } else {
+            prepend.replaceWith($html);
         }
-        $html.fadeIn(3000);
+        $html.fadeIn(fadeInSpeed);
     };
 
     this.finalizeForm = function () {
@@ -673,14 +679,14 @@ function Taskboard($) {
     };
 
     this.onTaskRemove = function (task) {
-        task.fadeOut(300, function () {
+        task.fadeOut(fadeOutSpeed, function () {
             task.remove();
         });
         taskboardApplication.updateBalance();
     };
 
     this.onTaskCreate = function (response, task) {
-        task.replaceWith(response);
+        taskboardApplication.renderHtmlTasks(response, task);
         taskboardApplication.updateBalance();
     };
 
@@ -805,11 +811,17 @@ function Taskboard($) {
                     return;
                 feed.loading = true;
                 var el = $(this);
+                el.attr('disabled', true);
+                taskboardApplication.replaceIconWithSpinner(el.find('i'));
                 taskboardApplication.sendNonPost(el, 'PUT', function (response, task) {
                     feed.loading = false;
+                    taskboardApplication.replaceSpinnerWithIcon(el.find('i'));
+                    el.attr('disabled', false);
                     taskboardApplication.onTaskRemove(task);
                 }, function (response, task) {
                     feed.loading = false;
+                    taskboardApplication.replaceSpinnerWithIcon(el.find('i'));
+                    el.attr('disabled', false);
                     if (response.status == 409) {
                         try {
                             task.remove();
@@ -820,7 +832,6 @@ function Taskboard($) {
                     taskboardApplication.onNonPostError(response, task);
                 });
             });
-            /**/
         }
         return taskboardApplication;
     };

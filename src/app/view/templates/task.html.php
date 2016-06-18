@@ -41,7 +41,7 @@ if ($user_customer) {
                       data-timestamp-offset="<?php echo $current_task_ts_offset ?>"></span>
             </small>
             <?php if (is_performer($user[ROLE])) {
-                echo '<button type="button" class="perform-task btn btn-primary pull-right no-shadow" data-csrf="' . $csrf . '">$' . $current_task_price . '</button>';
+                echo '<button type="button" class="perform-task btn btn-primary pull-right no-shadow" data-csrf="' . $csrf . '"><i class="fa fa-usd" data-icon="fa fa-usd"></i>' . $current_task_price . '</button>';
             }
             ?>
         </div>
