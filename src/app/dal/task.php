@@ -346,7 +346,7 @@ function dal_task_fetch_tasks_complex_query_limit($callback, $user_id, $balance_
     if (!$limit) {
         $limit = 100;
     }
-    $query = "SELECT id, timestampdiff(SECOND, now(), created_at), amount as price, customer_id, performer_id, amount + commission as amount, description, balance_locked, paid FROM db_task.task WHERE $balance_locked $latest_task_id_query AND not deleted AND $select_user_type <=> ? $last_id_clause ORDER BY id DESC LIMIT ?";
+    $query = "SELECT id, timestampdiff(SECOND, now(), created_at), amount as price, customer_id, performer_id, amount + commission as amount, description, balance_locked, paid FROM db_task.task WHERE $balance_locked $latest_task_id_query AND not deleted AND ($select_user_type <=> ?) $last_id_clause ORDER BY id DESC LIMIT ?";
     $stmt = mysqli_prepare($connection, $query);
     if (!$stmt) {
         add_error($connection, $db_errors);

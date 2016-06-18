@@ -11,7 +11,7 @@ $current_task_price = $current_task[PRICE];
 $customer_name = 'Jean Customer';
 $user_customer = is_customer($user[ROLE]);
 $user_performer = is_performer($user[ROLE]);
-$task_unpaid = "";
+$task_unpaid_marker = "";
 if ($user_customer) {
     if (!is_task_active($current_task)) {
         $task_unpaid = "<span data-l10n=\"unpaid\" class=\"l10n l10n-text task-header$task_class\">Unpaid</span>";
@@ -19,6 +19,8 @@ if ($user_customer) {
     $strong = "<strong class='task-header$task_class'><i class=\"fa fa-usd\"></i>$current_task_amount $task_unpaid</strong>";
     $csrf = get_customer_task_csrf($user[ID], $current_task[ID]);
 } elseif ($user_performer) {
+    if(!$current_task[PAID] && $current_task[PERFORMER_ID])
+        $task_unpaid_marker = " unpaid";
     $strong = "<strong class='task-header'>$customer_name</strong>";
     $csrf = get_performer_task_csrf($user[ID], $current_task[ID]);
 } else {
@@ -26,7 +28,7 @@ if ($user_customer) {
     $csrf = null;
 }
 ?>
-<li class="task-feed-item media<?php echo $task_class; ?>" data-id="<?php echo $current_task_id ?>">
+<li class="task-feed-item media<?php echo $task_class . $task_unpaid_marker; ?>" data-id="<?php echo $current_task_id ?>">
     <a href="#" class="pull-left">
         <img class="avatar-img" src="<?php echo $current_task_img ?>">
     </a>

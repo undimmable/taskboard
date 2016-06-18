@@ -237,6 +237,10 @@ function api_task_get_all()
     if (is_customer($user[ROLE])) {
         $user_id = $user[ID];
         $select_user_type = CUSTOMER_ID;
+    } else if (is_performer($user[ROLE])) {
+        $user_id = $user[ID];
+        $select_user_type = "(performer_id is null) or not paid and performer_id";
+        $balance_locked_clause = BALANCE_LOCKED;
     } else {
         $select_user_type = PERFORMER_ID;
         $balance_locked_clause = BALANCE_LOCKED;
