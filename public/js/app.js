@@ -20,7 +20,6 @@ function Taskboard($) {
     this.initialized = false;
     this.disableModals = false;
     this.currentForm = null;
-    this.supportEvents = false;
     this.logger = function () {
         var oldConsoleLog = null;
         var pub = {};
@@ -408,8 +407,11 @@ function Taskboard($) {
         var lastElementIndex = feedHtml.children().length - 1;
         if (lastElementIndex < 0)
             lastElementIndex = 0;
+        var $html = $(html);
+        $html.hide();
         if (prepend) {
-            feedHtml.prepend(html).hide().fadeIn(3000);
+            feedHtml.prepend($html);
+            $html.fadeIn(3000);
             var taskDiv = feedHtml.find('li:first');
             taskDiv.find('.l10n').each(function () {
                 taskboardApplication.updateLocale($(this));
@@ -418,7 +420,8 @@ function Taskboard($) {
             timestamp.setTimestamp();
             timestamp.substituteTime();
         } else {
-            feedHtml.append(html).hide().fadeIn(3000);
+            feedHtml.append($html);
+            $html.fadeIn(3000);
             var gtSelector = lastElementIndex == 0 ? '' : ':gt('.concat(lastElementIndex.toString(), ')');
             feedHtml.find('li'.concat(gtSelector)).each(function () {
                 var currentElement = $(this);
