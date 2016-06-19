@@ -19,22 +19,24 @@
 require_once "dal/event.php";
 /**
  * @param $entity_id        integer Id of an entity
+ * @param $target_role
  * @param $json             string Event object
  * @param $type             string Event type
  */
-function send_generic_event($entity_id, $json, $type = 'c')
+function send_generic_event($entity_id, $target_role, $json, $type = 'c')
 {
-    dal_write_event($entity_id, $json, $type);
+    dal_write_event($entity_id, $target_role, $json, $type);
 }
 
 /**
  * Apply callback for fetched event
  *
  * @param $entity_id integer
+ * @param $target_role
  * @param $last_event_id
  * @return array|bool|null
  */
-function fetch_generic_event($entity_id, $last_event_id)
+function fetch_generic_event($entity_id, $target_role, $last_event_id)
 {
-    return fetch_events_after($entity_id, $last_event_id, 1000);
+    return fetch_events_after($entity_id, $target_role, $last_event_id, 10);
 }

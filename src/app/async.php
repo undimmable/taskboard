@@ -173,6 +173,7 @@ function parse_client($connection)
         return null;
     }
     $user_id = $user[ID];
+    $role = $user[ROLE];
     $login = dal_login_fetch($user[ID], parse_ip($client_ip), parse_user_client($user_agent));
     if (!$login) {
         log_info("Client provided token for unauthenticated user $user_id, will drop");
@@ -184,6 +185,7 @@ function parse_client($connection)
         'user_agent' => $user_agent,
         'connection' => $connection,
         'user_email' => $user[EMAIL],
+        'role'       => $role,
         'last_event_id' => $client_last_event_id
     ];
 }
@@ -192,7 +194,7 @@ function fetch_events()
 {
     foreach ($GLOBALS['clients'] as &$client_array) {
         foreach ($client_array as &$existing_client) {
-            $ev = fetch_generic_event($existing_client[USER_ID], $existing_client['last_event_id']);
+            $ev = fetch_generic_event($existing_client[USER_ID],$existing_client[ROLE], $existing_client['last_event_id']);
             if ($ev && count($ev) > 0 && array_key_exists('id', $ev) && $ev['id']) {
                 if (array_key_exists('debug_enabled', $GLOBALS) && $GLOBALS['debug_enabled']) {
                     log_debug("Fetched events" . $ev['ev_list']);

@@ -336,7 +336,8 @@ function set_task_paid(&$task)
 
 function on_payment_success($task)
 {
-    dal_write_event(null, $task[ID], 'p');
+    send_generic_event(null, get_role_key(PERFORMER), $task[ID], 'p');
+    send_generic_event($task[CUSTOMER_ID], get_role_key(CUSTOMER), $task[ID], 'p');
     render_ok_json($task);
     return;
 }
@@ -427,7 +428,8 @@ function api_task_create()
         error_log("Setting lock_tx_id failed");
     }
     $task = dal_task_fetch($task_id);
-    send_generic_event(null, $task_id, 'c');
+    send_generic_event(null, get_role_key(PERFORMER), $task_id, 'c');
+    send_generic_event($user[ID], get_role_key(CUSTOMER), $task_id, 'c');
     if (!$task) {
         error_log("Couldn't fetch task");
         render_bad_request_json([JSON_ERROR => get_dal_errors()]);
