@@ -135,19 +135,19 @@ function dal_payment_lock_balance($user_id, $tx_id, $amount)
     return true;
 }
 
-function dal_payment_pay($tx_id, $customer_id, $performer_id, $amount, $commission)
+function dal_payment_pay($tx_id, $customer_id, $performer_id, $price, $commission)
 {
     $db_errors = initialize_dal_errors();
     $connection = get_account_connection();
     mysqli_autocommit($connection, false);
-    $result = mysqli_query($connection, "UPDATE db_account.account SET locked_balance = locked_balance - $amount - $commission, balance = balance - $amount - $commission WHERE user_id=$customer_id AND locked_balance - $amount - $commission > 0 AND balance - $amount - $commission > 0");
+    $result = mysqli_query($connection, "UPDATE db_account.account SET locked_balance = locked_balance - $price - $commission, balance = balance - $price - $commission WHERE user_id=$customer_id AND locked_balance - $price - $commission > 0 AND balance - $price - $commission > 0");
     if (!$result) {
         add_dal_error($connection, $db_errors);
         mysqli_rollback($connection);
         mysqli_autocommit($connection, true);
         return false;
     }
-    $result = mysqli_query($connection, "UPDATE db_account.account SET balance = balance + $amount, last_tx_id=$tx_id WHERE user_id=$performer_id AND (last_tx_id is NULL or last_tx_id < $tx_id)");
+    $result = mysqli_query($connection, "UPDATE db_account.account SET balance = balance + $price, last_tx_id=$tx_id WHERE user_id=$performer_id AND (last_tx_id is NULL or last_tx_id < $tx_id)");
     if (!$result) {
         add_dal_error($connection, $db_errors);
         mysqli_rollback($connection);
@@ -334,9 +334,9 @@ function dal_payment_process_lock_transaction($tx_id, $id_from, $amount = null)
     }
 }
 
-function dal_payment_process_pay_transaction($tx_id, $customer_id = null, $performer_id = null, $amount = null, $commission = null)
+function dal_payment_process_pay_transaction($tx_id, $customer_id = null, $performer_id = null, $price = null, $commission = null)
 {
-    if (is_null($amount) || is_null($commission)) {
+    if (is_null($price) || is_null($commission)) {
         $payment_connection = get_payment_connection();
         $result = mysqli_query($payment_connection, "SELECT id_from FROM db_tx.tx WHERE id=$tx_id");
         if (!$result) {
@@ -348,12 +348,12 @@ function dal_payment_process_pay_transaction($tx_id, $customer_id = null, $perfo
         $task = dal_task_fetch($task_id);
         if ($task)
             return false;
-        $amount = $task[PRICE];
+        $price = $task[PRICE];
         $commission = $task[COMMISSION];
     }
     $result = mysqli_query(get_payment_connection(), "SELECT processed FROM db_tx.tx WHERE id=$tx_id");
     if (mysqli_num_rows($result) < 1) {
-        if (dal_payment_pay($tx_id, $customer_id, $performer_id, $amount, $commission)) {
+        if (dal_payment_pay($tx_id, $customer_id, $performer_id, $price, $commission)) {
             return _payment_transaction_set_processed($tx_id);
         } else {
             return false;
@@ -368,7 +368,7 @@ function dal_payment_process_pay_transaction($tx_id, $customer_id = null, $perfo
     if (is_null($processed)) {
         return false;
     } else if (!$processed[PROCESSED]) {
-        if (dal_payment_pay($tx_id, $customer_id, $performer_id, $amount, $commission)) {
+        if (dal_payment_pay($tx_id, $customer_id, $performer_id, $price, $commission)) {
             return _payment_transaction_set_processed($tx_id);
         } else {
             return false;
