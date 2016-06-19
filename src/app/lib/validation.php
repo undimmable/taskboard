@@ -40,7 +40,7 @@ function _validate_performer_task_csrf($csrf, $performer_id, $task_id, &$validat
         return true;
 }
 
-function is_login_csrf_token_valid($csrf, &$validation_context)
+function _is_login_csrf_token_valid($csrf, &$validation_context)
 {
     if ($csrf != get_login_csrf()) {
         add_validation_error($validation_context, 'unspecified', 'token_wrong');
@@ -49,9 +49,27 @@ function is_login_csrf_token_valid($csrf, &$validation_context)
         return true;
 }
 
-function is_signup_csrf_token_valid($csrf, &$validation_context)
+function _is_signup_csrf_token_valid($csrf, &$validation_context)
 {
     if ($csrf != get_signup_csrf()) {
+        add_validation_error($validation_context, 'unspecified', 'token_wrong');
+        return false;
+    } else
+        return true;
+}
+
+function _is_remind_csrf_token_valid($csrf, &$validation_context)
+{
+    if ($csrf != get_remind_csrf()) {
+        add_validation_error($validation_context, 'unspecified', 'token_wrong');
+        return false;
+    } else
+        return true;
+}
+
+function _is_change_password_token_valid($csrf, &$validation_context)
+{
+    if ($csrf != get_change_password_csrf()) {
         add_validation_error($validation_context, 'unspecified', 'token_wrong');
         return false;
     } else
@@ -67,7 +85,7 @@ function is_account_csrf_token_valid($csrf, $user_id, &$validation_context)
         return true;
 }
 
-function is_password_valid($password, &$validation_context)
+function _is_password_valid($password, &$validation_context)
 {
     if (is_null($password)) {
         add_validation_error($validation_context, PASSWORD, 'not_provided');
@@ -96,7 +114,7 @@ function is_password_repeat_valid($password, $password_repeat, &$validation_cont
     return true;
 }
 
-function is_email_valid($email, &$validation_context)
+function _is_email_valid($email, &$validation_context)
 {
     if (is_null($email)) {
         add_validation_error($validation_context, EMAIL, 'not_provided');
@@ -123,7 +141,7 @@ function is_checked($value)
     return $value === "on";
 }
 
-function is_role_valid(&$role, &$validation_context)
+function _is_role_valid(&$role, &$validation_context)
 {
     if (is_null($role)) {
         add_validation_error($validation_context, ROLE, 'not_provided');
@@ -135,6 +153,10 @@ function is_role_valid(&$role, &$validation_context)
     }
     if (!role_value_exists($role)) {
         $role = filter_var(FILTER_SANITIZE_NUMBER_INT);
+        add_validation_error($validation_context, ROLE, "is_invalid");
+        return false;
+    }
+    if (!(is_customer($role) || (is_performer($role)))) {
         add_validation_error($validation_context, ROLE, "is_invalid");
         return false;
     }
