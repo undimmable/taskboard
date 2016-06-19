@@ -279,6 +279,8 @@ function Taskboard($) {
         if (changed) {
             feed.loadedTaskIds.splice(indexOf, 1);
             var smallest = Math.min.apply(feed.loadedTaskIds);
+            console.log("Smallest ".concat(smallest));
+            console.log("Largest")
             if (smallest < feed.lastTaskId)
                 feed.lastTaskId = smallest;
         }
@@ -777,6 +779,7 @@ function Taskboard($) {
                     latestTaskID = id;
                 }
             });
+            latestTaskID = Math.max(latestTaskID, feed.lastTaskId);
             $.ajax({
                 url: 'api/v1/task',
                 contentType: 'application/json; charset=UTF-8',
