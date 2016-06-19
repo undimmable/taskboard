@@ -29,7 +29,8 @@ function set_token_cookie($jwt_token, $session = true)
 
 function delete_token_cookie()
 {
-    setcookie(PRIVATE_TOKEN, FALSE, 1, "/", null, true, true);
+    unset($_COOKIE[PRIVATE_TOKEN]);
+    setcookie(PRIVATE_TOKEN, NULL, -1, "/");
 }
 
 function parse_token_from_cookie()

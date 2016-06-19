@@ -224,7 +224,6 @@ function api_auth_logout_action()
     $user_id = get_authorized_user()[ID];
     dal_login_remove($user_id, $ip, $client);
     delete_token_cookie();
-    https_redirect("/");
 }
 
 function api_auth_reset_password()

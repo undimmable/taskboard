@@ -20,7 +20,7 @@ function get_security_config()
 {
     if (is_null($GLOBALS['security_config'])) {
         /** @noinspection PhpIncludeInspection */
-        $security_config = include "taskboard_security_config.php";
+        $GLOBALS['security_config'] = include "taskboard_security_config.php";
     }
     return $GLOBALS['security_config'];
 }

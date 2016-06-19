@@ -357,8 +357,16 @@ function Taskboard($) {
     };
 
     this.initializeListeners = function () {
-        $('#btn-logout').click(function () {
-            window.location = "/api/v1/auth/logout";
+        $('#btn-logout').click(function (e) {
+            e.preventDefault();
+            $.ajax({
+                type: 'GET',
+                url: "api/v1/auth/logout",
+                error: console.log,
+                success: function () {
+                    window.location = "/";
+                }
+            });
         });
         $('.modal').on('hidden.bs.modal', function () {
             var form = $(this).find('form');
@@ -575,7 +583,7 @@ function Taskboard($) {
 
     this.initializeFormModals = function () {
         var $modal = $('.modal');
-        $modal.on('shown.bs.modal', function (e) {
+        $modal.on('shown.bs.modal', function () {
             $(this).find("[autofocus]:first").focus();
         });
         $modal.on('hide.bs.modal', function (e) {

@@ -19,7 +19,8 @@ $validation_config = null;
 function get_validation_config()
 {
     if (is_null($GLOBALS['validation_config'])) {
-        $validation_config = include "taskboard_validation_config.php";
+        /** @noinspection PhpIncludeInspection */
+        $GLOBALS['validation_config'] = include "taskboard_validation_config.php";
     }
     return $GLOBALS['validation_config'];
 }

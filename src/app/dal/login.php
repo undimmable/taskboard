@@ -24,13 +24,13 @@ function dal_login_remove($user_id, $ip, $client)
         add_dal_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "DELETE FROM db_login.login WHERE user_id=? AND ip = ? AND user_client=?");
+    $stmt = mysqli_prepare($connection, "DELETE FROM db_login.login WHERE user_id=? AND ip=? AND user_client=?");
     if (!$stmt) {
         add_dal_error($connection, $db_errors);
         return false;
     }
     /** @noinspection PhpMethodParametersCountMismatchInspection */
-    if (!mysqli_stmt_bind_param($stmt, 'iis', $user_id, $ip, $client)) {
+    if (!mysqli_stmt_bind_param($stmt, 'iss', $user_id, $ip, $client)) {
         add_dal_error($connection, $db_errors);
         return false;
     }
