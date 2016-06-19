@@ -14,8 +14,6 @@
  * @since     1.0.0
  */
 
-$user = null;
-
 function create_jwt_token($email, $role, $id)
 {
     return JWT_encode([EMAIL => $email, ROLE => $role, ID => $id], get_config_jwt_secret());

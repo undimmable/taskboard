@@ -51,9 +51,7 @@
     <script type="application/javascript"
             src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
     <script type="application/javascript" src="/js/vendor/eventstream.min.js"></script>
-    <script type="application/javascript" src="/js/localization.js?__nocache=<?php echo rand(0,12739874925);?>"></script>
-    <script type="application/javascript" src="/js/app.js?__nocache=<?php echo rand(0,12739874925);?>"></script>
-<!--    <script type="application/javascript" src="/js/app.min.js"></script>-->
+    <script type="application/javascript" src="/js/app.min.js"></script>
 </head>
 <body>
 <?php
