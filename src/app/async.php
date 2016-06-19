@@ -17,12 +17,12 @@ require_once 'lib/logger.php';
 require_once 'security/jwt.php';
 require_once 'security/token_auth.php';
 date_default_timezone_set('UTC');
-$master = null;
-$clients = [];
-$forbidden_clients = [];
-$clients_size = 0;
-$critical_client_size = 500;
-$debug_enabled = false;
+$GLOBALS['master'] = null;
+$GLOBALS['clients'] = [];
+$GLOBALS['forbidden_clients'] = [];
+$GLOBALS['clients_size'] = 0;
+$GLOBALS['critical_clients_size'] = 10000;
+$GLOBALS['debug_enabled'] = true;
 
 function send_event_to_client($client, $id, $str)
 {
@@ -43,18 +43,20 @@ function send_event_to_client($client, $id, $str)
 
 function drop_client($client)
 {
-    $GLOBALS['clients_size']--;
     if (is_resource($client['connection']))
         socket_close($client['connection']);
-    if (($key = array_search($client, $GLOBALS['clients'])) !== false) {
-        unset($GLOBALS['clients'][$key]);
+    if (($key = array_search($client, $GLOBALS['clients'][$client[USER_ID]])) !== false) {
+        log_debug("Removing existing client " . print_r($GLOBALS['clients'][$client[USER_ID]], true));
+        $GLOBALS['clients_size']--;
+        unset($GLOBALS['clients'][$client[USER_ID]][$key]);
     }
 }
 
 function remove_existing_client($user_agent, $client_ip, $target_id)
 {
+    log_debug("Checking if exists client $user_agent $client_ip $target_id");
     if (array_key_exists($target_id, $GLOBALS['clients'])) {
-        foreach ($GLOBALS['clients'][$target_id] as $client) {
+        foreach ($GLOBALS['clients'][$target_id] as &$client) {
             if ($client['user_agent'] == $user_agent && $client['client_ip'] = $client_ip)
                 drop_client($client);
         }
@@ -64,19 +66,21 @@ function remove_existing_client($user_agent, $client_ip, $target_id)
 function add_client($client)
 {
     $user_id = $client[USER_ID];
-    log_info("Connected client $user_id");
+    log_debug("Connected client $user_id");
     if (socket_last_error($GLOBALS['master'])) {
+        log_debug("Error socket");
         socket_clear_error($GLOBALS['master']);
     } else {
-        if ($GLOBALS['clients_size'] >= $GLOBALS['critical_client_size']) {
+        if ($GLOBALS['clients_size'] >= $GLOBALS['critical_clients_size']) {
+            log_debug("Too much clients");
             @socket_close($client['connection']);
         } else {
             remove_existing_client($client['user_agent'], $client['client_ip'], $client['user_id']);
             $GLOBALS['clients_size']++;
             if (!array_key_exists($user_id, $GLOBALS['clients'])) {
-                $clients[$user_id] = [];
+                $GLOBALS['clients'][$user_id] = [];
             }
-            $clients[$user_id][] = $client;
+            $GLOBALS['clients'][$user_id][] = $client;
             socket_set_option($client['connection'], SOL_SOCKET, SO_KEEPALIVE, 1);
             @socket_write($client['connection'], "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nCache-Control: no-cache\r\nConnection: keep-alive\r\nX-Frame-Options: SAMEORIGIN\r\nX-Xss-Protection:1; mode=block\r\nX-Content-Type-Options: nosniff\r\n\r\n");
         }
@@ -93,8 +97,6 @@ function parse_params($uri)
 function parse_client($connection)
 {
     $read = socket_recv($connection, $request, 2048, MSG_DONTWAIT);
-    log_debug($read);
-    log_debug($request);
     if (!$read) {
         log_error("Couldn't parse client headers, will drop");
         return false;
@@ -195,50 +197,53 @@ function fetch_events()
                 if (array_key_exists('debug_enabled', $GLOBALS) && $GLOBALS['debug_enabled']) {
                     log_debug("Fetched events" . $ev['ev_list']);
                 }
-                var_dump($GLOBALS['clients']);
                 $existing_client['last_event_id'] = (int)$ev['id'];
-                var_dump($GLOBALS['clients']);
                 send_event_to_client($existing_client, $existing_client['last_event_id'], $ev['ev_list']);
             }
         }
     }
 }
 
-$socket_file = "/var/www/taskboards-events.sock";
-$master = socket_create(AF_UNIX, SOCK_STREAM, 0);
-if (!$master) {
-    log_error("Couldn't create socket, dying. " . socket_strerror(socket_last_error($master)));
-    die(2);
-}
-@unlink($socket_file);
-socket_set_option($master, SOL_SOCKET, SO_KEEPALIVE, 1);
-if (!@socket_bind($master, $socket_file)) {
-    log_error("Couldn't bind socket, dying. " . socket_strerror(socket_last_error($master)));
-    die(2);
-}
-if (!socket_set_nonblock($master)) {
-    log_error("Couldn't set socket non blocking, switching to blocking io. " . socket_strerror(socket_last_error($master)));
-}
-if (!socket_listen($master, $critical_client_size)) {
-    log_error("Couldn't listen on socket, dying. " . socket_strerror(socket_last_error($master)));
-    die(2);
-}
-for (; ;) {
-    $connection = socket_accept($master);
-    if ($connection) {
-        log_info("Socket accepted incoming connection " . $connection);
-        $incoming_client = parse_client($connection);
-        $client_str = print_r($incoming_client, true);
-        log_info("Parsed client $client_str");
-        if ($incoming_client) {
-            add_client($incoming_client);
-        } else {
-            log_info("Dropping client $client_str due to previous errors");
-            @socket_close($connection);
-        }
+function loop()
+{
+    $GLOBALS['socket_file'] = "/var/www/taskboards-events.sock";
+    $GLOBALS['master'] = socket_create(AF_UNIX, SOCK_STREAM, 0);
+    if (!$GLOBALS['master']) {
+        log_error("Couldn't create socket, dying. " . socket_strerror(socket_last_error($GLOBALS['master'])));
+        die(2);
     }
-    fetch_events();
-    sleep(1);
+    @unlink($GLOBALS['socket_file']);
+    socket_set_option($GLOBALS['master'], SOL_SOCKET, SO_KEEPALIVE, 1);
+    if (!@socket_bind($GLOBALS['master'], $GLOBALS['socket_file'])) {
+        log_error("Couldn't bind socket, dying. " . socket_strerror(socket_last_error($GLOBALS['master'])));
+        die(2);
+    }
+    if (!socket_set_nonblock($GLOBALS['master'])) {
+        log_error("Couldn't set socket non blocking, switching to blocking io. " . socket_strerror(socket_last_error($GLOBALS['master'])));
+    }
+    if (!socket_listen($GLOBALS['master'], $GLOBALS['critical_clients_size'])) {
+        log_error("Couldn't listen on socket, dying. " . socket_strerror(socket_last_error($GLOBALS['master'])));
+        die(2);
+    }
+    for (; ;) {
+        $connection = socket_accept($GLOBALS['master']);
+        if ($connection) {
+            log_debug("Socket accepted incoming connection " . $connection);
+            $incoming_client = parse_client($connection);
+            $client_str = print_r($incoming_client, true);
+            log_debug("Parsed client $client_str");
+            if ($incoming_client) {
+                add_client($incoming_client);
+            } else {
+                log_debug("Dropping client $client_str due to previous errors");
+                @socket_close($connection);
+            }
+        }
+        fetch_events();
+        sleep(1);
+    }
+    @socket_close($GLOBALS['master']);
 }
-@socket_close($master);
+
+loop();
 die(2);
