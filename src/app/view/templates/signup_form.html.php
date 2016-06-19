@@ -11,7 +11,7 @@
                     <div id="signup-<?php echo EMAIL ?>" class="form-group">
                         <label for="signup-<?php echo EMAIL ?>" class="l10n l10n-text" data-l10n="email">Email</label>
                         <input type="email" class="form-control input-lg l10n l10n-placeholder" placeholder="Email" name="<?php echo EMAIL ?>" data-l10n="email"
-                               id="signup-<?php echo EMAIL ?>">
+                               id="signup-<?php echo EMAIL ?>" autofocus>
                         <span id="signup-form-error-<?php echo EMAIL ?>" class="error-description"></span>
                         <span id="signup-form-error-unspecified" class="error-description"></span>
                     </div>

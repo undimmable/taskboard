@@ -545,6 +545,9 @@ function Taskboard($) {
 
     this.initializeFormModals = function () {
         var $modal = $('.modal');
+        $modal.on('shown.bs.modal', function (e) {
+            $(this).find("[autofocus]:first").focus();
+        });
         $modal.on('hide.bs.modal', function (e) {
             if (taskboardApplication.disableModals) {
                 e.preventDefault();

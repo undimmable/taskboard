@@ -11,7 +11,7 @@
                     <div class="form-group">
                         <label for="login-<?php echo EMAIL ?>" class="l10n l10n-text" data-l10n="email">Email</label>
                         <input id="login-<?php echo EMAIL ?>" type="email" class="form-control input-lg l10n l10n-placeholder" data-l10n="email"
-                               placeholder="Email" name="<?php echo EMAIL ?>">
+                               placeholder="Email" name="<?php echo EMAIL ?>" autofocus>
                         <span id="login-form-error-<?php echo EMAIL ?>" class="error-description"></span>
                         <span id="login-form-error-unspecified" class="error-description"></span>
                     </div>

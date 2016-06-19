@@ -27,7 +27,7 @@ $csrf = get_account_csrf(get_authorized_user()[ID]);
                         <label for="task-<?php echo DESCRIPTION ?>" class="l10n l10n-text" data-l10n="description"></label>
                         <textarea id="task-<?php echo DESCRIPTION ?>" class="form-control input-lg l10n l10n-placeholder" data-l10n="description"
                                   placeholder="Description" name="<?php echo DESCRIPTION ?>" rows="3"
-                                  maxlength="<?php echo get_config_max_task_description_length() ?>"></textarea>
+                                  maxlength="<?php echo get_config_max_task_description_length() ?>" autofocus></textarea>
                         <span id="task-form-error-<?php echo DESCRIPTION ?>" class="error-description"></span>
                         <span id="task-form-error-unspecified" class="error-description"></span>
                     </div>
@@ -118,7 +118,7 @@ $csrf = get_account_csrf(get_authorized_user()[ID]);
                         <label for="account-<?php echo AMOUNT ?>" class="l10n l10n-text" data-l10n="amount"></label>
                         <input id="account-<?php echo AMOUNT ?>" type="number" class="form-control input-lg l10n l10n-placeholder" data-l10n="amount"
                                placeholder="Amount" name="<?php echo AMOUNT ?>" min="1"
-                               max="<?php echo get_config_max_amount() ?>">
+                               max="<?php echo get_config_max_amount() ?>" autofocus>
                         <span id="account-form-error-<?php echo AMOUNT ?>" class="error-description"></span>
                         <span id="account-form-error-token" class="error-description"></span>
                     </div>
