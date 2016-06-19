@@ -264,10 +264,8 @@ function Taskboard($) {
                 $that.addClass('task-completed');
                 $that.find('button').remove();
                 $that.append('<button class="pull-right l10n l10n-text btn-link no-shadow task-completed" data-l10n="task_completed" disabled>Completed</button>');
-                $that.find('.l10n').each(function () {
-                    taskboardApplication.updateLocale($(this));
-                });
             });
+            taskboardApplication.updateLocales();
         }
         return changed;
     };
@@ -328,6 +326,7 @@ function Taskboard($) {
                                 changed = taskboardApplication.deleteTaskById(this);
                         });
                     } else if (this.hasOwnProperty('c')) {
+                        changed = true;
                         $.each(this['c'], function () {
                             taskboardApplication.incrementBadge(this);
                         });
@@ -335,7 +334,7 @@ function Taskboard($) {
                         console.log("Unknown event type");
                     }
                 });
-                if (changed && role === systemRole) {
+                if (changed) {
                     taskboardApplication.updateBalance();
                 }
             }
