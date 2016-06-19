@@ -135,10 +135,10 @@ function Localization() {
     this.error_unknown_en = "Unknown error occurred";
     this.error_unknown_ru = "Произошла неизвестная ошибка";
     this.commission_en = function () {
-        return "Note that the system commission ".concat($('#user-data').data('commission'), "% will be applied");
+        return "System fee ".concat($('#user-data').data('commission'), "%");
     };
     this.commission_ru = function () {
-        return "Обратите внимание, что система взимает комиссию в размере ".concat($('#user-data').data('commission'), "%");
+        return "Комиссия составит ".concat($('#user-data').data('commission'), "%");
     };
     this.email_sent_notice_header_en = "Notice";
     this.email_sent_notice_header_ru = "Внимание";
@@ -212,22 +212,22 @@ function Localization() {
     this.new_items_en = function () {
         var newItemsCounter = window.taskboard.newItemsCounter;
         if (newItemsCounter > 10) {
-            return "There's more than 10 new tasks";
+            return "Show more than 10 new tasks";
         } else if (newItemsCounter > 1) {
-            return "There're {0} new tasks".format(newItemsCounter);
+            return "Show {0} new tasks".format(newItemsCounter);
         } else if (newItemsCounter === 1) {
-            return "There's 1 new task";
+            return "Show 1 new task";
         }
     };
     this.new_items_ru = function () {
         var newItemsCounter = window.taskboard.newItemsCounter;
         switch (newItemsCounter) {
             case 1:
-                return "{0} новый заказ".format(newItemsCounter);
+                return "Показать {0} новый заказ".format(newItemsCounter);
             case 2:
             case 3:
             case 4:
-                return "{0} новых заказа".format(newItemsCounter);
+                return "Показать {0} новых заказа".format(newItemsCounter);
                 break;
             case 5:
             case 6:
@@ -235,10 +235,10 @@ function Localization() {
             case 8:
             case 9:
             case 10:
-                return "{0} новых заказов".format(newItemsCounter);
+                return "Показать {0} новых заказов".format(newItemsCounter);
                 break;
             default:
-                return "Более 10 новых заказов".format(newItemsCounter);
+                return "Показать более 10 новых заказов".format(newItemsCounter);
         }
     };
 }
