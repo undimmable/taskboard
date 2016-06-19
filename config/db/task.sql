@@ -12,7 +12,8 @@ CREATE TABLE task (
   paid           BOOL DEFAULT FALSE      NOT NULL,
   balance_locked BOOL DEFAULT FALSE      NOT NULL,
   commission     NUMERIC(10, 2)          NOT NULL,
-  deleted        BOOL DEFAULT FALSE      NOT NULL
+  deleted        BOOL DEFAULT FALSE      NOT NULL,
+  INDEX(id,customer_id,performer_id)
 )
   ENGINE = InnoDB
   DEFAULT CHARSET UTF8;

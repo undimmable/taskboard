@@ -8,7 +8,8 @@ CREATE TABLE event (
   target_id  BIGINT,
   message    VARCHAR(2048) NOT NULL,
   created_at TIMESTAMP(3)  NOT NULL             DEFAULT CURRENT_TIMESTAMP(3),
-  type       CHAR(1)       NOT NULL             DEFAULT 'c'
+  type       CHAR(1)       NOT NULL             DEFAULT 'c',
+  INDEX(id, target_id)
 )
   ENGINE = InnoDB
   DEFAULT CHARSET UTF8;
