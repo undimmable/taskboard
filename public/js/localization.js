@@ -86,7 +86,7 @@ function Localization() {
     this.password_is_invalid_ru = "Указано неверное значение пароля";
     this.email_is_too_short_en = "Email is too short";
     this.email_is_too_short_ru = "Слишком короткий email";
-    this.email_already_registered_en = "User with this email alreadt registered";
+    this.email_already_registered_en = "User with this email already registered";
     this.email_already_registered_ru = "Пользователь с таким именем уже существует";
     this.password_is_too_short_en = "Password is too short";
     this.password_is_too_short_ru = "Слишком короткий пароль";
