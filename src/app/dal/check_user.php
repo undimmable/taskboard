@@ -15,7 +15,7 @@
  */
 require_once 'dal/dal_helper.php';
 
-function check_logged_in($user_id, $user_agent, $ip)
+function dal_check_logged_in($user_id, $user_agent, $ip)
 {
     $result = false;
     $mysqli = get_dal_connection(LOGIN_DB);

@@ -24,7 +24,7 @@ require_once "dal/event.php";
  */
 function send_generic_event($entity_id, $json, $type = 'c')
 {
-    write_event($entity_id, $json, $type);
+    dal_write_event($entity_id, $json, $type);
 }
 
 /**

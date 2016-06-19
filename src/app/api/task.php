@@ -179,13 +179,13 @@ function _validate_task_perform_input($task_id, $performer_id, $csrf)
 
 function _try_fix_unprocessed_transaction($user_id, $is_customer = true)
 {
-    $id = payment_get_last_user_tx_id($user_id);
+    $id = dal_payment_get_last_user_tx_id($user_id);
     if (is_null($id)) {
         return null;
     } elseif ($id === false) {
         return false;
     } else {
-        $transactions = payment_fetch_transactions_after($id, $user_id, $is_customer);
+        $transactions = dal_payment_fetch_transactions_after($id, $user_id, $is_customer);
         if (is_null($transactions) || $transactions === false) {
             return false;
         } else {
@@ -272,7 +272,7 @@ function api_task_perform($task_id)
     if (!_validate_task_perform_input($task_id, $performer_id, $csrf)) {
         return;
     }
-    payment_fix_last_perform_transaction($performer_id);
+    dal_payment_fix_last_perform_transaction($performer_id);
     $task = dal_task_fetch($task_id);
     if (!$task) {
         render_forbidden();
@@ -292,11 +292,11 @@ function api_task_perform($task_id)
                 }
             }
         } elseif ($task[PERFORMER_ID] == $performer_id) {
-            $tx = payment_get_transaction_by_participants($task[ID], $task[PERFORMER_ID], 'p');
+            $tx = dal_payment_get_transaction_by_participants($task[ID], $task[PERFORMER_ID], 'p');
             if (!$tx) {
                 payment_process_complex($task);
             } else if (!$tx[PROCESSED]) {
-                $processed = payment_process_pay_transaction($tx[ID], $task[CUSTOMER_ID], $performer_id, $task[PRICE], $task[COMMISSION]);
+                $processed = dal_payment_process_pay_transaction($tx[ID], $task[CUSTOMER_ID], $performer_id, $task[PRICE], $task[COMMISSION]);
                 if ($processed) {
                     $paid_success = dal_task_update_set_paid($task[ID]);
                     if ($paid_success) {
@@ -332,7 +332,7 @@ function set_task_paid(&$task)
 
 function on_payment_success($task)
 {
-    write_event(null, $task[ID], 'p');
+    dal_write_event(null, $task[ID], 'p');
     render_ok_json($task);
     return;
 }
@@ -350,7 +350,7 @@ function on_payment_failure()
 function payment_process_complex($task)
 {
     $tx_id = payment_init_pay_transaction($task[ID], $task[PERFORMER_ID], $task[PRICE]);
-    $processed = payment_process_pay_transaction($tx_id, $task[CUSTOMER_ID], $task[PERFORMER_ID], $task[PRICE], $task[COMMISSION]);
+    $processed = dal_payment_process_pay_transaction($tx_id, $task[CUSTOMER_ID], $task[PERFORMER_ID], $task[PRICE], $task[COMMISSION]);
     if ($processed) {
         $paid_success = dal_task_update_set_paid($task[ID]);
         if ($paid_success)
@@ -398,15 +398,15 @@ function api_task_create()
             }
         }
     }
-    if (!payment_check_able_to_process($customer_id, $amount)) {
+    if (!dal_payment_check_able_to_process($customer_id, $amount)) {
         render_conflict([
             JSON_ERROR => ["amount" => "not_enough"]
         ]);
         return;
     }
     $task_id = dal_task_create($customer_id, $amount, $description);
-    $lock_tx_id = payment_init_lock_transaction($customer_id, $task_id, $amount);
-    $success = payment_process_lock_transaction($lock_tx_id, $customer_id);
+    $lock_tx_id = dal_payment_init_lock_transaction($customer_id, $task_id, $amount);
+    $success = dal_payment_process_lock_transaction($lock_tx_id, $customer_id);
     if (is_null($success)) {
         render_conflict([
             "error" => ["amount" => "not_enough"]
@@ -454,11 +454,11 @@ function api_task_fix($task_id)
         render_bad_request_json([JSON_ERROR => [UNSPECIFIED => "task_unable_to_process"]]);
         return;
     }
-    if (!payment_check_able_to_process($customer_id, $amount)) {
+    if (!dal_payment_check_able_to_process($customer_id, $amount)) {
         render_conflict([JSON_ERROR => [POPUP => "task_not_enough_money"]]);
         return;
     }
-    $tx_lock_processed = payment_retry_lock_transaction($task_id, $customer_id, $amount);
+    $tx_lock_processed = dal_payment_retry_lock_transaction($task_id, $customer_id, $amount);
     if ($tx_lock_processed === true) {
         $updated = dal_task_update_set_balance_locked($task_id);
         if (!$updated) {

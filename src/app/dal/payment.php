@@ -15,25 +15,25 @@
  */
 require_once "dal/dal_helper.php";
 
-function payment_check_able_to_process($user_id, $amount)
+function dal_payment_check_able_to_process($user_id, $amount)
 {
-    $balance = payment_fetch_balance($user_id);
+    $balance = dal_payment_fetch_balance($user_id);
     if (!$balance)
         return false;
     return $balance - $amount > 0;
 }
 
-function payment_fix_last_perform_transaction($performer_id)
+function dal_payment_fix_last_perform_transaction($performer_id)
 {
-    $last_tx_id = payment_get_last_user_tx_id($performer_id);
+    $last_tx_id = dal_payment_get_last_user_tx_id($performer_id);
     if ($last_tx_id === false) {
         on_payment_failure();
         return;
     }
     if (is_null($last_tx_id)) {
-        $unprocessed_tx = payment_fetch_transactions_after($performer_id, $last_tx_id, false);
+        $unprocessed_tx = dal_payment_fetch_transactions_after($performer_id, $last_tx_id, false);
         if ($unprocessed_tx) {
-            $tx = payment_get_transaction_by_participants($unprocessed_tx['id_from'], $performer_id, 'p');
+            $tx = dal_payment_get_transaction_by_participants($unprocessed_tx['id_from'], $performer_id, 'p');
             $task = dal_task_fetch($unprocessed_tx['id_from']);
             if (!$task) {
                 render_internal_server_error();
@@ -46,7 +46,7 @@ function payment_fix_last_perform_transaction($performer_id)
                 $tx[PROCESSED] = false;
             }
             if (!$tx[PROCESSED]) {
-                $tx[PROCESSED] = payment_process_pay_transaction($tx[ID], $task[CUSTOMER_ID], $performer_id, $task[PRICE], $task[COMMISSION]);
+                $tx[PROCESSED] = dal_payment_process_pay_transaction($tx[ID], $task[CUSTOMER_ID], $performer_id, $task[PRICE], $task[COMMISSION]);
             }
             if ($tx[PROCESSED]) {
                 set_task_paid($task);
@@ -58,7 +58,7 @@ function payment_fix_last_perform_transaction($performer_id)
     }
 }
 
-function payment_get_last_user_tx_id($user_id)
+function dal_payment_get_last_user_tx_id($user_id)
 {
     $connection = get_account_connection();
     $stmt = mysqli_prepare($connection, "SELECT last_tx_id FROM db_account.account WHERE user_id=?");
@@ -100,7 +100,7 @@ function payment_get_last_user_tx_id($user_id)
     return $id;
 }
 
-function payment_fetch_transactions_after($tx_id, $user_id, $is_customer)
+function dal_payment_fetch_transactions_after($tx_id, $user_id, $is_customer)
 {
     $connection = get_payment_connection();
     $query = $is_customer ? "id_from=$user_id" : "id_to = $user_id";
@@ -110,7 +110,7 @@ function payment_fetch_transactions_after($tx_id, $user_id, $is_customer)
     return $result;
 }
 
-function payment_lock_balance($user_id, $tx_id, $amount)
+function dal_payment_lock_balance($user_id, $tx_id, $amount)
 {
     $connection = get_account_connection();
     $stmt = mysqli_prepare($connection, "UPDATE db_account.account SET locked_balance = locked_balance + $amount, last_tx_id=? WHERE user_id=? AND $amount < account.balance - account.locked_balance");
@@ -135,7 +135,7 @@ function payment_lock_balance($user_id, $tx_id, $amount)
     return true;
 }
 
-function payment_pay($tx_id, $customer_id, $performer_id, $amount, $commission)
+function dal_payment_pay($tx_id, $customer_id, $performer_id, $amount, $commission)
 {
     $db_errors = initialize_dal_errors();
     $connection = get_account_connection();
@@ -157,7 +157,7 @@ function payment_pay($tx_id, $customer_id, $performer_id, $amount, $commission)
     return mysqli_commit($connection);
 }
 
-function payment_unlock_balance($user_id, $amount)
+function dal_payment_unlock_balance($user_id, $amount)
 {
     $connection = get_account_connection();
     $stmt = mysqli_prepare($connection, "UPDATE db_account.account SET locked_balance = locked_balance - $amount WHERE user_id=?");
@@ -182,7 +182,7 @@ function payment_unlock_balance($user_id, $amount)
     return true;
 }
 
-function payment_refill_balance($user_id, $amount)
+function dal_payment_refill_balance($user_id, $amount)
 {
     $connection = get_account_connection();
     $stmt = mysqli_prepare($connection, "UPDATE db_account.account SET balance = balance + $amount WHERE user_id=?");
@@ -207,7 +207,7 @@ function payment_refill_balance($user_id, $amount)
     return true;
 }
 
-function payment_create_account($user_id, $balance = DEFAULT_BALANCE)
+function dal_payment_create_account($user_id, $balance = DEFAULT_BALANCE)
 {
     $db_errors = initialize_dal_errors();
     $connection = get_account_connection();
@@ -245,9 +245,9 @@ function payment_create_account($user_id, $balance = DEFAULT_BALANCE)
  * @param $amount
  * @return bool|mysqli_result
  */
-function payment_retry_lock_transaction($task_id, $customer_id, $amount)
+function dal_payment_retry_lock_transaction($task_id, $customer_id, $amount)
 {
-    $lock_tx_id_processed = payment_get_transaction_by_participants($customer_id, $task_id, 'l');
+    $lock_tx_id_processed = dal_payment_get_transaction_by_participants($customer_id, $task_id, 'l');
     if (is_null($lock_tx_id_processed) || $lock_tx_id_processed[PROCESSED] === false) {
         $tx_id = is_null($lock_tx_id_processed) ? $lock_tx_id_processed[ID] : null;
         $tx_lock_processed = _lock($customer_id, $task_id, $amount, $tx_id);
@@ -261,11 +261,11 @@ function payment_retry_lock_transaction($task_id, $customer_id, $amount)
 function _lock($user_id, $task_id, $amount, $tx_id)
 {
     if (is_null($tx_id)) {
-        $tx_id = payment_init_lock_transaction($user_id, $task_id, $amount);
+        $tx_id = dal_payment_init_lock_transaction($user_id, $task_id, $amount);
     }
     if (is_null($tx_id) || !$tx_id)
         return false;
-    return payment_process_lock_transaction($tx_id, $user_id);
+    return dal_payment_process_lock_transaction($tx_id, $user_id);
 }
 
 function _payment_init_transaction($id_from, $id_to, $amount, $type)
@@ -301,7 +301,7 @@ function _payment_init_transaction($id_from, $id_to, $amount, $type)
     return $id;
 }
 
-function payment_init_lock_transaction($id_from, $id_to, $amount)
+function dal_payment_init_lock_transaction($id_from, $id_to, $amount)
 {
     return _payment_init_transaction($id_from, $id_to, $amount, 'l');
 }
@@ -311,7 +311,7 @@ function payment_init_pay_transaction($task_id, $performer_id, $amount)
     return _payment_init_transaction($task_id, $performer_id, $amount, 'p');
 }
 
-function payment_process_lock_transaction($tx_id, $id_from, $amount = null)
+function dal_payment_process_lock_transaction($tx_id, $id_from, $amount = null)
 {
     if ($amount == null) {
         $connection = get_payment_connection();
@@ -327,14 +327,14 @@ function payment_process_lock_transaction($tx_id, $id_from, $amount = null)
             $amount = $amount_array[AMOUNT];
         }
     }
-    if (payment_lock_balance($id_from, $tx_id, $amount)) {
+    if (dal_payment_lock_balance($id_from, $tx_id, $amount)) {
         return _payment_transaction_set_processed($tx_id);
     } else {
         return false;
     }
 }
 
-function payment_process_pay_transaction($tx_id, $customer_id = null, $performer_id = null, $amount = null, $commission = null)
+function dal_payment_process_pay_transaction($tx_id, $customer_id = null, $performer_id = null, $amount = null, $commission = null)
 {
     if (is_null($amount) || is_null($commission)) {
         $payment_connection = get_payment_connection();
@@ -353,7 +353,7 @@ function payment_process_pay_transaction($tx_id, $customer_id = null, $performer
     }
     $result = mysqli_query(get_payment_connection(), "SELECT processed FROM db_tx.tx WHERE id=$tx_id");
     if (mysqli_num_rows($result) < 1) {
-        if (payment_pay($tx_id, $customer_id, $performer_id, $amount, $commission)) {
+        if (dal_payment_pay($tx_id, $customer_id, $performer_id, $amount, $commission)) {
             return _payment_transaction_set_processed($tx_id);
         } else {
             return false;
@@ -368,7 +368,7 @@ function payment_process_pay_transaction($tx_id, $customer_id = null, $performer
     if (is_null($processed)) {
         return false;
     } else if (!$processed[PROCESSED]) {
-        if (payment_pay($tx_id, $customer_id, $performer_id, $amount, $commission)) {
+        if (dal_payment_pay($tx_id, $customer_id, $performer_id, $amount, $commission)) {
             return _payment_transaction_set_processed($tx_id);
         } else {
             return false;
@@ -378,7 +378,7 @@ function payment_process_pay_transaction($tx_id, $customer_id = null, $performer
     }
 }
 
-function payment_get_transaction_by_participants($entity_id_from, $entity_id_to, $type)
+function dal_payment_get_transaction_by_participants($entity_id_from, $entity_id_to, $type)
 {
     $db_errors = initialize_dal_errors();
     $connection = get_payment_connection();
@@ -439,7 +439,7 @@ function _payment_transaction_set_processed($id)
     return $success;
 }
 
-function payment_fetch_balance($user_id)
+function dal_payment_fetch_balance($user_id)
 {
     $db_errors = initialize_dal_errors();
     $connection = get_account_connection();

@@ -47,7 +47,7 @@ function dal_last_event_id()
     return $result;
 }
 
-function write_event($entity_id = "NULL", $message, $type)
+function dal_write_event($entity_id = "NULL", $message, $type)
 {
     if (is_null($entity_id))
         $entity_id = "NULL";

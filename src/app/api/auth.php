@@ -208,7 +208,7 @@ function api_auth_signup_action()
     $account = false;
     while (!$account && $retries <= CREATE_ACCOUNT_RETRIES) {
         $retries++;
-        $account = payment_create_account($user[ID], DEFAULT_BALANCE);
+        $account = dal_payment_create_account($user[ID], DEFAULT_BALANCE);
     }
     send_registration_email($email, $_SERVER['HTTP_HOST']);
     _login($user[ID], $role, $email, parse_ip_from_server(), parse_user_client_from_server(), true);

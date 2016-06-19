@@ -95,7 +95,7 @@ function api_get_balance()
     if (is_system($user[ROLE])) {
         $balance = dal_task_count_total_paid_commission();
     } else {
-        $balance = payment_fetch_balance($user[ID]);
+        $balance = dal_payment_fetch_balance($user[ID]);
     }
     if (!$balance) {
         render_internal_server_error([JSON_ERROR => get_dal_errors()]);
@@ -125,7 +125,7 @@ function api_refill_balance()
     if (!_validate_account_input($amount, $customer_id, $csrf)) {
         return;
     }
-    $updated = payment_refill_balance($customer_id, $amount);
+    $updated = dal_payment_refill_balance($customer_id, $amount);
     if (!$updated) {
         render_internal_server_error([JSON_ERROR => get_dal_errors()]);
         return;
