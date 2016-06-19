@@ -638,13 +638,16 @@ function Taskboard($) {
     this.initializeFeed = function () {
         feed = new taskboardApplication.Feed(10);
         feed.initialize();
-        $('#hide-completed').change(function () {
+        var $check = $('#hide-completed');
+        $check.change(function () {
             if (this.checked) {
                 $('#task-feed').attr('data-hide-completed', true);
             } else {
                 $('#task-feed').attr('data-hide-completed', false);
             }
         });
+        $check.prop('checked', true);
+        $('#task-feed').attr('data-hide-completed', true);
     };
 
     this.initializeTooltips = function () {
