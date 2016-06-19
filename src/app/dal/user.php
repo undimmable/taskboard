@@ -105,7 +105,7 @@ function dal_user_update_password_by_email($email, $hashed_password, $ts)
     $connection = get_user_connection();
     if (!$connection)
         add_dal_error($connection, $db_errors);
-    $mysqli_stmt = mysqli_prepare($connection, "UPDATE db_user.user SET hashed_password=? WHERE email=? AND UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 minute)) < ?");
+    $mysqli_stmt = mysqli_prepare($connection, "UPDATE db_user.user SET hashed_password=? WHERE email=? AND UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 15 minute)) < ?");
     if (!$mysqli_stmt) {
         add_dal_error($connection, $db_errors);
         return false;
