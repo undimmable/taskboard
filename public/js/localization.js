@@ -127,7 +127,7 @@ function Localization() {
     this.hour_ago_en = "About an hour ago";
     this.hour_ago_ru = "Около часа назад";
     this.hide_completed_en = "Hide Completed";
-    this.hide_completed_ru = "Скрыть Завершённые";
+    this.hide_completed_ru = "Скрыть завершённые";
     this.task_completed_en = "Completed";
     this.task_completed_ru = "Выполнен";
     this.unspecified_too_many_attempts_en = this.too_many_attempts_en;

@@ -253,6 +253,24 @@ function Taskboard($) {
         taskboardApplication.localStorageRemoveItem(storageItemName);
     };
 
+    this.setTaskPerformedById = function (id) {
+        var indexOf = $.inArray(parseInt(id), feed.loadedTaskIds);
+        var changed = indexOf > -1;
+        if (changed) {
+            $('#task-feed').find('li[data-id="'.concat(id, '"]')).each(function () {
+                var $that = $(this);
+                $that.find('.avatar-img').attr('src', '/img/m.png');
+                $that.addClass('task-completed');
+                $that.find('button').remove();
+                $that.append('<button class="pull-right l10n l10n-text btn-link no-shadow task-completed" data-l10n="task_completed" disabled>Completed</button>');
+                $that.find('.l10n').each(function () {
+                    taskboardApplication.updateLocale($(this));
+                });
+            });
+        }
+        return changed;
+    };
+
     this.deleteTaskById = function (id) {
         var indexOf = $.inArray(parseInt(id), feed.loadedTaskIds);
         $('#task-feed').find('li[data-id="'.concat(id, '"]')).fadeOut(fadeOutSpeed, function () {
@@ -303,7 +321,10 @@ function Taskboard($) {
                         });
                     } else if (this.hasOwnProperty('p')) {
                         $.each(this['p'], function () {
-                            changed = taskboardApplication.deleteTaskById(this);
+                            if (role == customerRole || role == systemRole)
+                                changed = taskboardApplication.setTaskPerformedById(this);
+                            else if (role == performerRole)
+                                changed = taskboardApplication.deleteTaskById(this);
                         });
                     } else if (this.hasOwnProperty('c')) {
                         $.each(this['c'], function () {
@@ -638,16 +659,18 @@ function Taskboard($) {
     this.initializeFeed = function () {
         feed = new taskboardApplication.Feed(10);
         feed.initialize();
-        var $check = $('#hide-completed');
-        $check.change(function () {
-            if (this.checked) {
-                $('#task-feed').attr('data-hide-completed', true);
-            } else {
-                $('#task-feed').attr('data-hide-completed', false);
-            }
-        });
-        $check.prop('checked', true);
-        $('#task-feed').attr('data-hide-completed', true);
+        if (role !== performerRole) {
+            var $check = $('#hide-completed');
+            $check.change(function () {
+                if (this.checked) {
+                    $('#task-feed').attr('data-hide-completed', true);
+                } else {
+                    $('#task-feed').attr('data-hide-completed', false);
+                }
+            });
+            $check.prop('checked', true);
+            $('#task-feed').attr('data-hide-completed', true);
+        }
     };
 
     this.initializeTooltips = function () {
