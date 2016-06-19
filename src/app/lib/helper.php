@@ -155,6 +155,22 @@ function get_signup_csrf()
     return hash("sha256", 0 . "." . parse_ip_from_server() . "." . parse_user_client_from_server() . ".gnsiup" . get_config_login_csrf_secret(), false);
 }
 
+function get_reset_password_csrf()
+{
+    if ($GLOBALS['staging']) {
+        return 8;
+    }
+    return hash("sha256", 0 . "." . parse_ip_from_server() . "." . parse_user_client_from_server() . ".gnremnd" . get_config_login_csrf_secret(), false);
+}
+
+function get_change_password_csrf()
+{
+    if ($GLOBALS['staging']) {
+        return 8;
+    }
+    return hash("sha256", 0 . "." . parse_ip_from_server() . "." . parse_user_client_from_server() . ".gnchps" . get_config_login_csrf_secret(), false);
+}
+
 function get_account_csrf($user_id)
 {
     if ($GLOBALS['staging']) {

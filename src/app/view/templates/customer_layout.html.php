@@ -56,7 +56,7 @@ $csrf = get_account_csrf(get_authorized_user()[ID]);
     </div>
 </div>
 
-<div id="task-unpaid-modal" class="modal fade center-modal" tabindex="-1" role="dialog" aria-hidden="true">
+<div id="task-unpaid-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header col-md-12">
@@ -72,7 +72,7 @@ $csrf = get_account_csrf(get_authorized_user()[ID]);
     </div>
 </div>
 
-<div id="task-not-enough-money-modal" class="modal fade center-modal" tabindex="-1" role="dialog" aria-hidden="true">
+<div id="task-not-enough-money-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header col-md-12">
@@ -88,7 +88,7 @@ $csrf = get_account_csrf(get_authorized_user()[ID]);
     </div>
 </div>
 
-<div id="task-already-paid-modal" class="modal fade center-modal" tabindex="-1" role="dialog" aria-hidden="true">
+<div id="task-already-paid-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header col-md-12">

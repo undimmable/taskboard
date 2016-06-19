@@ -56,20 +56,20 @@ $authorization = [
 function _validate_amount($amount, &$validation_context)
 {
     if (is_null($amount)) {
-        add_validation_error($validation_context, AMOUNT, 'not_provided');
+        _add_validation_error($validation_context, AMOUNT, 'not_provided');
         return false;
     }
     $amount = filter_var($amount, FILTER_VALIDATE_INT);
     if (!$amount) {
-        add_validation_error($validation_context, AMOUNT, 'is_invalid');
+        _add_validation_error($validation_context, AMOUNT, 'is_invalid');
         return false;
     }
     if ($amount < get_config_min_amount()) {
-        add_validation_error($validation_context, AMOUNT, 'too_small');
+        _add_validation_error($validation_context, AMOUNT, 'too_small');
         return false;
     }
     if ($amount > get_config_max_amount()) {
-        add_validation_error($validation_context, AMOUNT, 'too_large');
+        _add_validation_error($validation_context, AMOUNT, 'too_large');
         return false;
     }
     return true;
@@ -86,12 +86,12 @@ function _validate_amount($amount, &$validation_context)
 function _validate_id(&$id, $error_key = 'id', &$validation_context)
 {
     if (is_null($id)) {
-        add_validation_error($validation_context, $error_key, 'not_provided');
+        _add_validation_error($validation_context, $error_key, 'not_provided');
         return false;
     }
     $id = filter_var($id, FILTER_VALIDATE_INT);
     if (!$id) {
-        add_validation_error($validation_context, $error_key, 'is_invalid');
+        _add_validation_error($validation_context, $error_key, 'is_invalid');
         return false;
     }
     return true;
@@ -107,7 +107,7 @@ function _validate_id(&$id, $error_key = 'id', &$validation_context)
 function _validate_description($description, &$validation_context)
 {
     if (is_null($description) || strlen($description) < 1 || ctype_space($description)) {
-        add_validation_error($validation_context, DESCRIPTION, 'not_provided');
+        _add_validation_error($validation_context, DESCRIPTION, 'not_provided');
         return false;
     }
     return true;
@@ -339,7 +339,7 @@ function on_payment_success($task)
 
 function on_payment_failure()
 {
-    render_internal_server_error(get_db_errors());
+    render_internal_server_error(get_dal_errors());
     return;
 }
 
@@ -426,7 +426,7 @@ function api_task_create()
     send_generic_event(null, $task_id, 'c');
     if (!$task) {
         error_log("Couldn't fetch task");
-        render_bad_request_json([JSON_ERROR => get_db_errors()]);
+        render_bad_request_json([JSON_ERROR => get_dal_errors()]);
         return;
     } else {
         $create_csrf = get_customer_task_create_csrf($user[ID], $task[ID]);

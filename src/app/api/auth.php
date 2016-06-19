@@ -26,9 +26,10 @@ $routes = [
     'POST' => [
         'login' => 'api_auth_login_action',
         'signup' => 'api_auth_signup_action',
+        'reset_password' => 'api_auth_reset_password',
+        'change_password' => 'api_auth_change_password'
     ],
     'GET' => [
-        'verify' => 'api_auth_verify_action',
         'logout' => 'api_auth_logout_action'
     ],
     'PUT' => [],
@@ -37,8 +38,9 @@ $routes = [
 
 $authorization = [
     'api_auth_login_action' => auth_unauthenticated(),
+    'api_auth_change_password' => auth_unauthenticated(),
+    'api_auth_reset_password' => auth_unauthenticated(),
     'api_auth_signup_action' => auth_unauthenticated(),
-    'api_auth_verify_action' => auth_unauthenticated(),
     'api_auth_logout_action' => auth_any_authenticated()
 ];
 
@@ -55,16 +57,16 @@ $authorization = [
 function _validate_signup_input($email, &$role, $password, $password_repeat, $csrf)
 {
     $validation_context = initialize_validation_context();
-    is_signup_csrf_token_valid($csrf, $validation_context);
-    is_email_valid($email, $validation_context);
-    is_role_valid($role, $validation_context);
-    is_password_valid($password, $validation_context);
-    is_password_repeat_valid($password, $password_repeat, $validation_context);
-    if (validation_context_has_errors($validation_context)) {
-        render_bad_request_json([JSON_ERROR => get_all_validation_errors($validation_context)]);
-        return false;
+    _is_signup_csrf_token_valid($csrf, $validation_context);
+    _is_email_valid($email, $validation_context);
+    _is_role_valid($role, $validation_context);
+    _is_password_valid($password, $validation_context);
+    _is_password_repeat_valid($password, $password_repeat, $validation_context);
+    if (!validation_context_has_errors($validation_context)) {
+        return true;
     }
-    return true;
+    render_bad_request_json([JSON_ERROR => get_all_validation_errors($validation_context)]);
+    return false;
 }
 
 /**
@@ -78,14 +80,41 @@ function _validate_signup_input($email, &$role, $password, $password_repeat, $cs
 function _validate_login_input($email, $password, $csrf)
 {
     $validation_context = initialize_validation_context();
-    is_login_csrf_token_valid($csrf, $validation_context);
-    is_email_valid($email, $validation_context);
-    is_password_valid($password, $validation_context);
-    if (validation_context_has_errors($validation_context)) {
-        render_bad_request_json([JSON_ERROR => get_all_validation_errors($validation_context)]);
-        return false;
+    _is_login_csrf_token_valid($csrf, $validation_context);
+    _is_email_valid($email, $validation_context);
+    _is_password_valid($password, $validation_context);
+    if (!validation_context_has_errors($validation_context)) {
+        return true;
     }
-    return true;
+    render_bad_request_json([JSON_ERROR => get_all_validation_errors($validation_context)]);
+    return false;
+}
+
+function _validate_remind_input($email, $csrf)
+{
+    $validation_context = initialize_validation_context();
+    _is_remind_csrf_token_valid($csrf, $validation_context);
+    _is_email_valid($email, $validation_context);
+    if (!validation_context_has_errors($validation_context)) {
+        return true;
+    }
+    render_bad_request_json([JSON_ERROR => get_all_validation_errors($validation_context)]);
+    return false;
+}
+
+function _validate_change_password_input($email, $password, $password_repeat, $ts, $csrf)
+{
+    $validation_context = initialize_validation_context();
+    _is_change_password_token_valid($csrf, $validation_context);
+    _is_email_valid($email, $validation_context);
+    _is_password_valid($password, $validation_context);
+    _is_password_repeat_valid($password, $password_repeat, $validation_context);
+    _is_change_password_ts_valid($ts, $validation_context);
+    if (!validation_context_has_errors($validation_context)) {
+        return true;
+    }
+    render_bad_request_json([JSON_ERROR => get_all_validation_errors($validation_context)]);
+    return false;
 }
 
 /**
@@ -118,7 +147,7 @@ function api_auth_login_action()
     $data = json_decode(file_get_contents('php://input'), true);
     $email = $data[EMAIL];
     $password = $data[PASSWORD];
-    $remember_me = is_checked($data[REMEMBER_ME]);
+    $remember_me = _is_checked($data[REMEMBER_ME]);
     $csrf = parse_csrf_token_header();
     if (!_validate_login_input($email, $password, $csrf)) {
         return;
@@ -131,7 +160,7 @@ function api_auth_login_action()
         render_not_authorized_json([JSON_ERROR => [UNSPECIFIED => "too_many_attempts"]]);
         return;
     }
-    $user = db_fetch_user_by_email($email);
+    $user = dal_fetch_user_by_email($email);
     if ($user === null || !password_verify($password, $user[HASHED_PASSWORD])) {
         dal_login_log_failed($ip, $client);
         render_not_authorized_json([JSON_ERROR => [EMAIL => 'no_such_user']]);
@@ -155,7 +184,7 @@ function api_auth_signup_action()
     $is_customer = $data[IS_CUSTOMER];
     $password = $data[PASSWORD];
     $password_repeat = $data[PASSWORD_REPEAT];
-    if (is_checked($is_customer)) {
+    if (_is_checked($is_customer)) {
         $role = get_role_key(CUSTOMER);
     } else {
         $role = get_role_key(PERFORMER);
@@ -166,9 +195,9 @@ function api_auth_signup_action()
     }
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
     $confirmation_token = create_confirmation_token($email);
-    $user = create_user($email, $role, $hashed_password, $confirmation_token);
+    $user = dal_create_user($email, $role, $hashed_password, $confirmation_token);
     if (!$user) {
-        $errors = get_db_errors();
+        $errors = get_dal_errors();
         if ($errors[LOGIN] === "duplicate entity") {
             $errors = [JSON_ERROR => [EMAIL => "already_registered"]];
         }
@@ -181,7 +210,7 @@ function api_auth_signup_action()
         $retries++;
         $account = payment_create_account($user[ID], DEFAULT_BALANCE);
     }
-    send_verification_request_email($email, $_SERVER['HTTP_HOST'], $confirmation_token);
+    send_registration_email($email, $_SERVER['HTTP_HOST']);
     _login($user[ID], $role, $email, parse_ip_from_server(), parse_user_client_from_server(), true);
 }
 
@@ -194,23 +223,55 @@ function api_auth_logout_action()
     https_redirect("/");
 }
 
-/**
- * Verify that user has followed link received in email
- */
-function api_auth_verify_action()
+function api_auth_reset_password()
 {
-    if (array_key_exists(CONFIRMATION_TOKEN, $_GET)) {
-        $user = verify_user($_GET[CONFIRMATION_TOKEN]);
-        if (!is_null($user)) {
-            $token = create_jwt_token($user[EMAIL], $user[ROLE], $user[ID]);
-            set_token_cookie($token);
-            https_redirect("/");
-            send_verification_confirmed_email($user[EMAIL], $_SERVER['HTTP_HOST']);
-        } else
-            render_not_authorized_json();
-    } else {
-        render_not_authorized_json();
+    if (!is_request_json()) {
+        render_unsupported_media_type();
+        return;
     }
+    $data = json_decode(file_get_contents('php://input'), true);
+    $email = $data[EMAIL];
+    $csrf = parse_csrf_token_header();
+    if (_validate_remind_input($email, $csrf)) {
+        $user = dal_fetch_user_by_email($email);
+        if ($user) {
+            $token = JWT_encode([EMAIL => $user[EMAIL], 'ts' => dal_now()], get_config_confirmation_secret());
+            send_reset_password_email($user[EMAIL], $_SERVER['HTTP_HOST'], $token);
+            render_ok_json("");
+        } else {
+            render_forbidden();
+        }
+    }
+}
+
+function api_auth_change_password()
+{
+    if (!is_request_json()) {
+        render_unsupported_media_type();
+        return;
+    }
+    $data = json_decode(file_get_contents('php://input'), true);
+    if ($data) {
+        $token = JWT_decode($data['verification_token'], get_config_confirmation_secret());
+        if ($token) {
+            $email = $token[EMAIL];
+            $password = $data[PASSWORD];
+            $password_repeat = $data[PASSWORD_REPEAT];
+            $timestamp = $token['ts'];
+            $csrf = parse_csrf_token_header();
+            if (_validate_change_password_input($email, $password, $password_repeat, $timestamp, $csrf)) {
+                $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                if (dal_user_update_password_by_email($email, $hashed_password, $timestamp)) {
+                    send_password_changed_email($email, $_SERVER['HTTP_HOST']);
+                    render_ok_json("");
+                } else {
+                    render_bad_request_json([JSON_ERROR => [UNSPECIFIED => "token_wrong"]]);
+                }
+            }
+            return;
+        }
+    }
+    render_forbidden();
 }
 
 route_request($routes, $authorization);

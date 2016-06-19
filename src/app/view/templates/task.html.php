@@ -4,7 +4,7 @@ global $current_task;
 $task_class = !is_task_active($current_task) ? ' task-inactive' : (is_task_completed($current_task) ? ' task-completed' : ' task-active');
 $current_task_id = $current_task[ID];
 $current_task_img = get_task_img($current_task, $user);
-$current_task_description = htmlspecialchars($current_task[DESCRIPTION], ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5 | ENT_DISALLOWED, 'UTF-8', false);
+$current_task_description = htmlspecialchars($current_task[DESCRIPTION], ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5 | ENT_DISALLOWED, 'UTF-8', true);
 $current_task_ts_offset = $current_task[CREATED_AT_OFFSET];
 $current_task_amount = $current_task[AMOUNT];
 $current_task_price = $current_task[PRICE];

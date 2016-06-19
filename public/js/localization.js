@@ -26,6 +26,8 @@ function Localization() {
     this.refill_ru = "Пополнить";
     this.refill_account_en = "Refill Account";
     this.refill_account_ru = "Пополнить баланс";
+    this.change_password_en = "Change Password";
+    this.change_password_ru = "Сменить пароль";
     this.amount_en = "Amount";
     this.amount_ru = "Сумма";
     this.price_en = "Price";
@@ -58,6 +60,8 @@ function Localization() {
     this.password_ru = "Пароль";
     this.password_repeat_en = "Password repeat";
     this.password_repeat_ru = "Повторите пароль";
+    this.reset_password_en = "Reset password";
+    this.reset_password_ru = "Сбросить пароль";
     this.i_am_performer_en = "I'm a performer";
     this.i_am_performer_ru = "Исполнитель";
     this.i_am_customer_en = "I'm a customer";
@@ -136,6 +140,10 @@ function Localization() {
     this.commission_ru = function () {
         return "Обратите внимание, что система взимает комиссию в размере ".concat($('#user-data').data('commission'), "%");
     };
+    this.email_sent_notice_header_en = "Notice";
+    this.email_sent_notice_header_ru = "Внимание";
+    this.email_sent_notice_body_en = "Password reset link has been sent to your email.";
+    this.email_sent_notice_body_ru = "Ссылка для сброса пароля отправлена на ваш email.";
     this.unpaid_notice_header_en = "Notice";
     this.unpaid_notice_header_ru = "Внимание";
     this.unpaid_notice_body_en = "You have unpaid tasks. You should either fix them or delete to create new task.";

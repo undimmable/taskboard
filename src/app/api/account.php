@@ -46,20 +46,20 @@ $authorization = [
 function _validate_amount($amount, &$validation_context)
 {
     if (is_null($amount)) {
-        add_validation_error($validation_context, AMOUNT, 'not_provided');
+        _add_validation_error($validation_context, AMOUNT, 'not_provided');
         return false;
     }
     $amount = filter_var($amount, FILTER_VALIDATE_INT);
     if (!$amount) {
-        add_validation_error($validation_context, AMOUNT, 'is_invalid');
+        _add_validation_error($validation_context, AMOUNT, 'is_invalid');
         return false;
     }
     if ($amount < get_config_min_amount()) {
-        add_validation_error($validation_context, AMOUNT, 'too_small');
+        _add_validation_error($validation_context, AMOUNT, 'too_small');
         return false;
     }
     if ($amount > get_config_max_amount()) {
-        add_validation_error($validation_context, AMOUNT, 'too_large');
+        _add_validation_error($validation_context, AMOUNT, 'too_large');
         return false;
     }
     return true;
@@ -98,7 +98,7 @@ function api_get_balance()
         $balance = payment_fetch_balance($user[ID]);
     }
     if (!$balance) {
-        render_internal_server_error([JSON_ERROR => get_db_errors()]);
+        render_internal_server_error([JSON_ERROR => get_dal_errors()]);
         return;
     }
     render_ok_json(["balance" => $balance]);
@@ -127,7 +127,7 @@ function api_refill_balance()
     }
     $updated = payment_refill_balance($customer_id, $amount);
     if (!$updated) {
-        render_internal_server_error([JSON_ERROR => get_db_errors()]);
+        render_internal_server_error([JSON_ERROR => get_dal_errors()]);
         return;
     } else {
         api_get_balance();

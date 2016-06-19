@@ -24,7 +24,7 @@ function fetch_events_after($target_id, $last_event_id, $limit)
 {
     $connection = get_event_connection();
     if (!$connection) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     $mysqli_result = @mysqli_query($connection, "SELECT max(ev.id) AS id, concat('[', group_concat(ev.event_list), ']') as ev_list FROM (SELECT max(id) as id, concat('{\"', type, '\":[', group_concat(DISTINCT concat('\"', message, '\"')), ']}') AS event_list FROM (SELECT type, message, id FROM db_event.event WHERE id > $last_event_id AND (target_id = $target_id OR target_id is null) LIMIT $limit) AS t_event GROUP BY t_event.type) AS ev");
@@ -35,10 +35,10 @@ function fetch_events_after($target_id, $last_event_id, $limit)
 
 function dal_last_event_id()
 {
-    $db_errors = initialize_db_errors();
+    $db_errors = initialize_dal_errors();
     $connection = get_event_connection();
     if (!$connection) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     $mysqli_result = mysqli_query($connection, "SELECT max(id) AS id FROM db_event.event;");
@@ -51,28 +51,28 @@ function write_event($entity_id = "NULL", $message, $type)
 {
     if (is_null($entity_id))
         $entity_id = "NULL";
-    $db_errors = initialize_db_errors();
+    $db_errors = initialize_dal_errors();
     $connection = get_event_connection();
     if (!$connection) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     $stmt = mysqli_prepare($connection, "INSERT INTO db_event.event (target_id, message, type) VALUES ($entity_id,?,?)");
     if (!$stmt) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     /** @noinspection PhpMethodParametersCountMismatchInspection */
     if (!mysqli_stmt_bind_param($stmt, 'ss', $message, $type)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_execute($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_close($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (mysqli_errno($connection) !== 0) {

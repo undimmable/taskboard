@@ -63,19 +63,19 @@ function payment_get_last_user_tx_id($user_id)
     $connection = get_account_connection();
     $stmt = mysqli_prepare($connection, "SELECT last_tx_id FROM db_account.account WHERE user_id=?");
     if (!$stmt) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_bind_param($stmt, 'i', $user_id)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_execute($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_store_result($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (mysqli_stmt_num_rows($stmt) < 1) {
@@ -83,15 +83,15 @@ function payment_get_last_user_tx_id($user_id)
         return null;
     }
     if (!mysqli_stmt_bind_result($stmt, $id)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_fetch($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_close($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (mysqli_errno($connection) !== 0) {
@@ -115,16 +115,16 @@ function payment_lock_balance($user_id, $tx_id, $amount)
     $connection = get_account_connection();
     $stmt = mysqli_prepare($connection, "UPDATE db_account.account SET locked_balance = locked_balance + $amount, last_tx_id=? WHERE user_id=? AND $amount < account.balance - account.locked_balance");
     if (!$stmt) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     /** @noinspection PhpMethodParametersCountMismatchInspection */
     if (!mysqli_stmt_bind_param($stmt, 'ii', $tx_id, $user_id)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_execute($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (mysqli_stmt_affected_rows($stmt) != 1) {
@@ -137,19 +137,19 @@ function payment_lock_balance($user_id, $tx_id, $amount)
 
 function payment_pay($tx_id, $customer_id, $performer_id, $amount, $commission)
 {
-    $db_errors = initialize_db_errors();
+    $db_errors = initialize_dal_errors();
     $connection = get_account_connection();
     mysqli_autocommit($connection, false);
     $result = mysqli_query($connection, "UPDATE db_account.account SET locked_balance = locked_balance - $amount - $commission, balance = balance - $amount - $commission WHERE user_id=$customer_id AND locked_balance - $amount - $commission > 0 AND balance - $amount - $commission > 0");
     if (!$result) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         mysqli_rollback($connection);
         mysqli_autocommit($connection, true);
         return false;
     }
     $result = mysqli_query($connection, "UPDATE db_account.account SET balance = balance + $amount, last_tx_id=$tx_id WHERE user_id=$performer_id AND (last_tx_id is NULL or last_tx_id < $tx_id)");
     if (!$result) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         mysqli_rollback($connection);
         mysqli_autocommit($connection, true);
         return false;
@@ -162,16 +162,16 @@ function payment_unlock_balance($user_id, $amount)
     $connection = get_account_connection();
     $stmt = mysqli_prepare($connection, "UPDATE db_account.account SET locked_balance = locked_balance - $amount WHERE user_id=?");
     if (!$stmt) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     /** @noinspection PhpMethodParametersCountMismatchInspection */
     if (!mysqli_stmt_bind_param($stmt, 'i', $user_id)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_execute($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (mysqli_stmt_affected_rows($stmt) != 1) {
@@ -187,16 +187,16 @@ function payment_refill_balance($user_id, $amount)
     $connection = get_account_connection();
     $stmt = mysqli_prepare($connection, "UPDATE db_account.account SET balance = balance + $amount WHERE user_id=?");
     if (!$stmt) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     /** @noinspection PhpMethodParametersCountMismatchInspection */
     if (!mysqli_stmt_bind_param($stmt, 'i', $user_id)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_execute($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (mysqli_stmt_affected_rows($stmt) != 1) {
@@ -209,28 +209,28 @@ function payment_refill_balance($user_id, $amount)
 
 function payment_create_account($user_id, $balance = DEFAULT_BALANCE)
 {
-    $db_errors = initialize_db_errors();
+    $db_errors = initialize_dal_errors();
     $connection = get_account_connection();
     if (!$connection) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     $stmt = mysqli_prepare($connection, "INSERT INTO db_account.account (user_id, balance, last_tx_id, locked_balance) VALUES (?, ?, -1, 0.00)");
     if (!$stmt) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     /** @noinspection PhpMethodParametersCountMismatchInspection */
     if (!mysqli_stmt_bind_param($stmt, 'id', $user_id, $balance)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_execute($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_close($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (mysqli_errno($connection) !== 0) {
@@ -270,28 +270,28 @@ function _lock($user_id, $task_id, $amount, $tx_id)
 
 function _payment_init_transaction($id_from, $id_to, $amount, $type)
 {
-    $db_errors = initialize_db_errors();
+    $db_errors = initialize_dal_errors();
     $connection = get_payment_connection();
     if (!$connection) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     $stmt = mysqli_prepare($connection, "INSERT INTO db_tx.tx (id_from, id_to, amount, type) VALUES (?, ?, ?, ?)");
     if (!$stmt) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     /** @noinspection PhpMethodParametersCountMismatchInspection */
     if (!mysqli_stmt_bind_param($stmt, 'idss', $id_from, $id_to, $amount, $type)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_execute($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_close($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (mysqli_errno($connection) !== 0) {
@@ -380,28 +380,28 @@ function payment_process_pay_transaction($tx_id, $customer_id = null, $performer
 
 function payment_get_transaction_by_participants($entity_id_from, $entity_id_to, $type)
 {
-    $db_errors = initialize_db_errors();
+    $db_errors = initialize_dal_errors();
     $connection = get_payment_connection();
     if (!$connection) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     $stmt = mysqli_prepare($connection, "SELECT id, processed FROM db_tx.tx WHERE id_from=? AND id_to=? AND type=?");
     if (!$stmt) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     /** @noinspection PhpMethodParametersCountMismatchInspection */
     if (!mysqli_stmt_bind_param($stmt, 'iis', $entity_id_from, $entity_id_to, $type)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_execute($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_store_result($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (mysqli_stmt_num_rows($stmt) < 1) {
@@ -409,15 +409,15 @@ function payment_get_transaction_by_participants($entity_id_from, $entity_id_to,
         return null;
     }
     if (!mysqli_stmt_bind_result($stmt, $id, $processed)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_fetch($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_close($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (mysqli_errno($connection) !== 0) {
@@ -441,27 +441,27 @@ function _payment_transaction_set_processed($id)
 
 function payment_fetch_balance($user_id)
 {
-    $db_errors = initialize_db_errors();
+    $db_errors = initialize_dal_errors();
     $connection = get_account_connection();
     if (!$connection) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     $stmt = mysqli_prepare($connection, "SELECT balance-locked_balance FROM db_account.account WHERE user_id=?");
     if (!$stmt) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_bind_param($stmt, 'i', $user_id)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_execute($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_store_result($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (mysqli_stmt_num_rows($stmt) < 1) {
@@ -469,15 +469,15 @@ function payment_fetch_balance($user_id)
         return null;
     }
     if (!mysqli_stmt_bind_result($stmt, $balance)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_fetch($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_close($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (mysqli_errno($connection) !== 0) {

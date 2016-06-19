@@ -30,6 +30,10 @@
                         </button>
                     </div>
                 </form>
+                <a type="button" class="btn btn-link" data-toggle="modal" data-type="reset-password"
+                   data-target="#reset-form-modal">
+                    <i class="fa fa-key"></i><span id="reset-password" class="l10n l10n-text" data-l10n="reset_password"></span>
+                </a>
             </div>
             <div class="modal-footer">
                 <div class="col-md-12">

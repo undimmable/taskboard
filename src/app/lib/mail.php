@@ -13,14 +13,13 @@
  * @link      https://taskboards.top
  * @since     1.0.0
  */
-function send_verification_confirmed_email($email, $host)
+
+function send_password_changed_email($email, $host)
 {
-    if (INTEGRATION_TESTS)
-        return;
     $to = $email;
-    $subject = 'Thanks for the registration on taskboards.top';
+    $subject = "Password successfully changed.";
     $message = '<html><body>';
-    $message .= 'Now you can use <a href="https://' . $host . '/profile">this link</a> to access your profile ';
+    $message .= 'Now you can use <a href="https://' . $host . '/">this link</a> to access the app.';
     $message .= '</body></html>';
     $headers = 'MIME-Version: 1.0' . "\r\n";
     $headers .= 'Content-type: text/html; charset=utf-8' . "\r\n";
@@ -29,14 +28,26 @@ function send_verification_confirmed_email($email, $host)
     mail($to, $subject, $message, $headers);
 }
 
-function send_verification_request_email($email, $host, $signup_token)
+function send_registration_email($email, $host)
 {
-    if (INTEGRATION_TESTS)
-        return;
     $to = $email;
-    $subject = 'Confirm registration on taskboards.top';
+    $subject = "Thanks for the registration on taskboards.top";
     $message = '<html><body>';
-    $message .= '<a href="https://' . $host . '/api/v1/auth/verify?confirmation_token=' . $signup_token . '">Follow this link to confirm signup request.</a>';
+    $message .= '<a href="https://' . $host . '/">Follow this link to access taskboards.</a>';
+    $message .= '</body></html>';
+    $headers = 'MIME-Version: 1.0' . "\r\n";
+    $headers .= 'Content-type: text/html; charset=utf-8' . "\r\n";
+    $headers .= 'From: Taskboards <signup@taskboards.top>' . "\r\n";
+    $headers .= 'Reply-To: Taskboards <signup@taskboards.top>' . "\r\n";
+    mail($to, $subject, $message, $headers);
+}
+
+function send_reset_password_email($email, $host, $token)
+{
+    $to = $email;
+    $subject = 'Reset password requested';
+    $message = '<html><body>';
+    $message .= '<a href="https://' . $host . '?verification_token=' . $token . '">Follow this link to reset your password.</a>';
     $message .= '</body></html>';
     $headers = 'MIME-Version: 1.0' . "\r\n";
     $headers .= 'Content-type: text/html; charset=utf-8' . "\r\n";

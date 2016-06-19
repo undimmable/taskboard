@@ -27,10 +27,10 @@ require_once "dal_helper.php";
  */
 function dal_task_update_set_balance_locked($task_id)
 {
-    $db_errors = initialize_db_errors();
+    $db_errors = initialize_dal_errors();
     $connection = get_task_connection();
     if (!$connection) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     $mysqli_result = mysqli_query($connection, "UPDATE db_task.task SET balance_locked=TRUE WHERE id = $task_id");
@@ -48,10 +48,10 @@ function dal_task_update_set_balance_locked($task_id)
  */
 function dal_task_update_set_paid($task_id)
 {
-    $db_errors = initialize_db_errors();
+    $db_errors = initialize_dal_errors();
     $connection = get_task_connection();
     if (!$connection) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     $mysqli_result = mysqli_query($connection, "UPDATE db_task.task SET paid=TRUE WHERE id = $task_id");
@@ -70,10 +70,10 @@ function dal_task_update_set_paid($task_id)
  */
 function dal_task_update_set_performer_id($task_id, $performer_id)
 {
-    $db_errors = initialize_db_errors();
+    $db_errors = initialize_dal_errors();
     $connection = get_task_connection();
     if (!$connection) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     $mysqli_result = mysqli_query($connection, "UPDATE db_task.task SET performer_id=$performer_id WHERE id = $task_id AND (performer_id=$performer_id OR performer_id IS NULL)");
@@ -91,24 +91,24 @@ function dal_task_update_set_performer_id($task_id, $performer_id)
  */
 function dal_task_delete($task_id)
 {
-    $db_errors = initialize_db_errors();
+    $db_errors = initialize_dal_errors();
     $connection = get_task_connection();
     if (!$connection) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     $stmt = mysqli_prepare($connection, "UPDATE db_task.task SET deleted=TRUE WHERE id=? AND NOT balance_locked");
     if (!$stmt) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     /** @noinspection PhpMethodParametersCountMismatchInspection */
     if (!mysqli_stmt_bind_param($stmt, 'i', $task_id)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_execute($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (mysqli_stmt_affected_rows($stmt) != 1) {
@@ -129,10 +129,10 @@ function dal_task_delete($task_id)
  */
 function dal_task_create($customer_id, $amount, $description)
 {
-    $db_errors = initialize_db_errors();
+    $db_errors = initialize_dal_errors();
     $connection = get_task_connection();
     if (!$connection) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     $system_commission_percent = get_system_commission();
@@ -144,20 +144,20 @@ function dal_task_create($customer_id, $amount, $description)
     $commission_query = "(SELECT ($amount * ($system_commission_percent / 100)))";
     $stmt = mysqli_prepare($connection, "INSERT INTO db_task.task (customer_id, amount, commission, description) VALUES (?,$amount_query,$commission_query,?)");
     if (!$stmt) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     /** @noinspection PhpMethodParametersCountMismatchInspection */
     if (!mysqli_stmt_bind_param($stmt, 'is', $customer_id, $description)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_execute($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_close($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (mysqli_errno($connection) !== 0) {
@@ -175,43 +175,43 @@ function dal_task_create($customer_id, $amount, $description)
  */
 function dal_task_fetch($task_id)
 {
-    $db_errors = initialize_db_errors();
+    $db_errors = initialize_dal_errors();
     $connection = get_task_connection();
     if (!$connection) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     $stmt = mysqli_prepare($connection, "SELECT id, timestampdiff(SECOND, now(), created_at), customer_id, performer_id, amount + commission, amount AS price, commission, description, balance_locked, paid FROM db_task.task WHERE id=?");
     if (!$stmt) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     /** @noinspection PhpMethodParametersCountMismatchInspection */
     if (!mysqli_stmt_bind_param($stmt, 'i', $task_id)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_execute($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_store_result($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (mysqli_stmt_num_rows($stmt) < 1) {
         return null;
     }
     if (!mysqli_stmt_bind_result($stmt, $id, $created_at, $customer_id, $performer_id, $amount, $price, $commission, $description, $balance_locked, $paid)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_fetch($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_close($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (mysqli_errno($connection) !== 0) {
@@ -234,10 +234,10 @@ function dal_task_fetch($task_id)
 function dal_task_count_total_paid_commission()
 {
     //TODO: cache balance
-    $db_errors = initialize_db_errors();
+    $db_errors = initialize_dal_errors();
     $connection = get_task_connection();
     if (!$connection) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     $mysqli_result = mysqli_query(get_task_connection(), "SELECT COALESCE(sum(commission),0) AS balance FROM db_task.task WHERE paid=TRUE");
@@ -256,43 +256,43 @@ function dal_task_count_total_paid_commission()
  */
 function dal_task_fetch_non_locked_price($task_id, $customer_id)
 {
-    $db_errors = initialize_db_errors();
+    $db_errors = initialize_dal_errors();
     $connection = get_task_connection();
     if (!$connection) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     $stmt = mysqli_prepare($connection, "SELECT amount+commission FROM db_task.task WHERE id=? AND customer_id=? AND NOT balance_locked");
     if (!$stmt) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     /** @noinspection PhpMethodParametersCountMismatchInspection */
     if (!mysqli_stmt_bind_param($stmt, 'ii', $task_id, $customer_id)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_execute($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_store_result($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (mysqli_stmt_num_rows($stmt) < 1) {
         return null;
     }
     if (!mysqli_stmt_bind_result($stmt, $amount)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_fetch($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_close($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (mysqli_errno($connection) !== 0) {
@@ -309,10 +309,10 @@ function dal_task_fetch_non_locked_price($task_id, $customer_id)
  */
 function dal_task_fetch_last($customer_id)
 {
-    $db_errors = initialize_db_errors();
+    $db_errors = initialize_dal_errors();
     $connection = get_task_connection();
     if (!$connection) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     $mysqli_result = mysqli_query($connection, "SELECT id, amount + commission, paid, balance_locked FROM db_task.task WHERE customer_id=$customer_id ORDER BY ID DESC LIMIT 1");
@@ -336,10 +336,10 @@ function dal_task_fetch_last($customer_id)
  */
 function dal_task_fetch_tasks_complex_query_limit($callback, $user_id, $balance_locked, $select_user_type, $limit = 100, $latest_task_id_query, $last_id = null)
 {
-    $db_errors = initialize_db_errors();
+    $db_errors = initialize_dal_errors();
     $connection = get_task_connection();
     if (!$connection) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     $last_id_clause = $last_id === null ? '' : "AND id < $last_id";
@@ -349,21 +349,21 @@ function dal_task_fetch_tasks_complex_query_limit($callback, $user_id, $balance_
     $query = "SELECT id, timestampdiff(SECOND, now(), created_at), amount as price, customer_id, performer_id, amount + commission as amount, description, balance_locked, paid FROM db_task.task WHERE $balance_locked $latest_task_id_query AND not deleted AND ($select_user_type <=> ?) $last_id_clause ORDER BY id DESC LIMIT ?";
     $stmt = mysqli_prepare($connection, $query);
     if (!$stmt) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
 
     /** @noinspection PhpMethodParametersCountMismatchInspection */
     if (!mysqli_stmt_bind_param($stmt, 'ii', $user_id, $limit)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_execute($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     if (!mysqli_stmt_bind_result($stmt, $id, $created_at, $price, $customer_id, $performer_id, $amount, $description, $balance_locked, $paid)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     $row_number = 0;
@@ -386,7 +386,7 @@ function dal_task_fetch_tasks_complex_query_limit($callback, $user_id, $balance_
         return null;
     }
     if (!mysqli_stmt_close($stmt)) {
-        add_error($connection, $db_errors);
+        add_dal_error($connection, $db_errors);
         return false;
     }
     return true;

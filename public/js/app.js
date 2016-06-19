@@ -467,9 +467,14 @@ function Taskboard($) {
         return $(form).attr('id') == 'account-form';
     };
 
+    this.isPasswordResetForm = function (form) {
+        return $(form).attr('id') == 'reset-form';
+    };
+
     this.onPostSuccess = function (response) {
         var taskForm = taskboardApplication.isTaskForm(taskboardApplication.currentForm);
         var balanceForm = taskboardApplication.isBalanceForm(taskboardApplication.currentForm);
+        var passwordResetForm = taskboardApplication.isPasswordResetForm(taskboardApplication.currentForm);
         taskboardApplication.removeFormSpinner();
         taskboardApplication.enableModals();
         taskboardApplication.closeFormModal();
@@ -487,6 +492,9 @@ function Taskboard($) {
         }
         if (balanceForm) {
             $('#user-balance').text(response['balance']);
+        }
+        if (passwordResetForm) {
+            $('#email-sent-modal').modal('show');
         }
         if (response['redirect'] != null) {
             location.href = response['redirect'];
@@ -555,6 +563,10 @@ function Taskboard($) {
                 taskboardApplication.cleanupModal(this);
             }
         });
+        $('#reset-password').click(function () {
+            taskboardApplication.enableModals();
+            $('#login-form-modal').modal('hide');
+        });
     };
 
     this.updateBalance = function () {
@@ -569,7 +581,7 @@ function Taskboard($) {
     };
 
     this.initializeFormListeners = function () {
-        $('#login-form,#signup-form,#task-form,#account-form').submit(function (e) {
+        $('#login-form,#signup-form,#task-form,#account-form,#reset-form,#change-password-form').submit(function (e) {
             e.preventDefault();
             if (taskboardApplication.currentForm != null) {
                 return;
@@ -781,60 +793,64 @@ function Taskboard($) {
         taskboardApplication.initializeFormModals();
         taskboardApplication.initializeTimestampRefresher(timestampRefreshPeriod);
         taskboardApplication.initializeTooltips();
-        if (role && role != unauthorizedRole) {
-            taskboardApplication.updateBalance();
-            taskboardApplication.initializeFeed();
-            taskboardApplication.initializeEventStream();
-            taskboardApplication.initializeBadgeUpdate();
-        }
-        if (role == customerRole) {
-            $(document).on('click', '.delete-task', function () {
-                if (feed.loading)
-                    return;
-                feed.loading = true;
-                var el = $(this);
-                taskboardApplication.sendNonPost(el, 'DELETE', function (response, task) {
-                    feed.loading = false;
-                    taskboardApplication.onTaskRemove(task);
-                }, function (response, task) {
-                    feed.loading = false;
-                    taskboardApplication.onNonPostError(response, task);
-                });
-            });
-            $(document).on('click', '.fix-task', function () {
-                if (feed.loading)
-                    return;
-                feed.loading = true;
-                var el = $(this);
-                taskboardApplication.sendNonPost(el, 'POST', function (response, task) {
-                    feed.loading = false;
-                    taskboardApplication.onTaskCreate(response, task);
-                }, function (response, task) {
-                    feed.loading = false;
-                    taskboardApplication.onNonPostError(response, task);
-                });
-            });
-        }
-        if (role == performerRole) {
-            $(document).on('click', '.perform-task', function () {
-                if (feed.loading)
-                    return;
-                feed.loading = true;
-                var el = $(this);
-                el.attr('disabled', true);
-                taskboardApplication.replaceIconWithSpinner(el.find('i'));
-                taskboardApplication.sendNonPost(el, 'PUT', function (response, task) {
-                    feed.loading = false;
-                    taskboardApplication.replaceSpinnerWithIcon(el.find('i'));
-                    el.attr('disabled', false);
-                    taskboardApplication.onTaskRemove(task);
-                }, function (response, task) {
-                    feed.loading = false;
-                    taskboardApplication.replaceSpinnerWithIcon(el.find('i'));
-                    el.attr('disabled', false);
-                    taskboardApplication.onNonPostError(response, task);
-                });
-            });
+        if (role !== undefined) {
+            if (role != unauthorizedRole) {
+                taskboardApplication.updateBalance();
+                taskboardApplication.initializeFeed();
+                taskboardApplication.initializeEventStream();
+                taskboardApplication.initializeBadgeUpdate();
+                if (role == customerRole) {
+                    $(document).on('click', '.delete-task', function () {
+                        if (feed.loading)
+                            return;
+                        feed.loading = true;
+                        var el = $(this);
+                        taskboardApplication.sendNonPost(el, 'DELETE', function (response, task) {
+                            feed.loading = false;
+                            taskboardApplication.onTaskRemove(task);
+                        }, function (response, task) {
+                            feed.loading = false;
+                            taskboardApplication.onNonPostError(response, task);
+                        });
+                    });
+                    $(document).on('click', '.fix-task', function () {
+                        if (feed.loading)
+                            return;
+                        feed.loading = true;
+                        var el = $(this);
+                        taskboardApplication.sendNonPost(el, 'POST', function (response, task) {
+                            feed.loading = false;
+                            taskboardApplication.onTaskCreate(response, task);
+                        }, function (response, task) {
+                            feed.loading = false;
+                            taskboardApplication.onNonPostError(response, task);
+                        });
+                    });
+                }
+                if (role == performerRole) {
+                    $(document).on('click', '.perform-task', function () {
+                        if (feed.loading)
+                            return;
+                        feed.loading = true;
+                        var el = $(this);
+                        el.attr('disabled', true);
+                        taskboardApplication.replaceIconWithSpinner(el.find('i'));
+                        taskboardApplication.sendNonPost(el, 'PUT', function (response, task) {
+                            feed.loading = false;
+                            taskboardApplication.replaceSpinnerWithIcon(el.find('i'));
+                            el.attr('disabled', false);
+                            taskboardApplication.onTaskRemove(task);
+                        }, function (response, task) {
+                            feed.loading = false;
+                            taskboardApplication.replaceSpinnerWithIcon(el.find('i'));
+                            el.attr('disabled', false);
+                            taskboardApplication.onNonPostError(response, task);
+                        });
+                    });
+                }
+            } else {
+                $('#change-password-form-modal').modal('show');
+            }
         }
         return taskboardApplication;
     };

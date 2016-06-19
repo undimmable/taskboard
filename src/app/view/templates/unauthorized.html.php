@@ -1,3 +1,60 @@
+<?php
+if (!get_authorized_user()) {
+    $GLOBALS['reset_csrf'] = get_reset_password_csrf();
+    if (array_key_exists("verification_token", $_GET)) {
+        $verification_token = htmlspecialchars($_GET['verification_token'], ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5 | ENT_DISALLOWED, 'UTF-8', true);
+        require_once 'reset_password.html.php';
+    }
+}
+?>
+<div id="email-sent-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header col-md-12">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h1 class="text-center l10n l10n-text" data-l10n="email_sent_notice_header"></h1>
+            </div>
+            <div class="modal-body col-md-12 l10n l10n-text" data-l10n="email_sent_notice_body"></div>
+            <div class="modal-footer">
+                <div class="col-md-12">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="reset-form-modal" class="modal fade" data-type="" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h1 class="text-center"><span class="l10n l10n-text" data-l10n=""></span></h1>
+            </div>
+            <div class="modal-body col-md-12">
+                <!--suppress HtmlUnknownTarget -->
+                <form id="reset-form" class="form col-md-12 center-block" action="/api/v1/auth/reset_password">
+                    <div id="reset-<?php echo EMAIL ?>" class="form-group">
+                        <label for="reset-<?php echo EMAIL ?>" class="l10n l10n-text" data-l10n="email">Email</label>
+                        <input type="email" class="form-control input-lg l10n l10n-placeholder" placeholder="Email"
+                               name="<?php echo EMAIL ?>" data-l10n="email"
+                               id="reset-<?php echo EMAIL ?>" autofocus>
+                        <span id="reset-form-error-<?php echo EMAIL ?>" class="error-description"></span>
+                        <span id="reset-form-error-unspecified" class="error-description"></span>
+                    </div>
+                    <input type="hidden" id="csrf_token" name="csrf_token" value="<?php echo $GLOBALS['reset_csrf']; ?>"/>
+                    <div class="form-group">
+                        <button class="btn btn-primary btn-lg btn-block btn-default">
+                            <i class="fa fa-key" aria-hidden="true"
+                               id="reset-form-spinner" data-icon="fa fa-key"></i>
+                            <span class="l10n l10n-text" data-l10n="reset_password"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
 <div class="col-lg-8 col-md-10 col-sm-12 col-xs-12 col-lg-offset-2 col-md-offset-1 col-sm-offset-0 col-xs-offset-0">
     <div class="feed-wrapper">
         <div class="panel panel-info">
