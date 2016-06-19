@@ -259,6 +259,7 @@ function Taskboard($) {
         if (changed) {
             $('#task-feed').find('li[data-id="'.concat(id, '"]')).each(function () {
                 var $that = $(this);
+                $that.find('strong').addClass('task-completed');
                 $that.find('.avatar-img').attr('src', '/img/m.png');
                 $that.addClass('task-completed');
                 $that.find('button').remove();
