@@ -294,7 +294,11 @@ function api_task_perform($task_id)
         } elseif ($task[PERFORMER_ID] == $performer_id) {
             $tx = dal_payment_get_transaction_by_participants($task[ID], $task[PERFORMER_ID], 'p');
             if (!$tx) {
-                payment_process_complex($task);
+                if(payment_process_complex($task)) {
+                    on_payment_success($task);
+                } else {
+                    on_payment_failure();
+                }
             } else if (!$tx[PROCESSED]) {
                 $processed = dal_payment_process_pay_transaction($tx[ID], $task[CUSTOMER_ID], $performer_id, $task[PRICE], $task[COMMISSION]);
                 if ($processed) {
@@ -349,7 +353,7 @@ function on_payment_failure()
  */
 function payment_process_complex($task)
 {
-    $tx_id = payment_init_pay_transaction($task[ID], $task[PERFORMER_ID], $task[PRICE]);
+    $tx_id = dal_payment_init_pay_transaction($task[ID], $task[PERFORMER_ID], $task[PRICE]);
     $processed = dal_payment_process_pay_transaction($tx_id, $task[CUSTOMER_ID], $task[PERFORMER_ID], $task[PRICE], $task[COMMISSION]);
     if ($processed) {
         $paid_success = dal_task_update_set_paid($task[ID]);
