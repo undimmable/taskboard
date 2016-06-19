@@ -16,6 +16,6 @@ function log_error($msg)
 
 function log_debug($msg)
 {
-    if ($GLOBALS['debug_enabled'])
+    if (array_key_exists('debug_enabled', $GLOBALS) && $GLOBALS['debug_enabled'])
         log_msg($msg, "/var/log/async_php_debug.log");
 }

@@ -22,6 +22,7 @@ $clients = [];
 $forbidden_clients = [];
 $clients_size = 0;
 $critical_client_size = 500;
+$debug_enabled = false;
 
 function send_event_to_client($client, $id, $str)
 {
@@ -36,7 +37,7 @@ function send_event_to_client($client, $id, $str)
         log_info("Socket write has failed " . socket_strerror(socket_last_error()));
         drop_client($client);
     }
-    if ($GLOBALS['debug_enabled'])
+    if (array_key_exists('debug_enabled', $GLOBALS) && $GLOBALS['debug_enabled'])
         log_debug("Event " . $event . " sent to client " . $client[USER_ID]);
 }
 
@@ -191,7 +192,7 @@ function fetch_events()
         foreach ($client_array as &$existing_client) {
             $ev = fetch_generic_event($existing_client[USER_ID], $existing_client['last_event_id']);
             if ($ev && count($ev) > 0 && array_key_exists('id', $ev) && $ev['id']) {
-                if ($GLOBALS['debug_enabled']) {
+                if (array_key_exists('debug_enabled', $GLOBALS) && $GLOBALS['debug_enabled']) {
                     log_debug("Fetched events" . $ev['ev_list']);
                 }
                 var_dump($GLOBALS['clients']);
