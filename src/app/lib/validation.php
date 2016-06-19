@@ -158,7 +158,7 @@ function _is_role_valid(&$role, &$validation_context)
         _add_validation_error($validation_context, ROLE, 'is_invalid');
         return false;
     }
-    if (!role_value_exists($role)) {
+    if (!role_exists($role)) {
         $role = filter_var(FILTER_SANITIZE_NUMBER_INT);
         _add_validation_error($validation_context, ROLE, "is_invalid");
         return false;

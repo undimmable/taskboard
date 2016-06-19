@@ -524,8 +524,7 @@ function api_task_delete_by_id($task_id)
  */
 function _render_task($task)
 {
-    global $current_task;
-    $current_task = $task;
+    $GLOBALS['current_task'] = $task;
     require 'view/templates/task.html.php';
 }
 

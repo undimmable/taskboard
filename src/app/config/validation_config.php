@@ -18,12 +18,10 @@ $validation_config = null;
 
 function get_validation_config()
 {
-    global $php_config_path, $validation_config;
-    if (is_null($validation_config)) {
-        /** @noinspection PhpIncludeInspection */
+    if (is_null($GLOBALS['validation_config'])) {
         $validation_config = include "taskboard_validation_config.php";
     }
-    return $validation_config;
+    return $GLOBALS['validation_config'];
 }
 
 function get_config_min_password_length()

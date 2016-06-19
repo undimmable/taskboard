@@ -219,6 +219,10 @@ function api_auth_signup_action()
  */
 function api_auth_logout_action()
 {
+    $ip = parse_ip_from_server();
+    $client = parse_user_client_from_server();
+    $user_id = get_authorized_user()[ID];
+    dal_login_remove($user_id, $ip, $client);
     delete_token_cookie();
     https_redirect("/");
 }

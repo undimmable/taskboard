@@ -71,6 +71,14 @@ function get_task_connection()
     return $GLOBALS['connections'][TASK_DB];
 }
 
+function get_text_idx_connection()
+{
+    if ($GLOBALS['connections'][TEXT_IDX_DB] === null) {
+        $GLOBALS['connections'][TEXT_IDX_DB] = get_dal_connection(TEXT_IDX_DB);
+    }
+    return $GLOBALS['connections'][TEXT_IDX_DB];
+}
+
 function get_user_connection()
 {
     if ($GLOBALS['connections'][USER_DB] === null) {
@@ -116,6 +124,14 @@ function close_task_connection()
     if ($GLOBALS['connections'][TASK_DB] !== null) {
         mysqli_close($GLOBALS['connections'][TASK_DB]);
         unset($GLOBALS['connections'][TASK_DB]);
+    }
+}
+
+function close_text_idx_connection()
+{
+    if ($GLOBALS['connections'][TEXT_IDX_DB] !== null) {
+        mysqli_close($GLOBALS['connections'][TEXT_IDX_DB]);
+        unset($GLOBALS['connections'][TEXT_IDX_DB]);
     }
 }
 

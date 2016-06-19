@@ -112,17 +112,11 @@ function is_task_completed($task)
 
 function get_customer_task_csrf($user_id, $task_id)
 {
-    if ($GLOBALS['staging']) {
-        return 10;
-    }
     return hash("sha256", "$user_id.$task_id." . get_config_task_csrf_secret(), false);
 }
 
 function get_customer_task_create_csrf($user_id, $task_id)
 {
-    if ($GLOBALS['staging']) {
-        return 10;
-    }
     return hash("sha256", "$user_id.$task_id." . get_config_task_csrf_secret(), false);
 }
 
@@ -133,49 +127,31 @@ function get_event_token_header()
 
 function get_performer_task_csrf($user_id, $task_id)
 {
-    if ($GLOBALS['staging']) {
-        return 10;
-    }
     return hash("sha256", "$user_id.$task_id." . get_config_task_csrf_secret(), false);
 }
 
 function get_login_csrf()
 {
-    if ($GLOBALS['staging']) {
-        return 9;
-    }
     return hash("sha256", 0 . " ." . parse_ip_from_server() . "." . parse_user_client_from_server() . ".gilon" . get_config_login_csrf_secret(), false);
 }
 
 function get_signup_csrf()
 {
-    if ($GLOBALS['staging']) {
-        return 8;
-    }
     return hash("sha256", 0 . "." . parse_ip_from_server() . "." . parse_user_client_from_server() . ".gnsiup" . get_config_login_csrf_secret(), false);
 }
 
 function get_reset_password_csrf()
 {
-    if ($GLOBALS['staging']) {
-        return 8;
-    }
     return hash("sha256", 0 . "." . parse_ip_from_server() . "." . parse_user_client_from_server() . ".gnremnd" . get_config_login_csrf_secret(), false);
 }
 
 function get_change_password_csrf()
 {
-    if ($GLOBALS['staging']) {
-        return 8;
-    }
     return hash("sha256", 0 . "." . parse_ip_from_server() . "." . parse_user_client_from_server() . ".gnchps" . get_config_login_csrf_secret(), false);
 }
 
 function get_account_csrf($user_id)
 {
-    if ($GLOBALS['staging']) {
-        return 11;
-    }
     return hash("sha256", ".$user_id.account" . get_config_account_csrf_secret(), false);
 }
 

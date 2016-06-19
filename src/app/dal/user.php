@@ -19,8 +19,7 @@ require_once "dal_helper.php";
 function dal_create_user($email, $role, $hashed_password, $confirmation_token)
 {
     if (dal_user_exists($email)) {
-        global $db_errors;
-        $db_errors[LOGIN] = "duplicate entity";
+        $GLOBALS['db_errors'][LOGIN] = "duplicate entity";
         return false;
     }
     initialize_dal_errors();

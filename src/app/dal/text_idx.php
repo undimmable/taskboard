@@ -15,16 +15,6 @@
  */
 require_once "../bootstrap.php";
 require_once "dal_helper.php";
-$text_idx_connection = null;
-
-function get_text_idx_connection()
-{
-    global $text_idx_connection;
-    if ($text_idx_connection === null) {
-        $text_idx_connection = get_dal_connection(TEXT_IDX_DB);
-    }
-    return $text_idx_connection;
-}
 
 function find_object($text)
 {

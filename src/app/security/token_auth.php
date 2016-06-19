@@ -29,7 +29,7 @@ function set_token_cookie($jwt_token, $session = true)
 
 function delete_token_cookie()
 {
-    setcookie(PRIVATE_TOKEN, null, 1, "/", null, true, true);
+    setcookie(PRIVATE_TOKEN, FALSE, 1, "/", null, true, true);
 }
 
 function parse_token_from_cookie()
@@ -95,14 +95,12 @@ function parse_user_from_token($token)
 
 function get_authorized_user()
 {
-    global $user;
-    return $user;
+    return $GLOBALS['user'];
 }
 
 function set_authorized_user($authorized_user)
 {
-    global $user;
-    $user = $authorized_user;
+    $GLOBALS['user'] = $authorized_user;
 }
 
 function is_authorized()

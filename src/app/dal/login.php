@@ -16,6 +16,38 @@
 
 require_once "dal/dal_helper.php";
 
+function dal_login_remove($user_id, $ip, $client)
+{
+    $db_errors = initialize_dal_errors();
+    $connection = get_login_connection();
+    if (!$connection) {
+        add_dal_error($connection, $db_errors);
+        return false;
+    }
+    $stmt = mysqli_prepare($connection, "DELETE FROM db_login.login WHERE user_id=? AND ip = ? AND user_client=?");
+    if (!$stmt) {
+        add_dal_error($connection, $db_errors);
+        return false;
+    }
+    /** @noinspection PhpMethodParametersCountMismatchInspection */
+    if (!mysqli_stmt_bind_param($stmt, 'iis', $user_id, $ip, $client)) {
+        add_dal_error($connection, $db_errors);
+        return false;
+    }
+    if (!mysqli_stmt_execute($stmt)) {
+        add_dal_error($connection, $db_errors);
+        return false;
+    }
+    if (!mysqli_stmt_close($stmt)) {
+        add_dal_error($connection, $db_errors);
+        return false;
+    }
+    if (mysqli_errno($connection) !== 0) {
+        return false;
+    }
+    return true;
+}
+
 function dal_login_create_or_update($user_id, $ip, $client)
 {
     $db_errors = initialize_dal_errors();

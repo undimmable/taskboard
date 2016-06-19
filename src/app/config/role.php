@@ -19,44 +19,32 @@ $roles_reversed = array_flip($roles);
 
 function get_role_value($key)
 {
-    global $roles;
-    return $roles[$key];
+    return $GLOBALS['roles'][$key];
 }
 
 function get_role_key($role)
 {
-    global $roles_reversed;
-    return $roles_reversed[$role];
+    return $GLOBALS['roles_reversed'][$role];
 }
 
-function role_key_exists($key)
+function role_exists($key)
 {
-    global $roles;
-    return array_key_exists($key, $roles);
-}
-
-function role_value_exists($key)
-{
-    global $roles;
-    return array_key_exists($key, $roles);
+    return array_key_exists($key, $GLOBALS['roles']);
 }
 
 function is_customer($key)
 {
-    global $roles_reversed;
-    return $key === $roles_reversed[CUSTOMER];
+    return $key === $GLOBALS['roles_reversed'][CUSTOMER];
 }
 
 function is_performer($key)
 {
-    global $roles_reversed;
-    return $key === $roles_reversed[PERFORMER];
+    return $key === $GLOBALS['roles_reversed'][PERFORMER];
 }
 
 function is_system($key)
 {
-    global $roles_reversed;
-    return $key === $roles_reversed[SYSTEM];
+    return $key === $GLOBALS['roles_reversed'][SYSTEM];
 }
 
 function auth_unauthenticated()

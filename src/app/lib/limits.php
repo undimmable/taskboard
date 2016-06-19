@@ -26,32 +26,30 @@ $_requests_storage = [];
  */
 function check_ip_limits($ip)
 {
-    global $_max_connections_per_ip;
     if (empty($ip)) {
         return false;
     }
     if (!isset ($_ipStorage[$ip])) {
         return true;
     }
-    return ($_ipStorage[$ip] > $_max_connections_per_ip) ? false : true;
+    return ($_ipStorage[$ip] > $GLOBALS['_max_connections_per_ip']) ? false : true;
 }
 
 function check_request_limits($client_id)
 {
-    global $_requests_storage, $_request_limit_timeout_sec, $_max_requests;
-    if (array_key_exists($client_id, $_requests_storage)) {
+    if (array_key_exists($client_id, $GLOBALS['_requests_storage'])) {
         $_requests_storage[$client_id] = ['last' => time(), 'total' => 1];
         return true;
     }
 
-    if (time() - $_requests_storage[$client_id]['last'] > $_request_limit_timeout_sec) {
+    if (time() - $GLOBALS['_requests_storage'][$client_id]['last'] > $GLOBALS['_request_limit_timeout_sec']) {
         $_request_storage[$client_id] = ['last' => time(), 'total' => 1];
         return true;
     }
-    if ($_requests_storage[$client_id]['total'] > $_max_requests) {
+    if ($GLOBALS['_requests_storage'][$client_id]['total'] > $GLOBALS['_max_requests']) {
         return false;
     }
-    $_requests_storage[$client_id]['total']++;
+    $GLOBALS['_requests_storage'][$client_id]['total']++;
     return true;
 
 }

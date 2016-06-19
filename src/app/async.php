@@ -42,20 +42,18 @@ function send_event_to_client($client, $id, $str)
 
 function drop_client($client)
 {
-    global $clients_size, $clients;
-    $clients_size--;
+    $GLOBALS['clients_size']--;
     if (is_resource($client['connection']))
         socket_close($client['connection']);
-    if (($key = array_search($client, $clients)) !== false) {
-        unset($clients[$key]);
+    if (($key = array_search($client, $GLOBALS['clients'])) !== false) {
+        unset($GLOBALS['clients'][$key]);
     }
 }
 
 function remove_existing_client($user_agent, $client_ip, $target_id)
 {
-    global $clients;
-    if (array_key_exists($target_id, $clients)) {
-        foreach ($clients[$target_id] as $client) {
+    if (array_key_exists($target_id, $GLOBALS['clients'])) {
+        foreach ($GLOBALS['clients'][$target_id] as $client) {
             if ($client['user_agent'] == $user_agent && $client['client_ip'] = $client_ip)
                 drop_client($client);
         }
@@ -64,18 +62,17 @@ function remove_existing_client($user_agent, $client_ip, $target_id)
 
 function add_client($client)
 {
-    global $clients_size, $master, $clients, $critical_client_size;
     $user_id = $client[USER_ID];
     log_info("Connected client $user_id");
-    if (socket_last_error($master)) {
-        socket_clear_error($master);
+    if (socket_last_error($GLOBALS['master'])) {
+        socket_clear_error($GLOBALS['master']);
     } else {
-        if ($clients_size >= $critical_client_size) {
+        if ($GLOBALS['clients_size'] >= $GLOBALS['critical_client_size']) {
             @socket_close($client['connection']);
         } else {
             remove_existing_client($client['user_agent'], $client['client_ip'], $client['user_id']);
-            $clients_size++;
-            if (!array_key_exists($user_id, $clients)) {
+            $GLOBALS['clients_size']++;
+            if (!array_key_exists($user_id, $GLOBALS['clients'])) {
                 $clients[$user_id] = [];
             }
             $clients[$user_id][] = $client;

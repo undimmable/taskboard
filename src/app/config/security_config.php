@@ -18,12 +18,11 @@ $security_config = null;
 
 function get_security_config()
 {
-    global $php_config_path, $security_config;
-    if (is_null($security_config)) {
+    if (is_null($GLOBALS['security_config'])) {
         /** @noinspection PhpIncludeInspection */
         $security_config = include "taskboard_security_config.php";
     }
-    return $security_config;
+    return $GLOBALS['security_config'];
 }
 
 function get_config_jwt_secret()
