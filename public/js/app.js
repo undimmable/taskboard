@@ -74,10 +74,16 @@ function Taskboard($) {
             $('#loading').show();
         };
         this.noMoreContent = function () {
+            feed.hideLoading();
             $('#no-more-content').show();
         };
         this.load = function () {
             if (feed.lastTaskId == -1) {
+                feed.loading = false;
+                return;
+            }
+            if (feed.loadedTaskIds.length > 10) {
+                feed.noMoreContent();
                 feed.loading = false;
                 return;
             }
