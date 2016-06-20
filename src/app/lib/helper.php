@@ -152,7 +152,7 @@ function get_change_password_csrf()
 
 function get_account_csrf($user_id)
 {
-    return hash("sha256", ".$user_id.account" . get_config_account_csrf_secret(), false);
+    return hash("sha256", ".$user_id.acc" . get_config_account_csrf_secret(), false);
 }
 
 function get_performer_img()

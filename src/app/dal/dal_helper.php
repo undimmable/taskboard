@@ -127,10 +127,7 @@ function get_text_idx_db_name()
 
 function get_user_db_name()
 {
-    if ($GLOBALS['connections'][USER_DB] === null) {
-        $GLOBALS['connections'][USER_DB] = get_dal_connection(USER_DB);
-    }
-    return $GLOBALS['connections'][USER_DB];
+    return get_entity_db_name(USER_DB);
 }
 
 function close_account_connection()
