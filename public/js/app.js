@@ -2,7 +2,7 @@ String.prototype.replaceAll = function (search, replacement) {
     var target = this;
     return target.split(search).join(replacement);
 };
-
+$.ajaxSetup({ cache: false });
 function Taskboard($) {
     "use strict";
     var errorNoticeKey = 'error-popup';
