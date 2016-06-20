@@ -226,6 +226,9 @@ function api_task_get_all()
     $latest_task_id_query = "";
     if (array_key_exists('HTTP_X_FETCH_NEW', $_SERVER)) {
         $task_ids = json_decode($_SERVER['HTTP_X_FETCH_NEW'], true);
+        if (!$task_ids) {
+            render_bad_request_json([JSON_ERROR => [UNSPECIFIED => "invalid"]]);
+        }
         foreach ($task_ids as $task_id) {
             if (!filter_var($task_id, FILTER_VALIDATE_INT)) {
                 render_bad_request_json([JSON_ERROR => [UNSPECIFIED => "invalid"]]);
@@ -234,6 +237,8 @@ function api_task_get_all()
         }
         if (!is_null($task_ids) && count($task_ids) > 0) {
             $latest_task_id_query = "AND id in (" . join(",", $task_ids) . ")";
+        } else {
+            render_bad_request_json([JSON_ERROR => [UNSPECIFIED => "invalid"]]);
         }
     }
     $last_id = parse_integer_param('last_id');
