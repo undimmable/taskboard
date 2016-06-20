@@ -119,7 +119,6 @@ function Taskboard($) {
                     taskboardApplication.closeFormOnUnknownError(status);
                     feed.loading = false;
                     feed.hideLoading();
-                    console.log(error);
                 }
             });
         }
@@ -361,8 +360,6 @@ function Taskboard($) {
                     taskboardApplication.updateBalance();
                 }
             }
-        } else {
-            console.log("Unknown event");
         }
     };
 
@@ -373,7 +370,6 @@ function Taskboard($) {
                 taskboardApplication.onEvent(e);
             };
             window.es.onerror = function (e) {
-                console.log(e);
             };
         }
     };
@@ -535,16 +531,15 @@ function Taskboard($) {
         taskboardApplication.enableModals();
         taskboardApplication.closeFormModal();
         taskboardApplication.finalizeForm();
-        if (taskForm) {
-            taskboardApplication.updateBalance();
-            taskboardApplication.replaceToken(response);
-            taskboardApplication.renderHtmlTasks(response, true);
-            return;
-        }
         if (response == null) {
             console.error("Something went extremely wrong here, response is not JSON");
             console.error(response);
             return;
+        }
+        if (taskForm) {
+            taskboardApplication.updateBalance();
+            taskboardApplication.replaceToken(response);
+            taskboardApplication.renderHtmlTasks(response, true);
         }
         if (balanceForm) {
             $('#user-balance').text(response['balance']);
@@ -562,17 +557,20 @@ function Taskboard($) {
         taskboardApplication.closeFormModal();
         taskboardApplication.initializeNotice(errorNoticeKey);
         taskboardApplication.finalizeForm();
+        $(taskboardApplication.currentForm).attr('data-submitted', 'false');
     };
 
     this.closeTaskFormWithAlert = function () {
         taskboardApplication.closeFormModal();
         taskboardApplication.finalizeForm();
+        $(taskboardApplication.currentForm).attr('data-submitted', 'false');
         $('#task-unpaid-modal').modal('show');
     };
 
     this.onPostError = function (response) {
         taskboardApplication.removeFormSpinner();
         taskboardApplication.enableModals();
+        $(taskboardApplication.currentForm).attr('data-submitted', 'false');
         var json = taskboardApplication.parseJsonResponse(response);
         if (!json) {
             taskboardApplication.closeFormOnUnknownError("Something went extremely wrong here, response is not a JSON.");
@@ -582,14 +580,6 @@ function Taskboard($) {
             taskboardApplication.closeFormOnUnknownError("Something went extremely wrong here, response is JSON of error type, but doesn't have any explanatory fields.");
             return;
         }
-        $(taskboardApplication.currentForm).find('input').on('change keyup', function () {
-            if (!taskboardApplication.disableModals) {
-                $(this).off('change keyup');
-                $(this).closest('form').find('button').each(function () {
-                    $(this).prop('disabled', false);
-                });
-            }
-        });
         if (json.error.hasOwnProperty("task-unpaid")) {
             taskboardApplication.closeTaskFormWithAlert();
             return;
@@ -611,6 +601,7 @@ function Taskboard($) {
         var $modal = $('.modal');
         $modal.on('shown.bs.modal', function () {
             $(this).find("[autofocus]:first").focus();
+            $(this).find('form').attr('data-submitted', 'false');
         });
         $modal.on('hide.bs.modal', function (e) {
             if (taskboardApplication.disableModals) {
@@ -639,45 +630,49 @@ function Taskboard($) {
     this.initializeFormListeners = function () {
         $('#login-form,#signup-form,#task-form,#account-form,#reset-form,#change-password-form').submit(function (e) {
             e.preventDefault();
-            if (taskboardApplication.currentForm != null) {
-                return;
-            }
-            taskboardApplication.cleanupModal($(this).closest('.modal'));
-            var empty;
-            var form = $(this);
-            $(this).find('input,textarea').each(function (e, v) {
-                if (!v.value.trim().length) {
-                    empty = true;
-                    var $errorSpan = $('#'.concat(form.attr('id'), '-error-', v.name));
-                    $errorSpan.parent('div').addClass('has-error');
-                    $errorSpan.text(taskboardApplication.localizedMessage('not_provided'));
+            if ($(this).attr('data-submitted') == 'true') {
+                return false;
+            } else {
+                $(this).attr('data-submitted', 'true');
+                taskboardApplication.cleanupModal($(this).closest('.modal'));
+                var empty;
+                var form = $(this);
+                $(this).find('input,textarea').each(function (e, v) {
+                    if (!v.value.trim().length) {
+                        empty = true;
+                        var $errorSpan = $('#'.concat(form.attr('id'), '-error-', v.name));
+                        $errorSpan.parent('div').addClass('has-error');
+                        $errorSpan.text(taskboardApplication.localizedMessage('not_provided'));
+                    }
+                });
+                if (empty) {
+                    $(this).attr('data-submitted', 'false');
+                    return false;
                 }
-            });
-            if (empty) {
-                return;
+                $(this).find('button').each(function () {
+                    $(this).prop('disabled', true);
+                });
+                var isTaskForm = $(this).attr('id') == 'task-form';
+                taskboardApplication.disableModals = true;
+                taskboardApplication.currentForm = this;
+                var data = taskboardApplication.serializeForm();
+                var action = $(taskboardApplication.currentForm).attr('action');
+                taskboardApplication.addFormSpinner();
+                var csrf = $(this).find('input[name=csrf_token]').val();
+                $.ajax({
+                    url: action,
+                    dataType: isTaskForm ? 'html' : 'json',
+                    contentType: 'application/json; charset=UTF-8',
+                    type: "POST",
+                    headers: {
+                        "X-CSRF-TOKEN": csrf
+                    },
+                    data: data,
+                    success: taskboardApplication.onPostSuccess,
+                    error: taskboardApplication.onPostError
+                });
+                return false;
             }
-            var isTaskForm = $(this).attr('id') == 'task-form';
-            taskboardApplication.disableModals = true;
-            taskboardApplication.currentForm = this;
-            $(this).find('button').each(function () {
-                $(this).attr('disabled', 'true');
-            });
-            var data = taskboardApplication.serializeForm();
-            var action = $(taskboardApplication.currentForm).attr('action');
-            taskboardApplication.addFormSpinner();
-            var csrf = $(this).find('input[name=csrf_token]').val();
-            $.ajax({
-                url: action,
-                dataType: isTaskForm ? 'html' : 'json',
-                contentType: 'application/json; charset=UTF-8',
-                type: "POST",
-                headers: {
-                    "X-CSRF-TOKEN": csrf
-                },
-                data: data,
-                success: taskboardApplication.onPostSuccess,
-                error: taskboardApplication.onPostError
-            });
         });
     };
 
@@ -818,7 +813,6 @@ function Taskboard($) {
                 error: function (response) {
                     feed.loading = false;
                     taskboardApplication.decrementBadge();
-                    console.log(response);
                 }
             });
         });

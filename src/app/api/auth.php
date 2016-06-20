@@ -102,7 +102,7 @@ function _validate_remind_input($email, $csrf)
     return false;
 }
 
-function _validate_change_password_input($email, $password, $password_repeat, $ts, $csrf)
+function _validate_change_password_input($email, $password, $password_repeat, $ts, $verification_token, $csrf)
 {
     $validation_context = initialize_validation_context();
     _is_change_password_token_valid($csrf, $validation_context);
@@ -110,6 +110,7 @@ function _validate_change_password_input($email, $password, $password_repeat, $t
     _is_password_valid($password, $validation_context);
     _is_password_repeat_valid($password, $password_repeat, $validation_context);
     _is_change_password_ts_valid($ts, $validation_context);
+    _is_change_password_verification_token_valid($verification_token, $email, $ts, $validation_context);
     if (!validation_context_has_errors($validation_context)) {
         return true;
     }
@@ -130,7 +131,7 @@ function _validate_change_password_input($email, $password, $password_repeat, $t
 function _login($user_id, $user_role, $email, $ip, $client, $remember_me)
 {
     dal_login_create_or_update($user_id, $ip, $client);
-    $token = create_jwt_token($email, $user_role, $user_id);
+    $token = create_jwt_token($email, $user_role, $user_id, get_private_token_csrf($user_id, $email));
     set_token_cookie($token, !$remember_me);
     render_ok_json(['redirect' => '/']);
 }
@@ -238,7 +239,8 @@ function api_auth_reset_password()
     if (_validate_remind_input($email, $csrf)) {
         $user = dal_fetch_user_by_email($email);
         if ($user) {
-            $token = JWT_encode([EMAIL => $user[EMAIL], 'ts' => dal_now()], get_config_confirmation_secret());
+            $ts = dal_now();
+            $token = JWT_encode([EMAIL => $user[EMAIL], 'ts' => $ts, 'verification_token' => get_reset_password_verification_token($user[EMAIL], $ts)], get_config_confirmation_secret());
             send_reset_password_email($user[EMAIL], $_SERVER['HTTP_HOST'], $token);
             render_ok_json("");
         } else {
@@ -261,8 +263,9 @@ function api_auth_change_password()
             $password = $data[PASSWORD];
             $password_repeat = $data[PASSWORD_REPEAT];
             $timestamp = $token['ts'];
+            $verification_token = $token['verification_token'];
             $csrf = parse_csrf_token_header();
-            if (_validate_change_password_input($email, $password, $password_repeat, $timestamp, $csrf)) {
+            if (_validate_change_password_input($email, $password, $password_repeat, $timestamp, $verification_token, $csrf)) {
                 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
                 if (dal_user_update_password_by_email($email, $hashed_password, $timestamp)) {
                     send_password_changed_email($email, $_SERVER['HTTP_HOST']);

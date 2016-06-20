@@ -22,7 +22,7 @@ $GLOBALS['clients'] = [];
 $GLOBALS['forbidden_clients'] = [];
 $GLOBALS['clients_size'] = 0;
 $GLOBALS['critical_clients_size'] = 10000;
-$GLOBALS['debug_enabled'] = true;
+$GLOBALS['debug_enabled'] = false;
 
 function send_event_to_client($client, $id, $str)
 {

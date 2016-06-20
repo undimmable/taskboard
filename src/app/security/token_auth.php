@@ -14,9 +14,9 @@
  * @since     1.0.0
  */
 
-function create_jwt_token($email, $role, $id)
+function create_jwt_token($email, $role, $id, $verification_token)
 {
-    return JWT_encode([EMAIL => $email, ROLE => $role, ID => $id], get_config_jwt_secret());
+    return JWT_encode([EMAIL => $email, ROLE => $role, ID => $id, 'verification_token' => $verification_token], get_config_jwt_secret());
 }
 
 function set_token_cookie($jwt_token, $session = true)
@@ -76,9 +76,14 @@ function parse_csrf_token_header()
         return null;
 }
 
+function verify_user_token($id, $email, $token)
+{
+    return $token != null && get_private_token_csrf($id, $email) == $token;
+}
+
 function parse_user_from_token($token)
 {
-    if (!array_key_exists(EMAIL, $token) || !array_key_exists(ROLE, $token) || !array_key_exists(ID, $token))
+    if (!array_key_exists(EMAIL, $token) || !array_key_exists(ROLE, $token) || !array_key_exists(ID, $token) || !array_key_exists('verification_token', $token))
         return null;
     $username = $token[EMAIL];
     if (is_null($username))
@@ -88,6 +93,9 @@ function parse_user_from_token($token)
         return null;
     $id = $token[ID];
     if (is_null($id))
+        return null;
+    $verification_token = $token['verification_token'];
+    if(!verify_user_token($id, $username, $verification_token))
         return null;
     return [EMAIL => $username, ROLE => $role, ID => $id];
 }

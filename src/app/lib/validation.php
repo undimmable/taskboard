@@ -121,6 +121,15 @@ function _is_change_password_ts_valid(&$ts, &$validation_context)
     return true;
 }
 
+function _is_change_password_verification_token_valid(&$verification_token, $email, $ts, &$validation_context)
+{
+    if (!$verification_token || is_null($verification_token) || $verification_token != get_reset_password_verification_token($email, $ts)) {
+        _add_validation_error($validation_context, UNSPECIFIED, 'token_wrong');
+        return false;
+    }
+    return true;
+}
+
 function _is_email_valid($email, &$validation_context)
 {
     if (is_null($email)) {
