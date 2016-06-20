@@ -17,6 +17,7 @@ function Taskboard($) {
     var fadeOutSpeed = 1000;
     var fadeInSpeed = 1000;
     window.taskboard = this;
+    this.loadedLimit = 500;
     this.newItemsCounter = 0;
     this.locale = 'ru';
     this.localization = new Localization();
@@ -82,7 +83,7 @@ function Taskboard($) {
                 feed.loading = false;
                 return;
             }
-            if (feed.loadedTaskIds.length > 10) {
+            if (feed.loadedTaskIds.length > taskboardApplication.loadedLimit) {
                 feed.noMoreContent();
                 feed.loading = false;
                 return;
