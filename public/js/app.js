@@ -45,6 +45,7 @@ function Taskboard($) {
         this.lastTaskId = null;
         this.loading = false;
         this.loadedTaskIds = [];
+        this.newTaskIds = [];
         var feed = this;
         this.buildQuery = function (limit) {
             if (feed.lastTaskId == null)
@@ -165,6 +166,12 @@ function Taskboard($) {
         return taskboardApplication.localization[message.concat('_', taskboardApplication.getLocale())];
     };
 
+    this.addNewTaskId = function (taskId) {
+        if ($.inArray(parseInt(taskId), feed.loadedTaskIds) == -1 && $.inArray(parseInt(taskId), feed.newTaskIds) == -1) {
+            feed.newTaskIds.push(taskId);
+        }
+    };
+
     this.updateLocale = function (el) {
         var msg = taskboardApplication.localizedMessage(el.data('l10n'));
         if (el.hasClass('l10n-tooltip')) {
@@ -280,7 +287,6 @@ function Taskboard($) {
             feed.loadedTaskIds.splice(indexOf, 1);
             var smallest = Math.min.apply(feed.loadedTaskIds);
             console.log("Smallest ".concat(smallest));
-            console.log("Largest")
             if (smallest < feed.lastTaskId)
                 feed.lastTaskId = smallest;
         }
@@ -331,6 +337,7 @@ function Taskboard($) {
                         changed = true;
                         $.each(this['c'], function () {
                             taskboardApplication.incrementBadge(this);
+                            taskboardApplication.addNewTaskId(this);
                         });
                     } else {
                         console.log("Unknown event type");
@@ -458,6 +465,8 @@ function Taskboard($) {
             var dataId = $(this).data('id');
             if (dataId && $.inArray(dataId, feed.loadedTaskIds) < 0) {
                 feed.loadedTaskIds.push(dataId);
+                var index = feed.newTaskIds.indexOf(parseInt(dataId));
+                feed.newTaskIds.splice(index, 1);
             }
         });
         $html.find('.timestamp').each(function () {
@@ -772,20 +781,13 @@ function Taskboard($) {
             if (feed.loading)
                 return;
             feed.loading = true;
-            var latestTaskID = 0;
-            $('#task-feed').find('li').each(function () {
-                var id = parseInt($(this).data('id'));
-                if (id > latestTaskID) {
-                    latestTaskID = id;
-                }
-            });
-            latestTaskID = Math.max(latestTaskID, feed.lastTaskId);
+            var taskIdsArray = JSON.stringify(feed.newTaskIds);
             $.ajax({
                 url: 'api/v1/task',
                 contentType: 'application/json; charset=UTF-8',
                 type: "GET",
                 headers: {
-                    "X-FETCH-NEW": latestTaskID
+                    "X-FETCH-NEW": taskIdsArray
                 },
                 success: function (response) {
                     feed.loading = false;

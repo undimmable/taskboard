@@ -225,9 +225,15 @@ function api_task_get_all()
     $select_user_type = null;
     $latest_task_id_query = "";
     if (array_key_exists('HTTP_X_FETCH_NEW', $_SERVER)) {
-        $latest_task_id = filter_var($_SERVER['HTTP_X_FETCH_NEW'], FILTER_SANITIZE_NUMBER_INT);
-        if (!is_null($latest_task_id_query) && $latest_task_id > 0) {
-            $latest_task_id_query = "AND id > $latest_task_id ";
+        $task_ids = json_decode($_SERVER['HTTP_X_FETCH_NEW'], true);
+        foreach ($task_ids as $task_id) {
+            if (!filter_var($task_id, FILTER_VALIDATE_INT)) {
+                render_bad_request_json([JSON_ERROR => [UNSPECIFIED => "invalid"]]);
+                return;
+            }
+        }
+        if (!is_null($task_ids) && count($task_ids) > 0) {
+            $latest_task_id_query = "AND id in (" . join(",", $task_ids) . ")";
         }
     }
     $last_id = parse_integer_param('last_id');
@@ -294,7 +300,7 @@ function api_task_perform($task_id)
         } elseif ($task[PERFORMER_ID] == $performer_id) {
             $tx = dal_payment_get_transaction_by_participants($task[ID], $task[PERFORMER_ID], 'p');
             if (!$tx) {
-                if(payment_process_complex($task)) {
+                if (payment_process_complex($task)) {
                     on_payment_success($task);
                 } else {
                     on_payment_failure();

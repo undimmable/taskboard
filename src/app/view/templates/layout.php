@@ -51,7 +51,9 @@
     <script type="application/javascript"
             src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
     <script type="application/javascript" src="/js/vendor/eventstream.min.js"></script>
-    <script type="application/javascript" src="/js/app.min.js"></script>
+    <script type="application/javascript" src="/js/localization.js"></script>
+    <script type="application/javascript" src="/js/app.js"></script>
+<!--    <script type="application/javascript" src="/js/app.min.js"></script>-->
 </head>
 <body>
 <?php
