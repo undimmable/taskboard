@@ -61,7 +61,7 @@ function dal_payment_fix_last_perform_transaction($performer_id)
 function dal_payment_get_last_user_tx_id($user_id)
 {
     $connection = get_account_connection();
-    $stmt = mysqli_prepare($connection, "SELECT last_tx_id FROM db_account.account WHERE user_id=?");
+    $stmt = mysqli_prepare($connection, "SELECT last_tx_id FROM " . get_account_db_name() . ".account WHERE user_id=?");
     if (!$stmt) {
         add_dal_error($connection, $db_errors);
         return false;
@@ -104,7 +104,7 @@ function dal_payment_fetch_transactions_after($tx_id, $user_id, $is_customer)
 {
     $connection = get_payment_connection();
     $query = $is_customer ? "id_from=$user_id" : "id_to = $user_id";
-    $mysqli_result = mysqli_query($connection, "SELECT id,id_from,amount,processed,type FROM db_tx.tx WHERE $query AND id>=$tx_id AND NOT processed", MYSQLI_ASSOC);
+    $mysqli_result = mysqli_query($connection, "SELECT id,id_from,amount,processed,type FROM " . get_payment_db_name() . ".tx WHERE $query AND id>=$tx_id AND NOT processed", MYSQLI_ASSOC);
     $result = mysqli_fetch_array($mysqli_result);
     mysqli_free_result($mysqli_result);
     return $result;
@@ -113,7 +113,7 @@ function dal_payment_fetch_transactions_after($tx_id, $user_id, $is_customer)
 function dal_payment_lock_balance($user_id, $tx_id, $amount)
 {
     $connection = get_account_connection();
-    $stmt = mysqli_prepare($connection, "UPDATE db_account.account SET locked_balance = locked_balance + $amount, last_tx_id=? WHERE user_id=? AND $amount < account.balance - account.locked_balance");
+    $stmt = mysqli_prepare($connection, "UPDATE " . get_account_db_name() . ".account SET locked_balance = locked_balance + $amount, last_tx_id=? WHERE user_id=? AND $amount < account.balance - account.locked_balance");
     if (!$stmt) {
         add_dal_error($connection, $db_errors);
         return false;
@@ -140,14 +140,14 @@ function dal_payment_pay($tx_id, $customer_id, $performer_id, $price, $commissio
     $db_errors = initialize_dal_errors();
     $connection = get_account_connection();
     mysqli_autocommit($connection, false);
-    $result = mysqli_query($connection, "UPDATE db_account.account SET balance = balance + $price, last_tx_id=$tx_id WHERE user_id=$performer_id AND (last_tx_id is NULL or last_tx_id < $tx_id)");
+    $result = mysqli_query($connection, "UPDATE " . get_account_db_name() . ".account SET balance = balance + $price, last_tx_id=$tx_id WHERE user_id=$performer_id AND (last_tx_id is NULL or last_tx_id < $tx_id)");
     if (!$result) {
         add_dal_error($connection, $db_errors);
         mysqli_rollback($connection);
         mysqli_autocommit($connection, true);
         return false;
     }
-    $result = mysqli_query($connection, "UPDATE db_account.account SET locked_balance = locked_balance - $price - $commission, balance = balance - $price - $commission WHERE user_id=$customer_id AND locked_balance - $price - $commission > 0 AND balance - $price - $commission > 0");
+    $result = mysqli_query($connection, "UPDATE " . get_account_db_name() . ".account SET locked_balance = locked_balance - $price - $commission, balance = balance - $price - $commission WHERE user_id=$customer_id AND locked_balance - $price - $commission > 0 AND balance - $price - $commission > 0");
     if (!$result) {
         add_dal_error($connection, $db_errors);
         mysqli_rollback($connection);
@@ -160,7 +160,7 @@ function dal_payment_pay($tx_id, $customer_id, $performer_id, $price, $commissio
 function dal_payment_unlock_balance($user_id, $amount)
 {
     $connection = get_account_connection();
-    $stmt = mysqli_prepare($connection, "UPDATE db_account.account SET locked_balance = locked_balance - $amount WHERE user_id=?");
+    $stmt = mysqli_prepare($connection, "UPDATE " . get_account_db_name() . ".account SET locked_balance = locked_balance - $amount WHERE user_id=?");
     if (!$stmt) {
         add_dal_error($connection, $db_errors);
         return false;
@@ -185,7 +185,7 @@ function dal_payment_unlock_balance($user_id, $amount)
 function dal_payment_refill_balance($user_id, $amount)
 {
     $connection = get_account_connection();
-    $stmt = mysqli_prepare($connection, "UPDATE db_account.account SET balance = balance + $amount WHERE user_id=?");
+    $stmt = mysqli_prepare($connection, "UPDATE " . get_account_db_name() . ".account SET balance = balance + $amount WHERE user_id=?");
     if (!$stmt) {
         add_dal_error($connection, $db_errors);
         return false;
@@ -215,7 +215,7 @@ function dal_payment_create_account($user_id, $balance = DEFAULT_BALANCE)
         add_dal_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "INSERT INTO db_account.account (user_id, balance, last_tx_id, locked_balance) VALUES (?, ?, -1, 0.00)");
+    $stmt = mysqli_prepare($connection, "INSERT INTO " . get_account_db_name() . ".account (user_id, balance, last_tx_id, locked_balance) VALUES (?, ?, -1, 0.00)");
     if (!$stmt) {
         add_dal_error($connection, $db_errors);
         return false;
@@ -276,7 +276,7 @@ function _dal_payment_init_transaction($id_from, $id_to, $amount, $type)
         add_dal_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "INSERT INTO db_tx.tx (id_from, id_to, amount, type) VALUES (?, ?, ?, ?)");
+    $stmt = mysqli_prepare($connection, "INSERT INTO " . get_payment_db_name() . ".tx (id_from, id_to, amount, type) VALUES (?, ?, ?, ?)");
     if (!$stmt) {
         add_dal_error($connection, $db_errors);
         return false;
@@ -315,7 +315,7 @@ function dal_payment_process_lock_transaction($tx_id, $id_from, $amount = null)
 {
     if ($amount == null) {
         $connection = get_payment_connection();
-        $result = mysqli_query($connection, "SELECT amount from db_tx.tx WHERE id=$tx_id", MYSQLI_STORE_RESULT);
+        $result = mysqli_query($connection, "SELECT amount from " . get_payment_db_name() . ".tx WHERE id=$tx_id", MYSQLI_STORE_RESULT);
         if (!$result || mysqli_num_rows($result) < 1) {
             return false;
         }
@@ -338,7 +338,7 @@ function dal_payment_process_pay_transaction($tx_id, $customer_id = null, $perfo
 {
     if (is_null($price) || is_null($commission)) {
         $payment_connection = get_payment_connection();
-        $result = mysqli_query($payment_connection, "SELECT id_from FROM db_tx.tx WHERE id=$tx_id");
+        $result = mysqli_query($payment_connection, "SELECT id_from FROM " . get_payment_db_name() . ".tx WHERE id=$tx_id");
         if (!$result) {
             mysqli_free_result($result);
             return false;
@@ -351,7 +351,7 @@ function dal_payment_process_pay_transaction($tx_id, $customer_id = null, $perfo
         $price = $task[PRICE];
         $commission = $task[COMMISSION];
     }
-    $result = mysqli_query(get_payment_connection(), "SELECT processed FROM db_tx.tx WHERE id=$tx_id");
+    $result = mysqli_query(get_payment_connection(), "SELECT processed FROM " . get_payment_db_name() . ".tx WHERE id=$tx_id");
     if (mysqli_num_rows($result) < 1) {
         if (dal_payment_pay($tx_id, $customer_id, $performer_id, $price, $commission)) {
             return _dal_payment_transaction_set_processed($tx_id);
@@ -386,7 +386,7 @@ function dal_payment_get_transaction_by_participants($entity_id_from, $entity_id
         add_dal_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "SELECT id, processed FROM db_tx.tx WHERE id_from=? AND id_to=? AND type=?");
+    $stmt = mysqli_prepare($connection, "SELECT id, processed FROM " . get_payment_db_name() . ".tx WHERE id_from=? AND id_to=? AND type=?");
     if (!$stmt) {
         add_dal_error($connection, $db_errors);
         return false;
@@ -432,7 +432,7 @@ function dal_payment_get_transaction_by_participants($entity_id_from, $entity_id
 function _dal_payment_transaction_set_processed($id)
 {
     $connection = get_payment_connection();
-    $mysqli_result = mysqli_query($connection, "UPDATE db_tx.tx SET processed=TRUE WHERE id=$id");
+    $mysqli_result = mysqli_query($connection, "UPDATE " . get_payment_db_name() . ".tx SET processed=TRUE WHERE id=$id");
     $success = false;
     if ($mysqli_result)
         $success = true;
@@ -447,7 +447,7 @@ function dal_payment_fetch_balance($user_id)
         add_dal_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "SELECT balance-locked_balance FROM db_account.account WHERE user_id=?");
+    $stmt = mysqli_prepare($connection, "SELECT balance-locked_balance FROM " . get_account_db_name() . ".account WHERE user_id=?");
     if (!$stmt) {
         add_dal_error($connection, $db_errors);
         return false;

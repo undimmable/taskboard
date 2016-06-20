@@ -33,7 +33,7 @@ function dal_task_update_set_balance_locked($task_id)
         add_dal_error($connection, $db_errors);
         return false;
     }
-    $mysqli_result = mysqli_query($connection, "UPDATE db_task.task SET balance_locked=TRUE WHERE id = $task_id");
+    $mysqli_result = mysqli_query($connection, "UPDATE " . get_task_db_name() . ".task SET balance_locked=TRUE WHERE id = $task_id");
     $success = false;
     if ($mysqli_result)
         $success = true;
@@ -54,7 +54,7 @@ function dal_task_update_set_paid($task_id)
         add_dal_error($connection, $db_errors);
         return false;
     }
-    $mysqli_result = mysqli_query($connection, "UPDATE db_task.task SET paid=TRUE WHERE id = $task_id");
+    $mysqli_result = mysqli_query($connection, "UPDATE " . get_task_db_name() . ".task SET paid=TRUE WHERE id = $task_id");
     $success = false;
     if ($mysqli_result)
         $success = true;
@@ -76,7 +76,7 @@ function dal_task_update_set_performer_id($task_id, $performer_id)
         add_dal_error($connection, $db_errors);
         return false;
     }
-    $mysqli_result = mysqli_query($connection, "UPDATE db_task.task SET performer_id=$performer_id WHERE id = $task_id AND (performer_id=$performer_id OR performer_id IS NULL)");
+    $mysqli_result = mysqli_query($connection, "UPDATE " . get_task_db_name() . ".task SET performer_id=$performer_id WHERE id = $task_id AND (performer_id=$performer_id OR performer_id IS NULL)");
     $success = false;
     if ($mysqli_result)
         $success = true;
@@ -97,7 +97,7 @@ function dal_task_delete($task_id)
         add_dal_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "UPDATE db_task.task SET deleted=TRUE WHERE id=? AND NOT balance_locked");
+    $stmt = mysqli_prepare($connection, "UPDATE " . get_task_db_name() . ".task SET deleted=TRUE WHERE id=? AND NOT balance_locked");
     if (!$stmt) {
         add_dal_error($connection, $db_errors);
         return false;
@@ -142,7 +142,7 @@ function dal_task_create($customer_id, $amount, $description)
     }
     $amount_query = "(SELECT ($amount - $amount * ($system_commission_percent / 100)))";
     $commission_query = "(SELECT ($amount * ($system_commission_percent / 100)))";
-    $stmt = mysqli_prepare($connection, "INSERT INTO db_task.task (customer_id, amount, commission, description) VALUES (?,$amount_query,$commission_query,?)");
+    $stmt = mysqli_prepare($connection, "INSERT INTO " . get_task_db_name() . ".task (customer_id, amount, commission, description) VALUES (?,$amount_query,$commission_query,?)");
     if (!$stmt) {
         add_dal_error($connection, $db_errors);
         return false;
@@ -181,7 +181,7 @@ function dal_task_fetch($task_id)
         add_dal_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "SELECT id, timestampdiff(SECOND, now(), created_at), customer_id, performer_id, amount + commission, amount AS price, commission, description, balance_locked, paid FROM db_task.task WHERE id=?");
+    $stmt = mysqli_prepare($connection, "SELECT id, timestampdiff(SECOND, now(), created_at), customer_id, performer_id, amount + commission, amount AS price, commission, description, balance_locked, paid FROM " . get_task_db_name() . ".task WHERE id=?");
     if (!$stmt) {
         add_dal_error($connection, $db_errors);
         return false;
@@ -240,7 +240,7 @@ function dal_task_count_total_paid_commission()
         add_dal_error($connection, $db_errors);
         return false;
     }
-    $mysqli_result = mysqli_query(get_task_connection(), "SELECT COALESCE(sum(commission),0) AS balance FROM db_task.task WHERE paid=TRUE");
+    $mysqli_result = mysqli_query(get_task_connection(), "SELECT COALESCE(sum(commission),0) AS balance FROM " . get_task_db_name() . ".task WHERE paid=TRUE");
     if ($mysqli_result === false) {
         return false;
     }
@@ -262,7 +262,7 @@ function dal_task_fetch_non_locked_price($task_id, $customer_id)
         add_dal_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "SELECT amount+commission FROM db_task.task WHERE id=? AND customer_id=? AND NOT balance_locked");
+    $stmt = mysqli_prepare($connection, "SELECT amount+commission FROM " . get_task_db_name() . ".task WHERE id=? AND customer_id=? AND NOT balance_locked");
     if (!$stmt) {
         add_dal_error($connection, $db_errors);
         return false;
@@ -315,7 +315,7 @@ function dal_task_fetch_last($customer_id)
         add_dal_error($connection, $db_errors);
         return false;
     }
-    $mysqli_result = mysqli_query($connection, "SELECT id, amount + commission, paid, balance_locked FROM db_task.task WHERE customer_id=$customer_id ORDER BY ID DESC LIMIT 1");
+    $mysqli_result = mysqli_query($connection, "SELECT id, amount + commission, paid, balance_locked FROM " . get_task_db_name() . ".task WHERE customer_id=$customer_id ORDER BY ID DESC LIMIT 1");
     $result = mysqli_fetch_array($mysqli_result, MYSQLI_ASSOC);
     mysqli_free_result($mysqli_result);
     return $result;
@@ -346,7 +346,7 @@ function dal_task_fetch_tasks_complex_query_limit($callback, $user_id, $balance_
     if (!$limit) {
         $limit = 100;
     }
-    $query = "SELECT id, timestampdiff(SECOND, now(), created_at), amount as price, customer_id, performer_id, amount + commission as amount, description, balance_locked, paid FROM db_task.task WHERE $balance_locked $latest_task_id_query AND not deleted AND ($select_user_type <=> ?) $last_id_clause ORDER BY id DESC LIMIT ?";
+    $query = "SELECT id, timestampdiff(SECOND, now(), created_at), amount as price, customer_id, performer_id, amount + commission as amount, description, balance_locked, paid FROM " . get_task_db_name() . ".task WHERE $balance_locked $latest_task_id_query AND not deleted AND ($select_user_type <=> ?) $last_id_clause ORDER BY id DESC LIMIT ?";
     $stmt = mysqli_prepare($connection, $query);
     if (!$stmt) {
         add_dal_error($connection, $db_errors);

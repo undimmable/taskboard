@@ -70,7 +70,7 @@ class Util
     {
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
         $confirmation_token = hash("sha256", $email . 'confirmation_secret');
-        $mysqli_stmt = $this->connection->prepare("INSERT INTO db_user.user (email, hashed_password, role, confirmation_token, confirmed) VALUES (?, ?, ?, ?, ?)");
+        $mysqli_stmt = $this->connection->prepare("INSERT INTO " . get_user_db_name() . ".user (email, hashed_password, role, confirmation_token, confirmed) VALUES (?, ?, ?, ?, ?)");
         $confirmed_int = (integer)$confirmed;
         $mysqli_stmt->bind_param("ssisi", $email, $hashed_password, $role, $confirmation_token, $confirmed_int);
         $mysqli_stmt->execute();
@@ -87,7 +87,7 @@ class Util
      */
     public function createAccount($user_id, $balance, $locked_balance)
     {
-        $mysqli_stmt = $this->connection->prepare("INSERT INTO db_account.account (user_id, balance, last_tx_id, locked_balance) VALUES (?, ?, -1, ?)");
+        $mysqli_stmt = $this->connection->prepare("INSERT INTO " . get_account_db_name() . ".account (user_id, balance, last_tx_id, locked_balance) VALUES (?, ?, -1, ?)");
         $mysqli_stmt->bind_param("idd", $user_id, $balance, $locked_balance);
         $mysqli_stmt->execute();
         $id = $mysqli_stmt->insert_id;

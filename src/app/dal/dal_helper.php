@@ -87,6 +87,52 @@ function get_user_connection()
     return $GLOBALS['connections'][USER_DB];
 }
 
+function get_entity_db_name($entity_name)
+{
+
+    $db_config = get_db_config();
+    $entity_db_config = $db_config[$entity_name];
+    return $entity_db_config['database'];
+}
+
+function get_account_db_name()
+{
+    return get_entity_db_name(ACCOUNT_DB);
+}
+
+function get_event_db_name()
+{
+    return get_entity_db_name(EVENT_DB);
+}
+
+function get_login_db_name()
+{
+    return get_entity_db_name(LOGIN_DB);
+}
+
+function get_payment_db_name()
+{
+    return get_entity_db_name(TX_DB);
+}
+
+function get_task_db_name()
+{
+    return get_entity_db_name(TASK_DB);
+}
+
+function get_text_idx_db_name()
+{
+    return get_entity_db_name(TEXT_IDX_DB);
+}
+
+function get_user_db_name()
+{
+    if ($GLOBALS['connections'][USER_DB] === null) {
+        $GLOBALS['connections'][USER_DB] = get_dal_connection(USER_DB);
+    }
+    return $GLOBALS['connections'][USER_DB];
+}
+
 function close_account_connection()
 {
     if ($GLOBALS['connections'][ACCOUNT_DB] !== null) {

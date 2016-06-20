@@ -24,7 +24,7 @@ function dal_login_remove($user_id, $ip, $client)
         add_dal_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "DELETE FROM db_login.login WHERE user_id=? AND ip=? AND user_client=?");
+    $stmt = mysqli_prepare($connection, "DELETE FROM " . get_login_db_name() . ".login WHERE user_id=? AND ip=? AND user_client=?");
     if (!$stmt) {
         add_dal_error($connection, $db_errors);
         return false;
@@ -56,7 +56,7 @@ function dal_login_create_or_update($user_id, $ip, $client)
         add_dal_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "INSERT INTO db_login.login (user_id, ip, user_client) VALUES (?,?,?) ON DUPLICATE KEY UPDATE user_id=?, failed_attepts = 0, last_login=now()");
+    $stmt = mysqli_prepare($connection, "INSERT INTO " . get_login_db_name() . ".login (user_id, ip, user_client) VALUES (?,?,?) ON DUPLICATE KEY UPDATE user_id=?, failed_attepts = 0, last_login=now()");
     if (!$stmt) {
         add_dal_error($connection, $db_errors);
         return false;
@@ -88,7 +88,7 @@ function dal_login_fetch($user_id, $ip, $client)
         add_dal_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "SELECT id FROM db_login.login WHERE user_id=? AND ip=? AND user_client=?");
+    $stmt = mysqli_prepare($connection, "SELECT id FROM " . get_login_db_name() . ".login WHERE user_id=? AND ip=? AND user_client=?");
     if (!$stmt) {
         add_dal_error($connection, $db_errors);
         return false;
@@ -135,7 +135,7 @@ function dal_login_log_failed($ip, $client)
         add_dal_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "INSERT INTO db_login.login (ip, user_client, user_id, failed_attepts) VALUES (?,?,-1,1) ON DUPLICATE KEY UPDATE failed_attepts = failed_attepts + 1, last_login=now()");
+    $stmt = mysqli_prepare($connection, "INSERT INTO " . get_login_db_name() . ".login (ip, user_client, user_id, failed_attepts) VALUES (?,?,-1,1) ON DUPLICATE KEY UPDATE failed_attepts = failed_attepts + 1, last_login=now()");
     if (!$stmt) {
         add_dal_error($connection, $db_errors);
         return false;
@@ -166,7 +166,7 @@ function dal_login_being_failed($ip, $client, $max_attempts, $interval_in_second
     $connection = get_login_connection();
     if (!$connection)
         add_dal_error($connection, $db_errors);
-    $stmt = mysqli_prepare($connection, "SELECT failed_attepts FROM db_login.login WHERE ip = ? AND user_client = ? AND user_id = -1 AND failed_attepts >= ? AND last_login > timestamp(DATE_SUB(NOW(), INTERVAL ? SECOND))");
+    $stmt = mysqli_prepare($connection, "SELECT failed_attepts FROM " . get_login_db_name() . ".login WHERE ip = ? AND user_client = ? AND user_id = -1 AND failed_attepts >= ? AND last_login > timestamp(DATE_SUB(NOW(), INTERVAL ? SECOND))");
     if (!$stmt) {
         add_dal_error($connection, $db_errors);
         return false;

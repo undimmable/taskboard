@@ -26,7 +26,7 @@ function dal_create_user($email, $role, $hashed_password, $confirmation_token)
     $connection = get_user_connection();
     if (!$connection)
         add_dal_error($connection, $db_errors);
-    $stmt = mysqli_prepare($connection, "INSERT INTO db_user.user (email, role, hashed_password, confirmation_token) VALUES (?,?,?,?)");
+    $stmt = mysqli_prepare($connection, "INSERT INTO " . get_user_db_name() . ".user (email, role, hashed_password, confirmation_token) VALUES (?,?,?,?)");
     if (!$stmt) {
         add_dal_error($connection, $db_errors);
         return false;
@@ -57,7 +57,7 @@ function dal_user_exists($email)
     $connection = get_user_connection();
     if (!$connection)
         add_dal_error($connection, $db_errors);
-    $mysqli_stmt = mysqli_prepare($connection, "SELECT count(*) AS count FROM db_user.user WHERE email = ?");
+    $mysqli_stmt = mysqli_prepare($connection, "SELECT count(*) AS count FROM " . get_user_db_name() . ".user WHERE email = ?");
     if (!$mysqli_stmt) {
         add_dal_error($connection, $db_errors);
         return false;
@@ -104,7 +104,7 @@ function dal_user_update_password_by_email($email, $hashed_password, $ts)
     $connection = get_user_connection();
     if (!$connection)
         add_dal_error($connection, $db_errors);
-    $mysqli_stmt = mysqli_prepare($connection, "UPDATE db_user.user SET hashed_password=? WHERE email=? AND UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 15 minute)) < ?");
+    $mysqli_stmt = mysqli_prepare($connection, "UPDATE " . get_user_db_name() . ".user SET hashed_password=? WHERE email=? AND UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 15 minute)) < ?");
     if (!$mysqli_stmt) {
         add_dal_error($connection, $db_errors);
         return false;
@@ -134,7 +134,7 @@ function dal_fetch_user_by_email($email)
     $connection = get_user_connection();
     if (!$connection)
         add_dal_error($connection, $db_errors);
-    $stmt = mysqli_prepare($connection, "SELECT id, email, hashed_password, role FROM db_user.user WHERE email = ?");
+    $stmt = mysqli_prepare($connection, "SELECT id, email, hashed_password, role FROM " . get_user_db_name() . ".user WHERE email = ?");
     if (!$stmt) {
         add_dal_error($connection, $db_errors);
         return false;
@@ -176,7 +176,7 @@ function dal_fetch_user($id)
     $connection = get_user_connection();
     if (!$connection)
         add_dal_error($connection, $db_errors);
-    $mysqli_stmt = mysqli_prepare($connection, "SELECT id, email, hashed_password, role FROM db_user.user WHERE id = ?");
+    $mysqli_stmt = mysqli_prepare($connection, "SELECT id, email, hashed_password, role FROM " . get_user_db_name() . ".user WHERE id = ?");
     if (!$mysqli_stmt) {
         add_dal_error($connection, $db_errors);
         return false;
@@ -215,7 +215,7 @@ function dal_verify_user($confirmation_token)
     $connection = get_user_connection();
     if (!$connection)
         add_dal_error($connection, $db_errors);
-    $mysqli_stmt = mysqli_prepare($connection, "UPDATE db_user.user SET confirmed=TRUE WHERE NOT confirmed AND confirmation_token = ? AND LAST_INSERT_ID(id) OR LAST_INSERT_ID(0)");
+    $mysqli_stmt = mysqli_prepare($connection, "UPDATE " . get_user_db_name() . ".user SET confirmed=TRUE WHERE NOT confirmed AND confirmation_token = ? AND LAST_INSERT_ID(id) OR LAST_INSERT_ID(0)");
     if (!$mysqli_stmt) {
         add_dal_error($connection, $db_errors);
         return false;

@@ -24,7 +24,7 @@ function idx_find_object($text)
         add_dal_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "SELECT entity_id, entity_type, text_val FROM db_text_idx.text_idx WHERE MATCH(text_val) AGAINST (? IN NATURAL LANGUAGE MODE)");
+    $stmt = mysqli_prepare($connection, "SELECT entity_id, entity_type, text_val FROM " . get_text_idx_db_name() . ".text_idx WHERE MATCH(text_val) AGAINST (? IN NATURAL LANGUAGE MODE)");
     if (!$stmt) {
         add_dal_error($connection, $db_errors);
         return false;
@@ -74,7 +74,7 @@ function idx_add_object($entity_id, $entity_type, $text)
         add_dal_error($connection, $db_errors);
         return false;
     }
-    $stmt = mysqli_prepare($connection, "INSERT INTO db_text_idx.text_idx (entity_id, entity_type, text_val) VALUES (?, ?, ?)");
+    $stmt = mysqli_prepare($connection, "INSERT INTO " . get_text_idx_db_name() . ".text_idx (entity_id, entity_type, text_val) VALUES (?, ?, ?)");
     if (!$stmt) {
         add_dal_error($connection, $db_errors);
         return false;

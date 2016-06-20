@@ -20,7 +20,7 @@ function dal_check_logged_in($user_id, $user_agent, $ip)
     $result = false;
     $mysqli = get_dal_connection(LOGIN_DB);
     if ($mysqli) {
-        $stmt = mysqli_prepare($mysqli, "SELECT * FROM db_login.login WHERE user_id=? AND user_client=? AND ip=?");
+        $stmt = mysqli_prepare($mysqli, "SELECT * FROM " . get_login_db_name() . ".login WHERE user_id=? AND user_client=? AND ip=?");
         if ($stmt) {
             /** @noinspection PhpMethodParametersCountMismatchInspection */
             if (mysqli_stmt_bind_param($stmt, 'iss', $user_id, $user_agent, $ip)) {
