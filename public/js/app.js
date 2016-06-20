@@ -407,7 +407,7 @@ function Taskboard($) {
     this.replaceToken = function (html) {
         var jsonStart = '<!--json-';
         var jsonEnd = '-json-->';
-        if (html.indexOf(jsonStart) > -1) {
+        if (html.indexOf(jsonStart) === 0) {
             var jsonEndIndex = html.indexOf(jsonEnd);
             var token = html.substr(jsonStart.length, jsonEndIndex - jsonEnd.length - 1);
             $('#task-form').find('input[name=csrf_token]').val(token);
@@ -806,8 +806,10 @@ function Taskboard($) {
                 success: function (response) {
                     feed.loading = false;
                     if (response != null) {
-                        if (response.trim() != "")
+                        if (response.trim() != "") {
+                            response = taskboardApplication.replaceToken(response);
                             taskboardApplication.renderHtmlTasks(response, true);
+                        }
                         taskboardApplication.decrementBadge();
                     }
                 },

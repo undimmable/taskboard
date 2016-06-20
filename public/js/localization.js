@@ -154,9 +154,7 @@ function Localization() {
     this.already_paid_notice_body_ru = "Нельзя удалить активный заказ. Только неоплаченные заказы могут быть удалены.";
     this.already_performed_notice_header_en = "Notice";
     this.already_performed_notice_header_ru = "Внимание";
-    this.already_performed_notice_body_en = "Seems like this task already performed. Try to perform another task.";
-    this.already_performed_notice_body_ru = "Похоже, заказ уже выполнен. Попробуйте выполнить другой заказ.";
-    this.already_performed_notice_body_en = "Seems like this task already performed. Try to perform another task.";
+    this.already_performed_notice_body_en = "Seems like this task is already performed. Try to perform another task.";
     this.already_performed_notice_body_ru = "Похоже, заказ уже выполнен. Попробуйте выполнить другой заказ.";
     this.not_enough_money_notice_header_en = "Error";
     this.not_enough_money_notice_header_ru = "Ошибка";
