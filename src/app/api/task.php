@@ -479,6 +479,7 @@ function api_task_fix($task_id)
         if (!$updated) {
             render_internal_server_error();
         } else {
+            send_generic_event(null, get_role_key(PERFORMER), $task_id, 'c');
             _render_task(dal_task_fetch($task_id));
         }
     } elseif (is_null($tx_lock_processed)) {
