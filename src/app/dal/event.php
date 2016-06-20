@@ -20,7 +20,7 @@
 
 require_once 'dal/dal_helper.php';
 
-function fetch_events_after($target_id, $target_role, $last_event_id, $limit)
+function dal_fetch_events_after($target_id, $target_role, $last_event_id, $limit)
 {
     $connection = get_event_connection();
     if (!$connection) {

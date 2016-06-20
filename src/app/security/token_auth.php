@@ -94,7 +94,7 @@ function parse_user_from_token($token)
 
 function get_authorized_user()
 {
-    return $GLOBALS['user'];
+    return array_key_exists('user', $GLOBALS) ? $GLOBALS['user'] : null;
 }
 
 function set_authorized_user($authorized_user)

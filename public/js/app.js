@@ -2,7 +2,7 @@ String.prototype.replaceAll = function (search, replacement) {
     var target = this;
     return target.split(search).join(replacement);
 };
-$.ajaxSetup({ cache: false });
+$.ajaxSetup({cache: false});
 function Taskboard($) {
     "use strict";
     var errorNoticeKey = 'error-popup';
@@ -104,7 +104,12 @@ function Taskboard($) {
                         var localLastTaskId = feed.lastTaskId;
                         feed.lastTaskId = -1;
                         if (role == customerRole && localLastTaskId == null) {
-                            $('#create-task-button').click();
+                            var $bal = $('#user-balance');
+                            if ($bal.text() == '0.00') {
+                                $bal.click();
+                            } else {
+                                $('#create-task-button').click();
+                            }
                         }
                     } else {
                         taskboardApplication.renderHtmlTasks(response, false);
@@ -332,21 +337,24 @@ function Taskboard($) {
                         $.each(this['d'], function () {
                             changed = taskboardApplication.deleteTaskById(this);
                         });
-                    } else if (this.hasOwnProperty('p')) {
+                    }
+                    if (this.hasOwnProperty('p')) {
                         $.each(this['p'], function () {
                             if (role == customerRole || role == systemRole)
                                 changed = taskboardApplication.setTaskPerformedById(this);
                             else if (role == performerRole)
                                 changed = taskboardApplication.deleteTaskById(this);
                         });
-                    } else if (this.hasOwnProperty('c')) {
+                    }
+                    if (this.hasOwnProperty('c')) {
                         changed = true;
                         $.each(this['c'], function () {
                             taskboardApplication.incrementBadge(this);
                             taskboardApplication.addNewTaskId(this);
                         });
-                    } else {
-                        console.log("Unknown event type");
+                    }
+                    if (this.hasOwnProperty('b')) {
+                        changed = true;
                     }
                 });
                 if (changed) {

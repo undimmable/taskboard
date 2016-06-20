@@ -189,7 +189,7 @@ function _try_fix_unprocessed_transaction($user_id, $is_customer = true)
         if (is_null($transactions) || $transactions === false) {
             return false;
         } else {
-            return _payment_transaction_set_processed($id);
+            return _dal_payment_transaction_set_processed($id);
         }
     }
 }

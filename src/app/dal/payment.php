@@ -250,7 +250,7 @@ function dal_payment_retry_lock_transaction($task_id, $customer_id, $amount)
     $lock_tx_id_processed = dal_payment_get_transaction_by_participants($customer_id, $task_id, 'l');
     if (is_null($lock_tx_id_processed) || $lock_tx_id_processed[PROCESSED] === false) {
         $tx_id = is_null($lock_tx_id_processed) ? $lock_tx_id_processed[ID] : null;
-        $tx_lock_processed = _lock($customer_id, $task_id, $amount, $tx_id);
+        $tx_lock_processed = _dal_lock($customer_id, $task_id, $amount, $tx_id);
         return $tx_lock_processed;
     } else {
         $tx_lock_processed = true;
@@ -258,7 +258,7 @@ function dal_payment_retry_lock_transaction($task_id, $customer_id, $amount)
     }
 }
 
-function _lock($user_id, $task_id, $amount, $tx_id)
+function _dal_lock($user_id, $task_id, $amount, $tx_id)
 {
     if (is_null($tx_id)) {
         $tx_id = dal_payment_init_lock_transaction($user_id, $task_id, $amount);
@@ -268,7 +268,7 @@ function _lock($user_id, $task_id, $amount, $tx_id)
     return dal_payment_process_lock_transaction($tx_id, $user_id);
 }
 
-function _payment_init_transaction($id_from, $id_to, $amount, $type)
+function _dal_payment_init_transaction($id_from, $id_to, $amount, $type)
 {
     $db_errors = initialize_dal_errors();
     $connection = get_payment_connection();
@@ -303,12 +303,12 @@ function _payment_init_transaction($id_from, $id_to, $amount, $type)
 
 function dal_payment_init_lock_transaction($id_from, $id_to, $amount)
 {
-    return _payment_init_transaction($id_from, $id_to, $amount, 'l');
+    return _dal_payment_init_transaction($id_from, $id_to, $amount, 'l');
 }
 
 function dal_payment_init_pay_transaction($task_id, $performer_id, $amount)
 {
-    return _payment_init_transaction($task_id, $performer_id, $amount, 'p');
+    return _dal_payment_init_transaction($task_id, $performer_id, $amount, 'p');
 }
 
 function dal_payment_process_lock_transaction($tx_id, $id_from, $amount = null)
@@ -328,7 +328,7 @@ function dal_payment_process_lock_transaction($tx_id, $id_from, $amount = null)
         }
     }
     if (dal_payment_lock_balance($id_from, $tx_id, $amount)) {
-        return _payment_transaction_set_processed($tx_id);
+        return _dal_payment_transaction_set_processed($tx_id);
     } else {
         return false;
     }
@@ -354,7 +354,7 @@ function dal_payment_process_pay_transaction($tx_id, $customer_id = null, $perfo
     $result = mysqli_query(get_payment_connection(), "SELECT processed FROM db_tx.tx WHERE id=$tx_id");
     if (mysqli_num_rows($result) < 1) {
         if (dal_payment_pay($tx_id, $customer_id, $performer_id, $price, $commission)) {
-            return _payment_transaction_set_processed($tx_id);
+            return _dal_payment_transaction_set_processed($tx_id);
         } else {
             return false;
         }
@@ -369,12 +369,12 @@ function dal_payment_process_pay_transaction($tx_id, $customer_id = null, $perfo
         return false;
     } else if (!$processed[PROCESSED]) {
         if (dal_payment_pay($tx_id, $customer_id, $performer_id, $price, $commission)) {
-            return _payment_transaction_set_processed($tx_id);
+            return _dal_payment_transaction_set_processed($tx_id);
         } else {
             return false;
         }
     } else {
-        return _payment_transaction_set_processed($tx_id);
+        return _dal_payment_transaction_set_processed($tx_id);
     }
 }
 
@@ -429,7 +429,7 @@ function dal_payment_get_transaction_by_participants($entity_id_from, $entity_id
     ];
 }
 
-function _payment_transaction_set_processed($id)
+function _dal_payment_transaction_set_processed($id)
 {
     $connection = get_payment_connection();
     $mysqli_result = mysqli_query($connection, "UPDATE db_tx.tx SET processed=TRUE WHERE id=$id");

@@ -16,7 +16,7 @@
 require_once "../bootstrap.php";
 require_once "dal_helper.php";
 
-function find_object($text)
+function idx_find_object($text)
 {
     $db_errors = initialize_dal_errors();
     $connection = get_text_idx_connection();
@@ -66,7 +66,7 @@ function find_object($text)
     ];
 }
 
-function add_object($entity_id, $entity_type, $text)
+function idx_add_object($entity_id, $entity_type, $text)
 {
     $db_errors = initialize_dal_errors();
     $connection = get_text_idx_connection();

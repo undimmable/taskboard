@@ -130,6 +130,7 @@ function api_refill_balance()
         render_internal_server_error([JSON_ERROR => get_dal_errors()]);
         return;
     } else {
+        send_generic_event($user[ID], get_role_key(CUSTOMER), "update", 'b');
         api_get_balance();
     }
 }
