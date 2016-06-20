@@ -64,5 +64,6 @@ define('INTEGRATION_TESTS', true);
 define("UNSPECIFIED", "unspecified");
 define("POPUP", "popup");
 define("JSON_ERROR", "error");
+define("EVENT_FETCH_LIMIT", 10);
 define("SYSTEM_COMMISSION_PERCENT", 30);
 ini_set('sendmail_from', 'signup@taskboards.top');

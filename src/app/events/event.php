@@ -38,5 +38,5 @@ function send_generic_event($entity_id, $target_role, $json, $type = 'c')
  */
 function fetch_generic_event($entity_id, $target_role, $last_event_id)
 {
-    return fetch_events_after($entity_id, $target_role, $last_event_id, 10);
+    return fetch_events_after($entity_id, $target_role, $last_event_id, EVENT_FETCH_LIMIT);
 }
