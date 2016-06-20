@@ -293,7 +293,6 @@ function Taskboard($) {
         if (changed) {
             feed.loadedTaskIds.splice(indexOf, 1);
             var smallest = Math.min.apply(feed.loadedTaskIds);
-            console.log("Smallest ".concat(smallest));
             if (smallest < feed.lastTaskId)
                 feed.lastTaskId = smallest;
         }
