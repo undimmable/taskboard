@@ -10,6 +10,7 @@ $customer_name = 'Jean Customer';
 $user_customer = is_customer($GLOBALS['user'][ROLE]);
 $user_performer = is_performer($GLOBALS['user'][ROLE]);
 $task_unpaid_marker = "";
+$task_unpaid = "";
 if ($user_customer) {
     if (!is_task_active($GLOBALS['current_task'])) {
         $task_unpaid = "<span data-l10n=\"unpaid\" class=\"l10n l10n-text task-header$task_class\">Unpaid</span>";
