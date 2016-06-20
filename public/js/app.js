@@ -412,6 +412,8 @@ function Taskboard($) {
             var token = html.substr(jsonStart.length, jsonEndIndex - jsonEnd.length - 1);
             $('#task-form').find('input[name=csrf_token]').val(token);
             return html.substr(jsonEndIndex + jsonEnd.length);
+        } else {
+            return html;
         }
     };
 
